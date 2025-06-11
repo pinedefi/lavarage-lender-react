@@ -46,34 +46,30 @@ const Dashboard: React.FC = () => {
       offers.reduce((sum, offer) => sum + offer.apr, 0) / offers.length : 0,
   };
 
+  const atRiskPositions = positions.filter(
+    (p) => parseFloat(p.currentLtv) >= 0.75
+  ).length;
+
   const statCards = [
     {
-      title: 'Total Value Locked',
-      value: '1,234.56 SOL',
-      change: '+12.3%',
+      title: 'Total Liquidity Deployed',
+      value: `${formatNumber(dashboardStats.totalLiquidityDeployed, 2)} SOL`,
       icon: TrendingUp,
-      positive: true,
     },
     {
       title: 'Active Positions',
-      value: '45',
-      change: '+5',
+      value: positionStats.activePositions.toString(),
       icon: Users,
-      positive: true,
     },
     {
       title: 'At Risk Positions',
-      value: '3',
-      change: '-2',
+      value: atRiskPositions.toString(),
       icon: AlertTriangle,
-      positive: false,
     },
     {
       title: 'Total Earnings',
-      value: '89.12 SOL',
-      change: '+2.4%',
+      value: `${formatNumber(dashboardStats.totalInterestEarned, 2)} SOL`,
       icon: BarChart3,
-      positive: true,
     },
   ];
 
@@ -164,27 +160,12 @@ const Dashboard: React.FC = () => {
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {stat.title}
-                </CardTitle>
-                <Icon className="h-4 w-4 text-gray-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-gray-600">
-                  <span
-                    className={
-                      stat.positive ? 'text-success-600' : 'text-error-600'
-                    }
-                  >
-                    {stat.change}
-                  </span>{' '}
-                  from last month
-                </p>
-              </CardContent>
-            </Card>
+            <StatCard
+              key={stat.title}
+              title={stat.title}
+              value={stat.value}
+              icon={<Icon className="h-4 w-4 text-gray-500" />}
+            />
           );
         })}
       </div>
@@ -301,7 +282,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Total Positions</span>
                   <span className="font-medium">
-                    {statCards.length}
+                    {positionStats.totalPositions}
                   </span>
                 </div>
                 <div className="pt-4 border-t">
