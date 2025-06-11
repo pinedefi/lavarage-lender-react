@@ -81,7 +81,7 @@ const Dashboard: React.FC = () => {
     changeType?: 'positive' | 'negative';
     icon: React.ReactNode;
   }> = ({ title, value, change, changeType, icon }) => (
-    <Card>
+    <Card variant="glass">
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
@@ -111,7 +111,7 @@ const Dashboard: React.FC = () => {
   if (!connected) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Card className="max-w-md mx-auto text-center">
+        <Card variant="glass" className="max-w-md mx-auto text-center">
           <CardContent className="p-8">
             <div className="h-16 w-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Wallet className="h-8 w-8 text-primary-600" />
@@ -141,12 +141,12 @@ const Dashboard: React.FC = () => {
           </p>
         </div>
         <div className="flex space-x-3">
-          <Button variant="secondary" size="sm">
+          <Button variant="glass" size="sm">
             <ExternalLink className="h-4 w-4 mr-2" />
             Export Data
           </Button>
           <Link to="/create-offer">
-            <Button size="sm">
+            <Button variant="glass" size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Create Offer
             </Button>
@@ -173,12 +173,12 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recent Offers */}
         <div className="lg:col-span-2">
-          <Card>
+          <Card variant="glass">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Recent Offers</CardTitle>
                 <Link to="/offers">
-                  <Button variant="ghost" size="sm">
+                  <Button variant="glass" size="sm">
                     View All
                     <ArrowUpRight className="h-4 w-4 ml-1" />
                   </Button>
@@ -246,7 +246,7 @@ const Dashboard: React.FC = () => {
                     Create your first loan offer to start earning interest
                   </p>
                   <Link to="/create-offer">
-                    <Button>
+                    <Button variant="glass">
                       <Plus className="h-4 w-4 mr-2" />
                       Create Offer
                     </Button>
@@ -260,7 +260,7 @@ const Dashboard: React.FC = () => {
         {/* Quick Stats & Actions */}
         <div className="space-y-6">
           {/* Performance Summary */}
-          <Card>
+          <Card variant="glass">
             <CardHeader>
               <CardTitle>Performance Summary</CardTitle>
             </CardHeader>
@@ -286,7 +286,7 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div className="pt-4 border-t">
                   <Link to="/analytics">
-                    <Button variant="ghost" fullWidth>
+                    <Button variant="glass" fullWidth>
                       View Detailed Analytics
                       <ArrowUpRight className="h-4 w-4 ml-2" />
                     </Button>
@@ -297,26 +297,26 @@ const Dashboard: React.FC = () => {
           </Card>
 
           {/* Quick Actions */}
-          <Card>
+          <Card variant="glass">
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 <Link to="/create-offer">
-                  <Button fullWidth variant="primary">
+                  <Button fullWidth variant="glass">
                     <Plus className="h-4 w-4 mr-2" />
                     Create New Offer
                   </Button>
                 </Link>
                 <Link to="/positions">
-                  <Button fullWidth variant="secondary">
+                  <Button fullWidth variant="glass">
                     <Users className="h-4 w-4 mr-2" />
                     View All Positions
                   </Button>
                 </Link>
                 <Link to="/liquidations">
-                  <Button fullWidth variant="secondary">
+                  <Button fullWidth variant="glass">
                     <Activity className="h-4 w-4 mr-2" />
                     Check Liquidations
                   </Button>

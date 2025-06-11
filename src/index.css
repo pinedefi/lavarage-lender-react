@@ -54,6 +54,10 @@
   .btn-error {
     @apply bg-error-600 text-white hover:bg-error-700 focus-visible:ring-error-500;
   }
+
+  .btn-glass {
+    @apply bg-white/20 backdrop-blur-sm text-gray-900 dark:text-white border border-white/40 dark:border-gray-500 hover:bg-white/30 hover:backdrop-blur-md focus-visible:ring-white/50;
+  }
   
   .btn-sm {
     @apply px-3 py-1.5 text-xs;
@@ -69,6 +73,10 @@
   
   .card {
     @apply bg-white rounded-lg border border-gray-200 shadow-sm;
+  }
+
+  .card-glass {
+    @apply bg-white/30 dark:bg-gray-700/30 backdrop-blur-lg border border-white/50 dark:border-gray-500 shadow-md;
   }
   
   .input {
