@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import { WalletMultiButton } from '@/contexts/WalletContext';
 import Badge from '@/components/ui/Badge';
 import { useOffers } from '@/hooks/useOffers';
 import { usePositions } from '@/hooks/usePositions';
@@ -126,9 +127,7 @@ const Dashboard: React.FC = () => {
               Connect your Solana wallet to start managing your lending positions
               and view your dashboard statistics.
             </p>
-            <Button className="w-full">
-              Connect Wallet
-            </Button>
+            <WalletMultiButton className="w-full !bg-primary-600 !rounded-md hover:!bg-primary-700" />
           </CardContent>
         </Card>
       </div>
@@ -150,7 +149,7 @@ const Dashboard: React.FC = () => {
             <ExternalLink className="h-4 w-4 mr-2" />
             Export Data
           </Button>
-          <Link to="/offers/create">
+          <Link to="/create-offer">
             <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Create Offer
@@ -265,7 +264,7 @@ const Dashboard: React.FC = () => {
                   <p className="text-gray-500 mb-4">
                     Create your first loan offer to start earning interest
                   </p>
-                  <Link to="/offers/create">
+                  <Link to="/create-offer">
                     <Button>
                       <Plus className="h-4 w-4 mr-2" />
                       Create Offer
@@ -323,7 +322,7 @@ const Dashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <Link to="/offers/create">
+                <Link to="/create-offer">
                   <Button fullWidth variant="primary">
                     <Plus className="h-4 w-4 mr-2" />
                     Create New Offer

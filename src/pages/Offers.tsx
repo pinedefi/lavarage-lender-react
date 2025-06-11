@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import { WalletMultiButton } from '@/contexts/WalletContext';
 import Badge from '@/components/ui/Badge';
 import Input from '@/components/ui/Input';
 import { useOffers } from '@/hooks/useOffers';
@@ -211,9 +212,7 @@ const Offers: React.FC = () => {
             <p className="text-gray-600 mb-6">
               Connect your wallet to view and manage your loan offers.
             </p>
-            <Button className="w-full">
-              Connect Wallet
-            </Button>
+            <WalletMultiButton className="w-full !bg-primary-600 !rounded-md hover:!bg-primary-700" />
           </CardContent>
         </Card>
       </div>
