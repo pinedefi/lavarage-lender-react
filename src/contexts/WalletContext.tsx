@@ -14,8 +14,7 @@ import {
 } from '@solana/wallet-adapter-wallets';
 import { Connection, clusterApiUrl, PublicKey } from '@solana/web3.js';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
-
-require('@solana/wallet-adapter-react-ui/styles.css');
+import '@solana/wallet-adapter-react-ui/styles.css';
 
 interface WalletContextType {
   connected: boolean;
@@ -39,8 +38,10 @@ export const useWallet = () => {
 export const WalletContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  // You can also provide a custom RPC endpoint
-  const endpoint = useMemo(() => clusterApiUrl(WalletAdapterNetwork.Devnet), []);
+  const network = (process.env.REACT_APP_SOLANA_NETWORK as WalletAdapterNetwork) || WalletAdapterNetwork.Devnet;
+  const endpoint = useMemo(() => {
+    return process.env.REACT_APP_SOLANA_RPC_URL || clusterApiUrl(network);
+  }, [network]);
 
   const wallets = useMemo(
     () => [

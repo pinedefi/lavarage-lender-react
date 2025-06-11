@@ -1,20 +1,17 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useWallet } from '@/contexts/WalletContext';
+import { WalletMultiButton } from '@/contexts/WalletContext';
 import {
   LayoutDashboard,
-  Wallet,
   TrendingUp,
   Users,
   AlertTriangle,
   PlusCircle,
   BarChart2,
 } from 'lucide-react';
-import Button from '@/components/ui/Button';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
-  const { connected, connect, disconnect } = useWallet();
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -38,14 +35,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               </Link>
             </div>
             <div className="flex items-center">
-              <Button
-                onClick={connected ? disconnect : connect}
-                variant={connected ? 'outline' : 'primary'}
-                className="flex items-center"
-              >
-                <Wallet className="mr-2 h-4 w-4" />
-                {connected ? 'Disconnect' : 'Connect Wallet'}
-              </Button>
+              <WalletMultiButton className="!bg-primary-600 !rounded-md hover:!bg-primary-700" />
             </div>
           </div>
         </div>
