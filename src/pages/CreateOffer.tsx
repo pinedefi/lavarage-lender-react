@@ -1,10 +1,59 @@
-import React from 'react';
-import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import { Plus } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import Card, { CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import { Plus } from "lucide-react";
+import { useOffers } from "@/hooks/useOffers";
+import { apiService } from "@/services/api";
+import { TokenModel } from "@/types";
+import { isValidSolanaAddress } from "@/utils";
 
 const CreateOffer: React.FC = () => {
+  const { createOffer } = useOffers();
+
+  const [amount, setAmount] = useState("");
+  const [interestRate, setInterestRate] = useState("");
+  const [duration, setDuration] = useState("");
+  const [quoteToken, setQuoteToken] = useState("SOL");
+  const [baseToken, setBaseToken] = useState("");
+  const [tokenData, setTokenData] = useState<TokenModel | null>(null);
+  const [metaError, setMetaError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      if (!isValidSolanaAddress(baseToken)) {
+        setTokenData(null);
+        return;
+      }
+      try {
+        const data = await apiService.getTokenMetadata(baseToken);
+        setTokenData(data);
+        setMetaError(null);
+      } catch (err) {
+        console.error(err);
+        setMetaError("Failed to fetch token metadata");
+        setTokenData(null);
+      }
+    };
+    if (baseToken) {
+      fetchMetadata();
+    } else {
+      setTokenData(null);
+      setMetaError(null);
+    }
+  }, [baseToken]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await createOffer({
+      collateralToken: baseToken,
+      maxExposure: parseFloat(amount),
+      interestRate: parseFloat(interestRate),
+      quoteToken,
+      tokenData: tokenData || undefined,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -16,7 +65,7 @@ const CreateOffer: React.FC = () => {
           <CardTitle>New Lending Offer</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -27,6 +76,8 @@ const CreateOffer: React.FC = () => {
                   placeholder="Enter amount to lend"
                   min="0"
                   step="0.1"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
                 />
               </div>
               <div>
@@ -39,6 +90,8 @@ const CreateOffer: React.FC = () => {
                   min="0"
                   max="100"
                   step="0.1"
+                  value={interestRate}
+                  onChange={(e) => setInterestRate(e.target.value)}
                 />
               </div>
               <div>
@@ -50,10 +103,43 @@ const CreateOffer: React.FC = () => {
                   placeholder="Enter loan duration in days"
                   min="1"
                   step="1"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Quote Token
+                </label>
+                <select
+                  className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  value={quoteToken}
+                  onChange={(e) => setQuoteToken(e.target.value)}
+                >
+                  <option value="SOL">SOL</option>
+                  <option value="USDC">USDC</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Base Token Address
+                </label>
+                <Input
+                  placeholder="Enter base token address"
+                  value={baseToken}
+                  onChange={(e) => setBaseToken(e.target.value.trim())}
+                />
+                {tokenData && (
+                  <p className="mt-1 text-sm text-gray-600">
+                    {tokenData.name} ({tokenData.symbol})
+                  </p>
+                )}
+                {metaError && (
+                  <p className="mt-1 text-sm text-error-600">{metaError}</p>
+                )}
+              </div>
             </div>
-            <Button className="w-full">
+            <Button className="w-full" type="submit">
               <Plus className="mr-2 h-4 w-4" />
               Create Offer
             </Button>
