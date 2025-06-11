@@ -4,7 +4,7 @@ A comprehensive React application for DeFi lenders to manage loan offers, monito
 
 ## 🚀 Features
 
-- **Wallet Integration**: Seamless Solana wallet connectivity with multiple wallet support
+- **Wallet Integration**: Seamless Solana wallet connectivity using the [Anza Wallet Adapter](https://github.com/anza-xyz/wallet-adapter)
 - **Loan Offer Management**: Create, update, and monitor lending offers
 - **Position Tracking**: Real-time monitoring of borrower positions using your liquidity
 - **Liquidation Management**: Track liquidation events and collateral recovery
@@ -14,7 +14,7 @@ A comprehensive React application for DeFi lenders to manage loan offers, monito
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 18 with TypeScript
-- **Wallet Integration**: Solana Wallet Adapter
+- **Wallet Integration**: [Anza Wallet Adapter](https://github.com/anza-xyz/wallet-adapter)
 - **Styling**: Tailwind CSS with custom design system
 - **State Management**: React Context + Custom Hooks
 - **Routing**: React Router v6
