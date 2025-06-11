@@ -88,8 +88,11 @@ const Offers: React.FC = () => {
 
   const OfferCard: React.FC<{ offer: OfferV2Model }> = ({ offer }) => {
     const utilization = getUtilization(offer);
-    const availableAmount = parseInt(offer.availableForOpen) / 1e9;
-    const totalExposure = parseInt(offer.maxExposure, 16) / 1e9;
+    const quoteToken = typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
+    const decimals = quoteToken?.decimals ?? 9;
+    const symbol = quoteToken?.symbol ?? 'SOL';
+    const availableAmount = parseInt(offer.availableForOpen) / (10 ** decimals);
+    const totalExposure = parseInt(offer.maxExposure, 16) / (10 ** decimals);
 
     return (
       <Card
@@ -148,13 +151,13 @@ const Offers: React.FC = () => {
             <div>
               <p className="text-sm text-gray-500">Available</p>
               <p className="text-lg font-semibold text-gray-900">
-                {formatNumber(availableAmount, 2)} SOL
+                {formatNumber(availableAmount, 2)} {symbol}
               </p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Max Exposure</p>
               <p className="text-lg font-semibold text-gray-900">
-                {formatNumber(totalExposure, 2)} SOL
+                {formatNumber(totalExposure, 2)} {symbol}
               </p>
             </div>
           </div>
@@ -225,13 +228,18 @@ const Offers: React.FC = () => {
 
     useEffect(() => {
       if (offer) {
+        const quoteToken = typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
+        const decimals = quoteToken?.decimals ?? 9;
         setApr(offer.apr.toString());
-        setExposure((parseInt(offer.maxExposure, 16) / 1e9).toString());
+        setExposure((parseInt(offer.maxExposure, 16) / (10 ** decimals)).toString());
         setLtv('');
       }
     }, [offer]);
 
     if (!offer) return null;
+
+    const quoteToken = typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
+    const symbol = quoteToken?.symbol ?? 'SOL';
 
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -261,7 +269,7 @@ const Offers: React.FC = () => {
               <Input type="number" value={apr} onChange={(e) => setApr(e.target.value)} step="0.1" min="0" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Max Exposure (SOL)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Max Exposure ({symbol})</label>
               <Input type="number" value={exposure} onChange={(e) => setExposure(e.target.value)} step="0.1" min="0" />
             </div>
             <div className="flex justify-end space-x-2 pt-2">

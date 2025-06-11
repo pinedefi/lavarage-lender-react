@@ -17,6 +17,7 @@
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "axios": "^1.6.7",
+    "bs58": "^6.0.0",
     "clsx": "^2.1.0",
     "date-fns": "^3.3.1",
     "lucide-react": "^0.358.0",
