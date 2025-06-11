@@ -33,6 +33,7 @@ const Offers: React.FC = () => {
   const [sortBy, setSortBy] = useState<'created' | 'apr' | 'utilization'>('created');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedOffer, setSelectedOffer] = useState<OfferV2Model | null>(null);
+  const [pauseOffer, setPauseOffer] = useState<OfferV2Model | null>(null);
 
   // Filter and sort offers
   const filteredOffers = offers
@@ -193,7 +194,14 @@ const Offers: React.FC = () => {
               >
                 <Edit3 className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="sm">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPauseOffer(offer);
+                }}
+              >
                 {offer.active ? (
                   <Pause className="h-4 w-4" />
                 ) : (
@@ -213,11 +221,13 @@ const Offers: React.FC = () => {
   const OfferModal: React.FC<{ offer: OfferV2Model | null; onClose: () => void }> = ({ offer, onClose }) => {
     const [apr, setApr] = useState('');
     const [exposure, setExposure] = useState('');
+    const [ltv, setLtv] = useState('');
 
     useEffect(() => {
       if (offer) {
         setApr(offer.apr.toString());
         setExposure((parseInt(offer.maxExposure, 16) / 1e9).toString());
+        setLtv('');
       }
     }, [offer]);
 
@@ -232,6 +242,12 @@ const Offers: React.FC = () => {
         maxExposure: parseFloat(exposure),
         interestRate: parseFloat(apr),
       });
+      onClose();
+    };
+
+    const handleLtvSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      await changeLTV(offer.publicKey.toString(), parseFloat(ltv));
       onClose();
     };
 
@@ -253,6 +269,46 @@ const Offers: React.FC = () => {
               <Button type="submit" variant="primary">Save</Button>
             </div>
           </form>
+          <hr />
+          <h2 className="text-xl font-semibold">Change LTV</h2>
+          <form onSubmit={handleLtvSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">New LTV (%)</label>
+              <Input
+                type="number"
+                value={ltv}
+                onChange={(e) => setLtv(e.target.value)}
+                step="0.1"
+                min="0"
+                max="100"
+              />
+            </div>
+            <div className="flex justify-end pt-2">
+              <Button type="submit" variant="primary">Update LTV</Button>
+            </div>
+          </form>
+        </div>
+      </Modal>
+    );
+  };
+
+  const PauseModal: React.FC<{ offer: OfferV2Model | null; onClose: () => void }> = ({ offer, onClose }) => {
+    if (!offer) return null;
+
+    const handlePause = async () => {
+      await changeLTV(offer.publicKey.toString(), 0);
+      onClose();
+    };
+
+    return (
+      <Modal open={!!offer} onClose={onClose}>
+        <div className="p-6 space-y-4">
+          <h2 className="text-xl font-semibold">Pause Offer</h2>
+          <p>Are you sure you want to pause this offer?</p>
+          <div className="flex justify-end space-x-2 pt-2">
+            <Button variant="ghost" onClick={onClose}>Cancel</Button>
+            <Button variant="primary" onClick={handlePause}>Pause</Button>
+          </div>
         </div>
       </Modal>
     );
@@ -321,6 +377,10 @@ const Offers: React.FC = () => {
       <OfferModal
         offer={selectedOffer}
         onClose={() => setSelectedOffer(null)}
+      />
+      <PauseModal
+        offer={pauseOffer}
+        onClose={() => setPauseOffer(null)}
       />
     </div>
   );

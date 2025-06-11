@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { OfferV2Model } from '@/types';
 import { apiService } from '@/services/api';
 import { useWallet } from '@/contexts/WalletContext';
+import { useWallet as useSolanaWallet } from '@solana/wallet-adapter-react';
 import toast from 'react-hot-toast';
 
 interface UseOffersOptions {
@@ -121,34 +122,46 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
     }
   }, [publicKey, fetchOffers]);
 
-  const changeLTV = useCallback(async (offerAddress: string, newLTV: number) => {
-    if (!publicKey) {
-      throw new Error('Wallet not connected');
-    }
+  const { signMessage } = useSolanaWallet();
 
-    try {
-      setError(null);
-      
-      // TODO: Create and sign message for LTV change
-      const signature = 'placeholder_signature';
-      
-      await apiService.changeLTV({
-        offerAddress,
-        signature,
-        newLTV,
-      });
-      
-      toast.success('LTV updated successfully');
-      
-      // Refresh offers after LTV change
-      await fetchOffers();
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to update LTV';
-      setError(errorMessage);
-      toast.error(errorMessage);
-      throw err;
-    }
-  }, [publicKey, fetchOffers]);
+  const changeLTV = useCallback(
+    async (offerAddress: string, newLTV: number) => {
+      if (!publicKey) {
+        throw new Error('Wallet not connected');
+      }
+
+      if (!signMessage) {
+        throw new Error('Wallet does not support message signing');
+      }
+
+      try {
+        setError(null);
+
+        const message = new TextEncoder().encode(
+          `Change LTV of ${offerAddress} to ${newLTV}`,
+        );
+        const signedMessage = await signMessage(message);
+        const signature = Buffer.from(signedMessage).toString('base64');
+
+        await apiService.changeLTV({
+          offerAddress,
+          signature,
+          newLTV,
+        });
+
+        toast.success('LTV updated successfully');
+
+        // Refresh offers after LTV change
+        await fetchOffers();
+      } catch (err: any) {
+        const errorMessage = err.message || 'Failed to update LTV';
+        setError(errorMessage);
+        toast.error(errorMessage);
+        throw err;
+      }
+    },
+    [publicKey, signMessage, fetchOffers],
+  );
 
   // Initial fetch
   useEffect(() => {
