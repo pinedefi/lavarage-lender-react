@@ -13,7 +13,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         'rounded-lg border shadow-sm',
         variant === 'glass'
           ? 'card-glass'
-          : 'bg-white dark:bg-gray-800',
+          : 'bg-white dark:bg-red-900',
         className
       )}
       {...props}
