@@ -5,6 +5,7 @@ module.exports = {
   webpack: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
+      process: 'process/browser.js',
     },
     configure: {
       resolve: {
@@ -12,12 +13,13 @@ module.exports = {
           "crypto": require.resolve("crypto-browserify"),
           "stream": require.resolve("stream-browserify"),
           "buffer": require.resolve("buffer/"),
+          "process": require.resolve("process/browser.js"),
         },
       },
       plugins: [
         new webpack.ProvidePlugin({
           Buffer: ['buffer', 'Buffer'],
-          process: 'process/browser',
+          process: 'process/browser.js',
         }),
       ],
     },
