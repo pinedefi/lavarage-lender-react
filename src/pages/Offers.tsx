@@ -344,15 +344,15 @@ const Offers: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="card-glass p-8 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Offers</h1>
-        <Button variant="primary" asChild>
-          <Link to="/create-offer">
-            <Plus className="mr-2 h-4 w-4" />
-            Create Offer
+        <Link to="/create-offer">
+            <Button variant="glass" size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Offer
+            </Button>
           </Link>
-        </Button>
       </div>
 
       <Card>
@@ -375,9 +375,12 @@ const Offers: React.FC = () => {
               <p className="mt-2 text-center text-gray-600">
                 Create your first lending offer to start earning interest on your assets.
               </p>
-              <Button variant="primary" className="mt-4" asChild>
-                <Link to="/create-offer">Create Offer</Link>
-              </Button>
+              <Link to="/create-offer">
+            <Button variant="glass" size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Offer
+            </Button>
+          </Link>
             </div>
           )}
         </CardContent>
