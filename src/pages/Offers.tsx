@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Plus,
@@ -19,6 +19,7 @@ import Button from '@/components/ui/Button';
 import { WalletMultiButton } from '@/contexts/WalletContext';
 import Badge from '@/components/ui/Badge';
 import Input from '@/components/ui/Input';
+import Modal from '@/components/ui/Modal';
 import { useOffers } from '@/hooks/useOffers';
 import { useWallet } from '@/contexts/WalletContext';
 import { formatNumber, formatPercentage, formatDate, truncateAddress } from '@/utils';
@@ -26,11 +27,12 @@ import { OfferV2Model } from '@/types';
 
 const Offers: React.FC = () => {
   const { connected } = useWallet();
-  const { offers, loading, error, refetch, changeLTV } = useOffers({ autoRefresh: true });
+  const { offers, loading, error, refetch, changeLTV, updateOffer } = useOffers({ autoRefresh: true });
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [sortBy, setSortBy] = useState<'created' | 'apr' | 'utilization'>('created');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedOffer, setSelectedOffer] = useState<OfferV2Model | null>(null);
 
   // Filter and sort offers
   const filteredOffers = offers
@@ -89,7 +91,10 @@ const Offers: React.FC = () => {
     const totalExposure = parseInt(offer.maxExposure, 16) / 1e9;
 
     return (
-      <Card className="hover:shadow-md transition-shadow">
+      <Card
+        onClick={() => setSelectedOffer(offer)}
+        className="hover:shadow-md transition-shadow cursor-pointer"
+      >
         <CardContent className="p-6">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
@@ -178,7 +183,14 @@ const Offers: React.FC = () => {
               Created {formatDate(offer.createdAt, 'relative')}
             </div>
             <div className="flex space-x-2">
-              <Button variant="ghost" size="sm">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedOffer(offer);
+                }}
+              >
                 <Edit3 className="h-4 w-4" />
               </Button>
               <Button variant="ghost" size="sm">
@@ -195,6 +207,54 @@ const Offers: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+    );
+  };
+
+  const OfferModal: React.FC<{ offer: OfferV2Model | null; onClose: () => void }> = ({ offer, onClose }) => {
+    const [apr, setApr] = useState('');
+    const [exposure, setExposure] = useState('');
+
+    useEffect(() => {
+      if (offer) {
+        setApr(offer.apr.toString());
+        setExposure((parseInt(offer.maxExposure, 16) / 1e9).toString());
+      }
+    }, [offer]);
+
+    if (!offer) return null;
+
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      await updateOffer({
+        nodeWallet: offer.nodeWallet.toString(),
+        collateralToken: offer.collateralToken?.address || '',
+        quoteToken: typeof offer.quoteToken === 'string' ? offer.quoteToken : offer.quoteToken.address,
+        maxExposure: parseFloat(exposure),
+        interestRate: parseFloat(apr),
+      });
+      onClose();
+    };
+
+    return (
+      <Modal open={!!offer} onClose={onClose}>
+        <div className="p-6 space-y-4">
+          <h2 className="text-xl font-semibold">Edit Offer</h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">APR (%)</label>
+              <Input type="number" value={apr} onChange={(e) => setApr(e.target.value)} step="0.1" min="0" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Max Exposure (SOL)</label>
+              <Input type="number" value={exposure} onChange={(e) => setExposure(e.target.value)} step="0.1" min="0" />
+            </div>
+            <div className="flex justify-end space-x-2 pt-2">
+              <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
+              <Button type="submit" variant="primary">Save</Button>
+            </div>
+          </form>
+        </div>
+      </Modal>
     );
   };
 
@@ -236,18 +296,32 @@ const Offers: React.FC = () => {
           <CardTitle>Active Offers</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center justify-center py-12">
-            <TrendingUp className="h-12 w-12 text-gray-400" />
-            <h3 className="mt-4 text-lg font-medium">No Active Offers</h3>
-            <p className="mt-2 text-center text-gray-600">
-              Create your first lending offer to start earning interest on your assets.
-            </p>
-            <Button variant="primary" className="mt-4" asChild>
-              <Link to="/create-offer">Create Offer</Link>
-            </Button>
-          </div>
+          {loading ? (
+            <div className="text-center py-8">Loading...</div>
+          ) : filteredOffers.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredOffers.map((offer) => (
+                <OfferCard key={offer.publicKey.toString()} offer={offer} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12">
+              <TrendingUp className="h-12 w-12 text-gray-400" />
+              <h3 className="mt-4 text-lg font-medium">No Active Offers</h3>
+              <p className="mt-2 text-center text-gray-600">
+                Create your first lending offer to start earning interest on your assets.
+              </p>
+              <Button variant="primary" className="mt-4" asChild>
+                <Link to="/create-offer">Create Offer</Link>
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
+      <OfferModal
+        offer={selectedOffer}
+        onClose={() => setSelectedOffer(null)}
+      />
     </div>
   );
 };
