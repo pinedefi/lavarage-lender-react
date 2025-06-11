@@ -10,6 +10,9 @@ import {
   MoreHorizontal,
   Plus,
   ExternalLink,
+  AlertTriangle,
+  Wallet,
+  BarChart3,
 } from 'lucide-react';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -22,7 +25,7 @@ import { formatCurrency, formatNumber, formatPercentage, formatDate } from '@/ut
 const Dashboard: React.FC = () => {
   const { connected, publicKey } = useWallet();
   const { offers, loading: offersLoading } = useOffers({ autoRefresh: true });
-  const { positions, loading: positionsLoading, stats } = usePositions({ autoRefresh: true });
+  const { positions, loading: positionsLoading, stats: positionStats } = usePositions({ autoRefresh: true });
 
   // Calculate dashboard metrics
   const dashboardStats = {
@@ -37,11 +40,42 @@ const Dashboard: React.FC = () => {
         const currentExposure = parseInt(offer.currentExposure, 16) || 0;
         return sum + (maxExposure > 0 ? (currentExposure / maxExposure) * 100 : 0);
       }, 0) / offers.length : 0,
-    totalInterestEarned: stats.totalInterestEarned,
-    activePositionsCount: stats.activePositions,
+    totalInterestEarned: positionStats.totalInterestEarned,
+    activePositionsCount: positionStats.activePositions,
     averageAPR: offers.length > 0 ? 
       offers.reduce((sum, offer) => sum + offer.apr, 0) / offers.length : 0,
   };
+
+  const statCards = [
+    {
+      title: 'Total Value Locked',
+      value: '1,234.56 SOL',
+      change: '+12.3%',
+      icon: TrendingUp,
+      positive: true,
+    },
+    {
+      title: 'Active Positions',
+      value: '45',
+      change: '+5',
+      icon: Users,
+      positive: true,
+    },
+    {
+      title: 'At Risk Positions',
+      value: '3',
+      change: '-2',
+      icon: AlertTriangle,
+      positive: false,
+    },
+    {
+      title: 'Total Earnings',
+      value: '89.12 SOL',
+      change: '+2.4%',
+      icon: BarChart3,
+      positive: true,
+    },
+  ];
 
   const StatCard: React.FC<{
     title: string;
@@ -83,13 +117,14 @@ const Dashboard: React.FC = () => {
         <Card className="max-w-md mx-auto text-center">
           <CardContent className="p-8">
             <div className="h-16 w-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <TrendingUp className="h-8 w-8 text-primary-600" />
+              <Wallet className="h-8 w-8 text-primary-600" />
             </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
               Connect Your Wallet
             </h2>
             <p className="text-gray-600 mb-6">
-              Connect your Solana wallet to start earning competitive returns through decentralized lending.
+              Connect your Solana wallet to start managing your lending positions
+              and view your dashboard statistics.
             </p>
             <Button className="w-full">
               Connect Wallet
@@ -126,34 +161,32 @@ const Dashboard: React.FC = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Liquidity Deployed"
-          value={formatCurrency(dashboardStats.totalLiquidityDeployed * 100)} // Assuming SOL price
-          change="+12.5%"
-          changeType="positive"
-          icon={<DollarSign className="h-6 w-6 text-primary-600" />}
-        />
-        <StatCard
-          title="Active Offers"
-          value={dashboardStats.activeOffersCount.toString()}
-          change="+2"
-          changeType="positive"
-          icon={<Activity className="h-6 w-6 text-primary-600" />}
-        />
-        <StatCard
-          title="Portfolio Utilization"
-          value={formatPercentage(dashboardStats.portfolioUtilization)}
-          change="+5.2%"
-          changeType="positive"
-          icon={<TrendingUp className="h-6 w-6 text-primary-600" />}
-        />
-        <StatCard
-          title="Active Positions"
-          value={dashboardStats.activePositionsCount.toString()}
-          change="+8"
-          changeType="positive"
-          icon={<Users className="h-6 w-6 text-primary-600" />}
-        />
+        {statCards.map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={stat.title}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {stat.title}
+                </CardTitle>
+                <Icon className="h-4 w-4 text-gray-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+                <p className="text-xs text-gray-600">
+                  <span
+                    className={
+                      stat.positive ? 'text-success-600' : 'text-error-600'
+                    }
+                  >
+                    {stat.change}
+                  </span>{' '}
+                  from last month
+                </p>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Main Content Grid */}
@@ -268,7 +301,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Total Positions</span>
                   <span className="font-medium">
-                    {stats.totalPositions}
+                    {statCards.length}
                   </span>
                 </div>
                 <div className="pt-4 border-t">

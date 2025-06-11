@@ -2,10 +2,15 @@
 module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
+    "./public/index.html",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        border: 'hsl(var(--border))',
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',

@@ -222,153 +222,33 @@ const Offers: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Offers</h1>
-          <p className="text-gray-600 mt-1">
-            Manage your loan offers and track their performance
-          </p>
-        </div>
-        <Link to="/offers/create">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Offers</h1>
+        <Button variant="primary" asChild>
+          <Link to="/create-offer">
+            <Plus className="mr-2 h-4 w-4" />
             Create Offer
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
-      {/* Filters and Search */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <Input
-                placeholder="Search offers by token symbol, name, or address..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                leftIcon={<Search className="h-4 w-4 text-gray-400" />}
-              />
-            </div>
-            <div className="flex gap-2">
-              <select
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-              <Button variant="secondary" size="sm">
-                <Filter className="h-4 w-4 mr-2" />
-                Filters
-              </Button>
-            </div>
+        <CardHeader>
+          <CardTitle>Active Offers</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-12">
+            <TrendingUp className="h-12 w-12 text-gray-400" />
+            <h3 className="mt-4 text-lg font-medium">No Active Offers</h3>
+            <p className="mt-2 text-center text-gray-600">
+              Create your first lending offer to start earning interest on your assets.
+            </p>
+            <Button variant="primary" className="mt-4" asChild>
+              <Link to="/create-offer">Create Offer</Link>
+            </Button>
           </div>
         </CardContent>
       </Card>
-
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-gray-900">{offers.length}</p>
-              <p className="text-sm text-gray-600">Total Offers</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-success-600">
-                {offers.filter(o => o.active).length}
-              </p>
-              <p className="text-sm text-gray-600">Active Offers</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-primary-600">
-                {offers.length > 0 ? formatPercentage(offers.reduce((sum, o) => sum + o.apr, 0) / offers.length) : '0%'}
-              </p>
-              <p className="text-sm text-gray-600">Avg APR</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-warning-600">
-                {offers.length > 0 ? formatPercentage(offers.reduce((sum, o) => sum + getUtilization(o), 0) / offers.length) : '0%'}
-              </p>
-              <p className="text-sm text-gray-600">Avg Utilization</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Offers Grid */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="h-12 w-12 bg-gray-200 rounded-lg"></div>
-                    <div className="space-y-2">
-                      <div className="h-4 w-20 bg-gray-200 rounded"></div>
-                      <div className="h-3 w-16 bg-gray-200 rounded"></div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <div className="h-3 w-8 bg-gray-200 rounded"></div>
-                      <div className="h-5 w-12 bg-gray-200 rounded"></div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="h-3 w-12 bg-gray-200 rounded"></div>
-                      <div className="h-5 w-16 bg-gray-200 rounded"></div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : filteredOffers.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredOffers.map(offer => (
-            <OfferCard key={offer.publicKey.toString()} offer={offer} />
-          ))}
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <Activity className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              {searchTerm || statusFilter !== 'all' ? 'No offers found' : 'No offers yet'}
-            </h3>
-            <p className="text-gray-600 mb-6">
-              {searchTerm || statusFilter !== 'all'
-                ? 'Try adjusting your search or filter criteria'
-                : 'Create your first loan offer to start earning interest on your crypto'}
-            </p>
-            {!searchTerm && statusFilter === 'all' && (
-              <Link to="/offers/create">
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Your First Offer
-                </Button>
-              </Link>
-            )}
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };

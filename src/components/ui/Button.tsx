@@ -1,69 +1,55 @@
-import React, { forwardRef, ButtonHTMLAttributes } from 'react';
-import { cn } from '@/utils';
-import { Loader2 } from 'lucide-react';
+import React from 'react';
+import { cn } from '@/utils/cn';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'ghost' | 'link';
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'default' | 'primary' | 'secondary' | 'ghost' | 'link';
   size?: 'sm' | 'md' | 'lg';
-  loading?: boolean;
-  loadingText?: string;
+  isLoading?: boolean;
   fullWidth?: boolean;
+  asChild?: boolean;
+  children: React.ReactNode;
 }
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({
-    className,
-    variant = 'primary',
-    size = 'md',
-    loading = false,
-    loadingText,
-    fullWidth = false,
-    disabled,
-    children,
-    ...props
-  }, ref) => {
-    const baseClasses = [
-      'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium',
-      'transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-      'disabled:pointer-events-none disabled:opacity-50',
-    ];
-
-    const variantClasses = {
-      primary: 'bg-primary-600 text-white hover:bg-primary-700 focus-visible:ring-primary-500',
-      secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 focus-visible:ring-gray-500',
-      success: 'bg-success-600 text-white hover:bg-success-700 focus-visible:ring-success-500',
-      warning: 'bg-warning-600 text-white hover:bg-warning-700 focus-visible:ring-warning-500',
-      error: 'bg-error-600 text-white hover:bg-error-700 focus-visible:ring-error-500',
-      ghost: 'bg-transparent hover:bg-gray-100 text-gray-900 focus-visible:ring-gray-500',
-      link: 'bg-transparent text-primary-600 hover:text-primary-700 underline-offset-4 hover:underline focus-visible:ring-primary-500',
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant = 'default', size = 'md', isLoading, fullWidth, asChild = false, children, ...props }, ref) => {
+    const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
+    
+    const variants = {
+      default: 'bg-gray-100 text-gray-900 hover:bg-gray-200',
+      primary: 'bg-primary-600 text-white hover:bg-primary-700',
+      secondary: 'bg-gray-500 text-white hover:bg-gray-600',
+      ghost: 'hover:bg-gray-100 hover:text-gray-900',
+      link: 'text-primary-600 hover:underline',
     };
 
-    const sizeClasses = {
-      sm: 'px-3 py-1.5 text-xs',
-      md: 'px-4 py-2 text-sm',
-      lg: 'px-6 py-3 text-base',
+    const sizes = {
+      sm: 'px-3 py-1.5 text-sm',
+      md: 'px-4 py-2',
+      lg: 'px-6 py-3 text-lg',
     };
 
-    const classes = cn(
-      baseClasses,
-      variantClasses[variant],
-      sizeClasses[size],
-      fullWidth && 'w-full',
-      className
-    );
+    const Comp = asChild && React.isValidElement(children) ? 
+      React.Children.only(children).type : 
+      'button';
 
     return (
-      <button
+      <Comp
         ref={ref}
-        disabled={disabled || loading}
-        className={classes}
+        className={cn(
+          baseStyles,
+          variants[variant],
+          sizes[size],
+          fullWidth && 'w-full',
+          className
+        )}
+        disabled={isLoading}
         {...props}
       >
-        {loading && (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        )}
-        {loading && loadingText ? loadingText : children}
-      </button>
+        {isLoading ? (
+          <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-200 border-t-white" />
+        ) : null}
+        {children}
+      </Comp>
     );
   }
 );

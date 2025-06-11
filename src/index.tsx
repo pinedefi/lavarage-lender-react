@@ -95,6 +95,6 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Hot module replacement for development
-if (process.env.NODE_ENV === 'development' && module.hot) {
-  module.hot.accept();
+if (process.env.NODE_ENV === 'development' && (module as any).hot) {
+  (module as any).hot.accept();
 }

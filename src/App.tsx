@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { WalletContextProvider } from '@/contexts/WalletContext';
 import Layout from '@/components/Layout/Layout';
 import Dashboard from '@/pages/Dashboard';
@@ -22,7 +22,7 @@ const App: React.FC = () => {
             
             {/* Offers Management */}
             <Route path="/offers" element={<Offers />} />
-            <Route path="/offers/create" element={<CreateOffer />} />
+            <Route path="/create-offer" element={<CreateOffer />} />
             
             {/* Positions Monitoring */}
             <Route path="/positions" element={<Positions />} />
@@ -32,9 +32,6 @@ const App: React.FC = () => {
             
             {/* Analytics */}
             <Route path="/analytics" element={<Analytics />} />
-            
-            {/* Redirects */}
-            <Route path="/dashboard" element={<Navigate to="/" replace />} />
             
             {/* 404 Page */}
             <Route path="*" element={<NotFound />} />

@@ -62,7 +62,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                 <span className="ml-3 text-xl font-bold text-gray-900">
                   Lavarage
                 </span>
-                <Badge variant="info" size="sm" className="ml-2">
+                <Badge variant="primary" size="sm" className="ml-2">
                   Lender
                 </Badge>
               </div>
