@@ -1,0 +1,3410 @@
+{
+    "swaggerDoc": {
+      "openapi": "3.0.0",
+      "paths": {
+        "/api/sdk/v1.0/offers": {
+          "get": {
+            "description": "Lists all the available loan offers",
+            "operationId": "OfferController_getOffers",
+            "parameters": [
+              {
+                "name": "includeTokens",
+                "required": false,
+                "in": "query",
+                "description": "Whether to include the tokens in the response.",
+                "schema": {
+                  "default": false,
+                  "example": false,
+                  "type": "boolean"
+                }
+              },
+              {
+                "name": "inactiveOffers",
+                "required": false,
+                "in": "query",
+                "description": "Whether to include inactive offers in the response.",
+                "schema": {
+                  "default": false,
+                  "example": true,
+                  "type": "boolean"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/OfferModel"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "All Offers",
+            "tags": [
+              "Offer"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/offers/v2": {
+          "get": {
+            "description": "Lists all the available loan offers",
+            "operationId": "OfferController_getOffersV2",
+            "parameters": [
+              {
+                "name": "includeTokens",
+                "required": false,
+                "in": "query",
+                "description": "Whether to include the tokens in the response.",
+                "schema": {
+                  "default": false,
+                  "example": false,
+                  "type": "boolean"
+                }
+              },
+              {
+                "name": "inactiveOffers",
+                "required": false,
+                "in": "query",
+                "description": "Whether to include inactive offers in the response.",
+                "schema": {
+                  "default": false,
+                  "example": true,
+                  "type": "boolean"
+                }
+              },
+              {
+                "name": "includeRawData",
+                "required": false,
+                "in": "query",
+                "description": "Whether to include raw account on-chain data in the response.",
+                "schema": {
+                  "default": false,
+                  "example": true,
+                  "type": "boolean"
+                }
+              },
+              {
+                "name": "chain",
+                "required": false,
+                "in": "query",
+                "description": "Chain to use for the offers",
+                "schema": {
+                  "default": "solana",
+                  "example": "solana",
+                  "enum": [
+                    "solana",
+                    "bsc"
+                  ],
+                  "type": "string"
+                }
+              },
+              {
+                "name": "tags",
+                "required": false,
+                "in": "query",
+                "description": "Tags to filter offers",
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/OfferV2Model"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "All Offers",
+            "tags": [
+              "Offer"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/offers/v2-realtime": {
+          "get": {
+            "description": "Get one offer real time",
+            "operationId": "OfferController_getOffersV2RT",
+            "parameters": [
+              {
+                "name": "includeTokens",
+                "required": false,
+                "in": "query",
+                "description": "Whether to include the tokens in the response.",
+                "schema": {
+                  "default": false,
+                  "example": false,
+                  "type": "boolean"
+                }
+              },
+              {
+                "name": "offerAddress",
+                "required": true,
+                "in": "query",
+                "description": "the offer address",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "quoteAddress",
+                "required": true,
+                "in": "query",
+                "description": "the quote token address",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "includeRawData",
+                "required": false,
+                "in": "query",
+                "description": "Whether to include raw account on-chain data in the response.",
+                "schema": {
+                  "default": false,
+                  "example": true,
+                  "type": "boolean"
+                }
+              },
+              {
+                "name": "chain",
+                "required": false,
+                "in": "query",
+                "description": "Chain to use for the offers",
+                "schema": {
+                  "default": "solana",
+                  "example": "solana",
+                  "enum": [
+                    "solana",
+                    "bsc"
+                  ],
+                  "type": "string"
+                }
+              },
+              {
+                "name": "tags",
+                "required": false,
+                "in": "query",
+                "description": "Tags to filter offers",
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/OfferV2Model"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "One Offer Real Time",
+            "tags": [
+              "Offer"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/offers/bsc": {
+          "get": {
+            "description": "Lists all the available loan offers for BSC",
+            "operationId": "OfferController_getOffersEvm",
+            "parameters": [
+              {
+                "name": "inactiveOffers",
+                "required": false,
+                "in": "query",
+                "description": "Include inactive offers in the results",
+                "schema": {
+                  "default": false,
+                  "example": false,
+                  "type": "boolean"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/OfferEvmModel"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "All BSC Offers",
+            "tags": [
+              "Offer"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/offers/bsc-sync": {
+          "post": {
+            "description": "Syncs BSC offers to the database",
+            "operationId": "OfferController_syncOffersBsc",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/SyncOffersEvmQuery"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "201": {
+                "description": ""
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Sync BSC Offers",
+            "tags": [
+              "Offer"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/open": {
+          "post": {
+            "description": "This endpoint allows users to open a leveraged position by specifying loan details, margin, leverage, and additional instructions.",
+            "operationId": "PositionCommandController_openPosition",
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "required": true,
+                "in": "header",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/OpenPositionDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/TransactionModel"
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Open a Position",
+            "tags": [
+              "Position Commands"
+            ]
+          },
+          "get": {
+            "deprecated": true,
+            "description": "Retrieve all active positions",
+            "operationId": "PositionQueryController_getOpenPositions",
+            "parameters": [
+              {
+                "name": "userPubKey",
+                "required": false,
+                "in": "query",
+                "description": "The public key of the user initiating the trade. This identifies the trader and links the trade to their account.",
+                "schema": {
+                  "example": "CL7LTBpFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTA9",
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/OpenPositionModel"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Open Positions",
+            "tags": [
+              "Position Queries (Deprecated)"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/sell": {
+          "post": {
+            "description": "This endpoint allows users to sell an existing leveraged position, repaying the borrowed funds and releasing any remaining collateral.",
+            "operationId": "PositionCommandController_sellPosition",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/SellPositionDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/TransactionModel"
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Sell a Position",
+            "tags": [
+              "Position Commands"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/repay": {
+          "post": {
+            "description": "This endpoint allows users to repay a leveraged position, repaying the borrowed funds and releasing any remaining collateral.",
+            "operationId": "PositionCommandController_repayPosition",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/RepayPositionDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/TransactionModel"
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Repay a Position",
+            "tags": [
+              "Position Commands"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/partial-repay": {
+          "post": {
+            "description": "This endpoint allows users to repay a leveraged position, repaying the borrowed funds and releasing any remaining collateral.",
+            "operationId": "PositionCommandController_partialRepayPosition",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PartialRepayPositionDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/TransactionModel"
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Partial Repay a Position",
+            "tags": [
+              "Position Commands"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/split": {
+          "post": {
+            "description": "This endpoint allows users to split a leveraged position into multiple positions.",
+            "operationId": "PositionCommandController_splitPosition",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/SplitPositionDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/TransactionModel"
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Split a Position",
+            "tags": [
+              "Position Commands"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/merge": {
+          "post": {
+            "description": "This endpoint allows users to merge multiple positions into a single position.",
+            "operationId": "PositionCommandController_mergePosition",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/MergePositionDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/TransactionModel"
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Merge a Position",
+            "tags": [
+              "Position Commands"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/update": {
+          "post": {
+            "description": "This endpoint allows users to update a position.",
+            "operationId": "PositionCommandController_updatePosition",
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "required": true,
+                "in": "header",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UpdatePositionDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": ""
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Update a Position",
+            "tags": [
+              "Position Commands"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions": {
+          "get": {
+            "deprecated": true,
+            "description": "Retrieve a comprehensive list of positions (open, closed, liquidated).",
+            "operationId": "PositionQueryController_getAllPositions",
+            "parameters": [
+              {
+                "name": "userPubKey",
+                "required": false,
+                "in": "query",
+                "description": "The public key of the user initiating the trade. This identifies the trader and links the trade to their account.",
+                "schema": {
+                  "example": "CL7LTBpFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTA9",
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PositionModel"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "All Positions",
+            "tags": [
+              "Position Queries (Deprecated)"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/closed": {
+          "get": {
+            "deprecated": true,
+            "description": "Retrieve positions that have been closed",
+            "operationId": "PositionQueryController_getClosedPositions",
+            "parameters": [
+              {
+                "name": "userPubKey",
+                "required": false,
+                "in": "query",
+                "description": "The public key of the user initiating the trade. This identifies the trader and links the trade to their account.",
+                "schema": {
+                  "example": "CL7LTBpFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTA9",
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PositionModel"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Closed Positions",
+            "tags": [
+              "Position Queries (Deprecated)"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/liquidated": {
+          "get": {
+            "deprecated": true,
+            "description": "Retrieve positions that have been liquidated",
+            "operationId": "PositionQueryController_getLiquidatedPositions",
+            "parameters": [
+              {
+                "name": "userPubKey",
+                "required": false,
+                "in": "query",
+                "description": "The public key of the user initiating the trade. This identifies the trader and links the trade to their account.",
+                "schema": {
+                  "example": "CL7LTBpFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTA9",
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PositionModel"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Liquidated Positions",
+            "tags": [
+              "Position Queries (Deprecated)"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/v2": {
+          "get": {
+            "description": "Retrieve a comprehensive list of positions (open, closed, liquidated).",
+            "operationId": "PositionQueryV2Controller_getAllPositions",
+            "parameters": [
+              {
+                "name": "userPubKey",
+                "required": false,
+                "in": "query",
+                "description": "The public key of the user initiating the trade. This identifies the trader and links the trade to their account.",
+                "schema": {
+                  "example": "CL7LTBpFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTA9",
+                  "type": "string"
+                }
+              },
+              {
+                "name": "x-api-key",
+                "required": true,
+                "in": "header",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PositionModel"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "All Positions V2",
+            "tags": [
+              "Position Queries V2"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/open/v2": {
+          "get": {
+            "description": "Retrieve all active positions",
+            "operationId": "PositionQueryV2Controller_getOpenPositions",
+            "parameters": [
+              {
+                "name": "userPubKey",
+                "required": false,
+                "in": "query",
+                "description": "The public key of the user initiating the trade. This identifies the trader and links the trade to their account.",
+                "schema": {
+                  "example": "CL7LTBpFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTA9",
+                  "type": "string"
+                }
+              },
+              {
+                "name": "x-api-key",
+                "required": true,
+                "in": "header",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/OpenPositionModel"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Open Positions V2",
+            "tags": [
+              "Position Queries V2"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/closed/v2": {
+          "get": {
+            "description": "Retrieve positions that have been closed",
+            "operationId": "PositionQueryV2Controller_getClosedPositions",
+            "parameters": [
+              {
+                "name": "userPubKey",
+                "required": false,
+                "in": "query",
+                "description": "The public key of the user initiating the trade. This identifies the trader and links the trade to their account.",
+                "schema": {
+                  "example": "CL7LTBpFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTA9",
+                  "type": "string"
+                }
+              },
+              {
+                "name": "x-api-key",
+                "required": true,
+                "in": "header",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PositionModel"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Closed Positions V2",
+            "tags": [
+              "Position Queries V2"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/liquidated/v2": {
+          "get": {
+            "description": "Retrieve positions that have been liquidated",
+            "operationId": "PositionQueryV2Controller_getLiquidatedPositions",
+            "parameters": [
+              {
+                "name": "userPubKey",
+                "required": false,
+                "in": "query",
+                "description": "The public key of the user initiating the trade. This identifies the trader and links the trade to their account.",
+                "schema": {
+                  "example": "CL7LTBpFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTA9",
+                  "type": "string"
+                }
+              },
+              {
+                "name": "x-api-key",
+                "required": true,
+                "in": "header",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PositionModel"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Liquidated Positions V2",
+            "tags": [
+              "Position Queries V2"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/v3": {
+          "get": {
+            "description": "Retrieve a comprehensive list of positions (open, closed, liquidated).",
+            "operationId": "PositionQueryV3Controller_getPositions",
+            "parameters": [
+              {
+                "name": "userPubKey",
+                "required": false,
+                "in": "query",
+                "description": "The public key of the user initiating the trade. This identifies the trader and links the trade to their account.",
+                "schema": {
+                  "example": "CL7LTBpFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTA9",
+                  "type": "string"
+                }
+              },
+              {
+                "name": "status",
+                "required": false,
+                "in": "query",
+                "description": "The status of the positions to retrieve.",
+                "schema": {
+                  "default": "all",
+                  "example": "open",
+                  "enum": [
+                    "open",
+                    "closed",
+                    "liquidated",
+                    "all"
+                  ],
+                  "type": "string"
+                }
+              },
+              {
+                "name": "includeInactionable",
+                "required": false,
+                "in": "query",
+                "description": "Whether to include inactionable positions.",
+                "schema": {
+                  "default": false,
+                  "example": false,
+                  "type": "boolean"
+                }
+              },
+              {
+                "name": "x-api-key",
+                "required": true,
+                "in": "header",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PositionV3Model"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Get Positions V3",
+            "tags": [
+              "Position Queries V3"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/evm": {
+          "get": {
+            "description": "Retrieve a comprehensive list of positions (open, closed, liquidated).",
+            "operationId": "PositionQueryV3Controller_getPositionsEvm",
+            "parameters": [
+              {
+                "name": "userAddress",
+                "required": false,
+                "in": "query",
+                "description": "The public key of the user initiating the trade. This identifies the trader and links the trade to their account.",
+                "schema": {
+                  "example": "0x0000000000000000000000000000000000000000",
+                  "type": "string"
+                }
+              },
+              {
+                "name": "status",
+                "required": false,
+                "in": "query",
+                "description": "The status of the positions to retrieve.",
+                "schema": {
+                  "default": "all",
+                  "example": "open",
+                  "enum": [
+                    "open",
+                    "closed",
+                    "liquidated",
+                    "all"
+                  ],
+                  "type": "string"
+                }
+              },
+              {
+                "name": "referer",
+                "required": true,
+                "in": "header",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "x-api-key",
+                "required": true,
+                "in": "header",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PositionModel"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Get Positions EVM",
+            "tags": [
+              "Position Queries V3"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/take-profit": {
+          "post": {
+            "description": "This endpoint allows users to submit a take profit order for a trade.",
+            "operationId": "TakeProfitController_createTakeProfitOrder",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UpsertTpDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/TransactionModel"
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Submit a take profit order",
+            "tags": [
+              "Take Profit"
+            ]
+          },
+          "put": {
+            "description": "This endpoint allows users to update a take profit order for a trade.",
+            "operationId": "TakeProfitController_updateTakeProfitOrder",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UpsertTpDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/TransactionModel"
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Update a take profit order",
+            "tags": [
+              "Take Profit"
+            ]
+          },
+          "delete": {
+            "description": "This endpoint allows users to delete a take profit order for a trade.",
+            "operationId": "TakeProfitController_deleteTakeProfitOrder",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/DeleteTpDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/TransactionModel"
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Delete a take profit order",
+            "tags": [
+              "Take Profit"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/bsc/open": {
+          "post": {
+            "description": "This endpoint allows users to open a leveraged position by specifying loan details, margin, leverage, and additional instructions.",
+            "operationId": "PositionBscCommandController_openPosition",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/OpenBscPositionDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/TransactionBscModel"
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Open a Position",
+            "tags": [
+              "Position Commands BSC"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/positions/bsc/close": {
+          "post": {
+            "description": "This endpoint allows users to close a leveraged position by specifying the loan ID and offer ID.",
+            "operationId": "PositionBscCommandController_closePosition",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CloseBscPositionDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/TransactionBscModel"
+                    }
+                  }
+                }
+              }
+            },
+            "security": [
+              {
+                "x-api-key": []
+              }
+            ],
+            "summary": "Close a Position",
+            "tags": [
+              "Position Commands BSC"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/jupiter/price": {
+          "get": {
+            "operationId": "JupiterController_getPrice",
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "required": true,
+                "in": "header",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "referer",
+                "required": true,
+                "in": "header",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "baseCurrencies",
+                "required": true,
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "vsToken",
+                "required": true,
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "tags": [
+              "Jupiter"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/partners/me": {
+          "get": {
+            "operationId": "PartnerController_getProfile",
+            "parameters": [],
+            "responses": {
+              "200": {
+                "description": "Returns the authenticated partner profile"
+              },
+              "401": {
+                "description": "Unauthorized"
+              }
+            },
+            "security": [
+              {
+                "bearer": []
+              }
+            ],
+            "summary": "Get authenticated partner profile",
+            "tags": [
+              "partners"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/partners/keys": {
+          "get": {
+            "operationId": "PartnerController_getApiKeys",
+            "parameters": [],
+            "responses": {
+              "200": {
+                "description": "Returns the partner API keys"
+              },
+              "401": {
+                "description": "Unauthorized"
+              }
+            },
+            "security": [
+              {
+                "bearer": []
+              }
+            ],
+            "summary": "Get partner API keys",
+            "tags": [
+              "partners"
+            ]
+          },
+          "post": {
+            "operationId": "PartnerController_createApiKey",
+            "parameters": [],
+            "responses": {
+              "201": {
+                "description": "Returns the newly created API key"
+              },
+              "401": {
+                "description": "Unauthorized"
+              }
+            },
+            "security": [
+              {
+                "bearer": []
+              }
+            ],
+            "summary": "Create a new API key for the partner",
+            "tags": [
+              "partners"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/partners/keys/{id}": {
+          "delete": {
+            "operationId": "PartnerController_revokeApiKey",
+            "parameters": [
+              {
+                "name": "id",
+                "required": true,
+                "in": "path",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "Returns the revoked API key"
+              },
+              "401": {
+                "description": "Unauthorized"
+              },
+              "404": {
+                "description": "API key not found"
+              }
+            },
+            "security": [
+              {
+                "bearer": []
+              }
+            ],
+            "summary": "Revoke an API key",
+            "tags": [
+              "partners"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/auth/login": {
+          "get": {
+            "operationId": "AuthController_login",
+            "parameters": [
+              {
+                "name": "callback",
+                "required": true,
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": ""
+              }
+            },
+            "tags": [
+              "Auth"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/auth/callback": {
+          "get": {
+            "operationId": "AuthController_handleCallback",
+            "parameters": [
+              {
+                "name": "code",
+                "required": true,
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              {
+                "name": "state",
+                "required": true,
+                "in": "query",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": ""
+              }
+            },
+            "tags": [
+              "Auth"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/auth/token": {
+          "post": {
+            "operationId": "AuthController_exchangeToken",
+            "parameters": [],
+            "responses": {
+              "201": {
+                "description": ""
+              }
+            },
+            "tags": [
+              "Auth"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/auth/me": {
+          "get": {
+            "operationId": "AuthController_getProfile",
+            "parameters": [],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "tags": [
+              "Auth"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/auth/login-error": {
+          "get": {
+            "operationId": "AuthController_loginError",
+            "parameters": [],
+            "responses": {
+              "200": {
+                "description": ""
+              }
+            },
+            "tags": [
+              "Auth"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/auth/logout": {
+          "get": {
+            "operationId": "AuthController_logout",
+            "parameters": [],
+            "responses": {
+              "200": {
+                "description": ""
+              }
+            },
+            "tags": [
+              "Auth"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/proxy/rpc": {
+          "post": {
+            "operationId": "ProxyController_handleRpcRequest",
+            "parameters": [],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "tags": [
+              "Proxy"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/proxy/bsc/tx": {
+          "post": {
+            "operationId": "ProxyBscController_handleTransaction",
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "required": true,
+                "in": "header",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": ""
+              }
+            },
+            "tags": [
+              "BSC Proxy"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/lender/pools/deposit": {
+          "post": {
+            "description": "Generate a transaction for depositing funds into a lending pool. User must sign and submit the transaction.",
+            "operationId": "LenderPoolController_depositFunds",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/DepositDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "201": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "summary": "Create deposit transaction",
+            "tags": [
+              "lender-pools"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/lender/pools/withdraw": {
+          "post": {
+            "description": "Generate a transaction for withdrawing funds from a lending pool. Only available funds can be withdrawn.",
+            "operationId": "LenderPoolController_withdrawFunds",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/WithdrawDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "201": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "summary": "Create withdrawal transaction",
+            "tags": [
+              "lender-pools"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/lender/pools/balance": {
+          "get": {
+            "description": "Returns comprehensive balance and performance information for a lending pool by querying blockchain state.",
+            "operationId": "LenderPoolController_getPoolBalance",
+            "parameters": [
+              {
+                "name": "userWallet",
+                "required": true,
+                "in": "query",
+                "description": "User wallet address",
+                "schema": {
+                  "example": "7xK8L9pVaLuZKfXzJtWd3QtyKhjGfBHoX7h8rzZfFyGx",
+                  "type": "string"
+                }
+              },
+              {
+                "name": "quoteToken",
+                "required": true,
+                "in": "query",
+                "description": "Quote token address",
+                "schema": {
+                  "example": "So11111111111111111111111111111111111111112",
+                  "type": "string"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "summary": "Get pool balance information",
+            "tags": [
+              "lender-pools"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/lender/offers/create": {
+          "post": {
+            "description": "Generate a transaction to create a new loan offer for a specific collateral token.",
+            "operationId": "LenderOfferController_createOffer",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CreateLenderOfferDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "201": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "summary": "Create a new loan offer",
+            "tags": [
+              "lender-offers"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/lender/offers/update": {
+          "put": {
+            "description": "Generate a transaction to update offer parameters. Interest rate changes affect new positions only.",
+            "operationId": "LenderOfferController_updateOffer",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UpdateLenderOfferDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "summary": "Update existing loan offer",
+            "tags": [
+              "lender-offers"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/lender/offers/changeLTV": {
+          "put": {
+            "description": "Immediately change the LTV of an offer. This is the only endpoint that directly updates the database. Set to 0 to close the offer.",
+            "operationId": "LenderOfferController_changeLTV",
+            "parameters": [],
+            "requestBody": {
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ChangeLTVDto"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "summary": "Change offer LTV (direct database update)",
+            "tags": [
+              "lender-offers"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/lender/offers": {
+          "get": {
+            "description": "Retrieve all loan offers created by a specific lender.",
+            "operationId": "LenderOfferController_getLenderOffers",
+            "parameters": [
+              {
+                "name": "lenderWallet",
+                "required": true,
+                "in": "query",
+                "description": "Lender wallet address",
+                "schema": {
+                  "example": "7xKzL8pVaLuZKfXzJtWd3QtyKhjGfBHoX7h8rzZfFyGx",
+                  "type": "string"
+                }
+              },
+              {
+                "name": "inactiveOffers",
+                "required": false,
+                "in": "query",
+                "description": "Whether to include inactive offers in the response.",
+                "schema": {
+                  "default": false,
+                  "example": true,
+                  "type": "boolean"
+                }
+              },
+              {
+                "name": "includeRawData",
+                "required": false,
+                "in": "query",
+                "description": "Whether to include raw account on-chain data in the response.",
+                "schema": {
+                  "default": false,
+                  "example": true,
+                  "type": "boolean"
+                }
+              },
+              {
+                "name": "chain",
+                "required": false,
+                "in": "query",
+                "description": "Chain to use for the offers",
+                "schema": {
+                  "default": "solana",
+                  "example": "solana",
+                  "enum": [
+                    "solana",
+                    "bsc"
+                  ],
+                  "type": "string"
+                }
+              },
+              {
+                "name": "tags",
+                "required": false,
+                "in": "query",
+                "description": "Tags to filter offers",
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "summary": "Get all loan offers for a lender",
+            "tags": [
+              "lender-offers"
+            ]
+          }
+        },
+        "/api/sdk/v1.0/lender/positions": {
+          "get": {
+            "description": "Retrieve all positions that are using loans from the specified lender.",
+            "operationId": "LenderPositionController_getLenderPositions",
+            "parameters": [
+              {
+                "name": "lenderWallet",
+                "required": true,
+                "in": "query",
+                "description": "Lender wallet address",
+                "schema": {
+                  "example": "7xKzL8pVaLuZKfXzJtWd3QtyKhjGfBHoX7h8rzZfFyGx",
+                  "type": "string"
+                }
+              },
+              {
+                "name": "status",
+                "required": false,
+                "in": "query",
+                "description": "The status of the positions to retrieve.",
+                "schema": {
+                  "default": "all",
+                  "example": "open",
+                  "enum": [
+                    "open",
+                    "closed",
+                    "liquidated",
+                    "all"
+                  ],
+                  "type": "string"
+                }
+              },
+              {
+                "name": "includeInactionable",
+                "required": false,
+                "in": "query",
+                "description": "Whether to include inactionable positions.",
+                "schema": {
+                  "default": false,
+                  "example": false,
+                  "type": "boolean"
+                }
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PositionV3Model"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "summary": "Get all positions borrowing from lender offers",
+            "tags": [
+              "lender-positions"
+            ]
+          }
+        }
+      },
+      "info": {
+        "title": "Lavarage API",
+        "description": "API documentation for Lavarage SDK methods",
+        "version": "1.0",
+        "contact": {}
+      },
+      "tags": [],
+      "servers": [],
+      "components": {
+        "securitySchemes": {
+          "x-api-key": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "x-api-key"
+          }
+        },
+        "schemas": {
+          "PublicKey": {
+            "type": "object",
+            "properties": {}
+          },
+          "OfferAccount": {
+            "type": "object",
+            "properties": {
+              "interestRate": {
+                "type": "number",
+                "description": "The annualized interest rate (%) for the loan offer. This value represents the total interest charged over a year.",
+                "example": 69
+              },
+              "collateralType": {
+                "description": "The token address of the collateral token that can be used for this loan offer.",
+                "example": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PublicKey"
+                  }
+                ]
+              },
+              "maxBorrow": {
+                "type": "string",
+                "description": "Represents the highest amount of the quoteToken (e.g., SOL, USDC) that a single borrower can borrow in one transaction.",
+                "example": "6f0a53"
+              },
+              "nodeWallet": {
+                "description": "The public key of the wallet used to manage the loan offer.",
+                "example": "6riP1W6R3qzUPWYwLGtXEC23aTqmyAEdDtXzhntJquAh",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PublicKey"
+                  }
+                ]
+              },
+              "maxExposure": {
+                "type": "string",
+                "description": "The maximum exposure limit sets an upper cap on the amount of the quoteToken (SOL, USDC) that can be borrowed cumulatively across all borrowers under a specific loan offer. Provided in the smallest unit of the quoteToken (lamports for SOL).",
+                "example": "011e61b68c00"
+              },
+              "currentExposure": {
+                "type": "string",
+                "description": "Represents the total amount of funds currently borrowed across all active loans under a specific loan offer. It reflects how much of the liquidity allocated to the loan offer is already in use.",
+                "example": "037255e53a"
+              }
+            },
+            "required": [
+              "interestRate",
+              "collateralType",
+              "maxBorrow",
+              "nodeWallet",
+              "maxExposure",
+              "currentExposure"
+            ]
+          },
+          "TokenModel": {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string",
+                "description": "The token address of the collateral token that can be used for this loan offer.",
+                "example": "E4Q5pLaEiejwEQHcM9GeYSQfMyGy8DJ4bPWgeYthn24v"
+              },
+              "name": {
+                "type": "string",
+                "description": "The name of the token.",
+                "example": "Ada"
+              },
+              "symbol": {
+                "type": "string",
+                "description": "The symbol of the token.",
+                "example": "ADA"
+              },
+              "logoURI": {
+                "type": "string",
+                "description": "The logo URI of the token.",
+                "example": "https://gateway.irys.xyz/BFejxwOQrFxDnvG84t8kUf3PI_nCU3PEBrHBlu6g5ww"
+              },
+              "decimals": {
+                "type": "number",
+                "description": "The decimals of the token.",
+                "example": 6
+              }
+            },
+            "required": [
+              "address",
+              "name",
+              "symbol",
+              "decimals"
+            ]
+          },
+          "OfferModel": {
+            "type": "object",
+            "properties": {
+              "publicKey": {
+                "description": "The unique public key identifying the loan offer.",
+                "example": "EnweNn1hjL1UdX4Zm5fLqrxhas2ftyb91SYDxPPMhcWL",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PublicKey"
+                  }
+                ]
+              },
+              "account": {
+                "$ref": "#/components/schemas/OfferAccount"
+              },
+              "collateralToken": {
+                "description": "The token used as collateral for the loan offer. Use the \"includeToken\" query parameter to include the token metadata.",
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/TokenModel"
+                  }
+                ]
+              },
+              "quoteToken": {
+                "description": "The token used for quoting the loan offer, can be SOL or USDC. Use the \"includeToken\" query parameter to include the token metadata.",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TokenModel"
+                  },
+                  {
+                    "type": "string",
+                    "example": "So11111111111111111111111111111111111111112"
+                  }
+                ]
+              },
+              "maxLeverage": {
+                "type": "number",
+                "description": "The highest multiplier a borrower can use on their collateral to amplify their borrowing power.",
+                "example": 4.590558018998
+              },
+              "maxOpenPerTrade": {
+                "type": "number",
+                "description": "Defines the maximum loan amount that can be borrowed in a single transaction under a specific loan offer, regardless of the collateral or leverage used.",
+                "example": 200000000000
+              },
+              "availableForOpen": {
+                "type": "number",
+                "description": "Represents the remaining liquidity in a loan offer that is available to borrowers for opening new positions. It reflects the amount of the quoteToken (e.g., SOL, USDC) that can still be borrowed without exceeding the loan pool's total capacity (maxExposure).",
+                "example": 1215196866246
+              },
+              "tags": {
+                "description": "Tags associated with the offer.",
+                "example": [
+                  "stable",
+                  "new"
+                ],
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "publicKey",
+              "account",
+              "quoteToken",
+              "maxLeverage",
+              "maxOpenPerTrade",
+              "availableForOpen"
+            ]
+          },
+          "OfferV2Model": {
+            "type": "object",
+            "properties": {
+              "publicKey": {
+                "description": "The unique public key identifying the loan offer.",
+                "example": "EnweNn1hjL1UdX4Zm5fLqrxhas2ftyb91SYDxPPMhcWL",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PublicKey"
+                  }
+                ]
+              },
+              "apr": {
+                "type": "number",
+                "description": "The annualized interest rate (%) for the loan offer. This value represents the total interest charged over a year.",
+                "example": 69
+              },
+              "maxBorrow": {
+                "type": "string",
+                "description": "Represents the highest amount of the quoteToken (e.g., SOL, USDC) that a single borrower can borrow in one transaction.",
+                "example": "6f0a53"
+              },
+              "nodeWallet": {
+                "description": "The public key of the wallet used to manage the loan offer.",
+                "example": "6riP1W6R3qzUPWYwLGtXEC23aTqmyAEdDtXzhntJquAh",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PublicKey"
+                  }
+                ]
+              },
+              "maxExposure": {
+                "type": "string",
+                "description": "The maximum exposure limit sets an upper cap on the amount of the quoteToken (SOL, USDC) that can be borrowed cumulatively across all borrowers under a specific loan offer. Provided in the smallest unit of the quoteToken (lamports for SOL).",
+                "example": "011e61b68c00"
+              },
+              "currentExposure": {
+                "type": "string",
+                "description": "Represents the total amount of funds currently borrowed across all active loans under a specific loan offer. It reflects how much of the liquidity allocated to the loan offer is already in use.",
+                "example": "037255e53a"
+              },
+              "collateralToken": {
+                "description": "The token used as collateral for the loan offer. Use the \"includeToken\" query parameter to include the token metadata.",
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/TokenModel"
+                  }
+                ]
+              },
+              "quoteToken": {
+                "description": "The token used for quoting the loan offer, can be SOL or USDC. Use the \"includeToken\" query parameter to include the token metadata.",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TokenModel"
+                  },
+                  {
+                    "type": "string",
+                    "example": "So11111111111111111111111111111111111111112"
+                  }
+                ]
+              },
+              "maxLeverage": {
+                "type": "number",
+                "description": "The highest multiplier a borrower can use on their collateral to amplify their borrowing power.",
+                "example": 4.590558018998
+              },
+              "maxOpenPerTrade": {
+                "type": "string",
+                "description": "Defines the maximum loan amount that can be borrowed in a single transaction under a specific loan offer, regardless of the collateral or leverage used.",
+                "example": 200000000000
+              },
+              "availableForOpen": {
+                "type": "string",
+                "description": "Represents the remaining liquidity in a loan offer that is available to borrowers for opening new positions. It reflects the amount of the quoteToken (e.g., SOL, USDC) that can still be borrowed without exceeding the loan pool's total capacity (maxExposure).",
+                "example": 1215196866246
+              },
+              "tags": {
+                "description": "Tags associated with the offer.",
+                "example": [
+                  "stable",
+                  "new"
+                ],
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "active": {
+                "type": "boolean",
+                "description": "Whether the loan offer is active.",
+                "example": true
+              },
+              "account": {
+                "description": "The price of the collateral token in the quote token.",
+                "example": 0.92135849,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/OfferAccount"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string",
+                "description": "The timestamp when the offer was created.",
+                "example": "2024-01-15T10:30:00.000Z"
+              }
+            },
+            "required": [
+              "publicKey",
+              "apr",
+              "maxBorrow",
+              "nodeWallet",
+              "maxExposure",
+              "currentExposure",
+              "quoteToken",
+              "maxLeverage",
+              "maxOpenPerTrade",
+              "availableForOpen",
+              "active",
+              "createdAt"
+            ]
+          },
+          "OfferEvmModel": {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string",
+                "description": "The address of the offer",
+                "example": "0x2d5f3b0722acd35fbb749cb936dfdd93247bbc95"
+              },
+              "maxLendPerToken": {
+                "type": "string",
+                "description": "The max lend per token",
+                "example": "1000000000000000000"
+              },
+              "interestRate": {
+                "type": "string",
+                "description": "The interest rate",
+                "example": "1000000000000000000"
+              },
+              "active": {
+                "type": "boolean",
+                "description": "The active status of the offer",
+                "example": true
+              },
+              "minAmount": {
+                "type": "string",
+                "description": "The min amount",
+                "example": "1000000000000000000"
+              }
+            },
+            "required": [
+              "address",
+              "maxLendPerToken",
+              "interestRate",
+              "active",
+              "minAmount"
+            ]
+          },
+          "SyncOffersEvmQuery": {
+            "type": "object",
+            "properties": {
+              "addresses": {
+                "default": [],
+                "minItems": 1,
+                "description": "Addresses of offers to sync",
+                "example": [
+                  "0x123...",
+                  "0x456..."
+                ],
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "addresses"
+            ]
+          },
+          "OpenPositionDto": {
+            "type": "object",
+            "properties": {
+              "offerId": {
+                "type": "string",
+                "description": "The unique identifier of the loan offer being utilized for this position. This should correspond to an offerId from the GET Loan Offers endpoint.",
+                "example": "7XX7mgzGgoMu12gYUZrzC7eARHDUZL38cLAU2hKbgAEw"
+              },
+              "marginSOL": {
+                "type": "number",
+                "minimum": 1,
+                "description": "The amount of collateral being deposited in SOL or USDC.",
+                "example": 300000000
+              },
+              "leverage": {
+                "type": "number",
+                "maximum": 4,
+                "minimum": 1,
+                "description": "The leverage multiplier applied to the position. For example: \"2\" means the trader is borrowing 2x the collateral.",
+                "example": 2
+              },
+              "partnerFeeRecipient": {
+                "type": "string",
+                "description": "The wallet address (public key) of the partner that will receive any applicable fees for facilitating this trade.",
+                "example": "BL7LPApFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrKT9"
+              },
+              "partnerFeeMarkupBps": {
+                "type": "number",
+                "maximum": 2000,
+                "minimum": 1,
+                "description": "The markup percentage for the partner fee. For example: \"200\" represents a 2% markup on the total trade amount (margin + borrow amount) * 0.02.",
+                "example": 200
+              },
+              "quoteToken": {
+                "type": "string",
+                "description": "The token used for quoting the loan offer, can be SOL or USDC.",
+                "example": "So11111111111111111111111111111111111111112"
+              },
+              "slippage": {
+                "type": "number",
+                "minimum": 1,
+                "description": "The maximum acceptable price slippage percentage during the trade execution. Example: \"500\" indicates a 5% slippage tolerance.",
+                "example": 500
+              },
+              "userPubKey": {
+                "type": "string",
+                "description": "The public key of the user initiating the trade. This identifies the trader and links the trade to their account.",
+                "example": "CL7LTBpFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTA9"
+              },
+              "chain": {
+                "default": "solana",
+                "enum": [
+                  "solana",
+                  "bsc"
+                ],
+                "type": "string",
+                "description": "Chain to use for the position",
+                "example": "solana"
+              },
+              "priorityFeeMicroLamports": {
+                "type": "number",
+                "minimum": 1,
+                "description": "The priority fee in micro-lamports. If not provided, the default priority fee will be used.",
+                "example": 1000000
+              }
+            },
+            "required": [
+              "offerId",
+              "marginSOL",
+              "leverage",
+              "quoteToken",
+              "slippage",
+              "userPubKey",
+              "chain"
+            ]
+          },
+          "TransactionModel": {
+            "type": "object",
+            "properties": {
+              "transaction": {
+                "type": "string",
+                "description": "A base58-encoded Solana VersionedTransaction object, representing the serialized transaction details for a trade. This includes instructions, signatures, and other transaction metadata.",
+                "example": "ZqotusxdFcZB9"
+              },
+              "quoteResponse": {
+                "type": "object",
+                "description": "A quote response from Jupiter, representing the details of the swap. This includes the swap amount, the token addresses, and the swap price.",
+                "example": "ZqotusxdFcZB9"
+              }
+            },
+            "required": [
+              "transaction",
+              "quoteResponse"
+            ]
+          },
+          "SellPositionDto": {
+            "type": "object",
+            "properties": {
+              "positionId": {
+                "type": "string",
+                "description": "The unique identifier of the position to be closed. This is obtained from previously opened position queries (e.g., GET Open Positions).",
+                "example": "AezAHf5e6Cfiyyvu35KkWKEuZKLsEAN4XWzA36NvvCBw"
+              },
+              "offerId": {
+                "type": "string",
+                "description": "The unique identifier of the loan offer associated with this position.",
+                "example": "7XX7mgzGgoMu12gYUZrzC7eARHDUZL38cLAU2hKbgAEw"
+              },
+              "partnerFeeRecipient": {
+                "type": "string",
+                "description": "The wallet address (public key) of a partner to receive any associated fees for facilitating this trade.",
+                "example": "BK7LPApFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTV9"
+              },
+              "profitFeeMarkup": {
+                "type": "number",
+                "description": "An optional markup applied to the closing profit fee. For example, 0.02 represents a 2% additional markup.",
+                "example": 0.02
+              },
+              "partnerFeeMarkupBps": {
+                "type": "number",
+                "maximum": 2000,
+                "minimum": 1,
+                "description": "The markup percentage for the partner fee. For example: \"200\" represents a 2% markup on the total trade amount (margin + borrow amount) * 0.02.",
+                "example": 200
+              },
+              "quoteToken": {
+                "type": "string",
+                "description": "The token used for quoting the loan offer, can be SOL or USDC.",
+                "example": "So11111111111111111111111111111111111111112"
+              },
+              "slippage": {
+                "type": "number",
+                "minimum": 1,
+                "description": "The maximum acceptable price slippage percentage during the trade execution. Example: \"500\" indicates a 5% slippage tolerance.",
+                "example": 500
+              },
+              "userPubKey": {
+                "type": "string",
+                "description": "The public key of the user initiating the trade. This identifies the trader and links the trade to their account.",
+                "example": "CL7LTBpFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTA9"
+              },
+              "chain": {
+                "default": "solana",
+                "enum": [
+                  "solana",
+                  "bsc"
+                ],
+                "type": "string",
+                "description": "Chain to use for the position",
+                "example": "solana"
+              },
+              "priorityFeeMicroLamports": {
+                "type": "number",
+                "minimum": 1,
+                "description": "The priority fee in micro-lamports. If not provided, the default priority fee will be used.",
+                "example": 1000000
+              }
+            },
+            "required": [
+              "positionId",
+              "offerId",
+              "quoteToken",
+              "slippage",
+              "userPubKey",
+              "chain"
+            ]
+          },
+          "RepayPositionDto": {
+            "type": "object",
+            "properties": {
+              "positionId": {
+                "type": "string",
+                "description": "The unique identifier of the position to be closed. This is obtained from previously opened position queries (e.g., GET Open Positions).",
+                "example": "AezAHf5e6Cfiyyvu35KkWKEuZKLsEAN4XWzA36NvvCBw"
+              },
+              "partnerFeeRecipient": {
+                "type": "string",
+                "description": "The wallet address (public key) of the partner that will receive any applicable fees for facilitating this trade.",
+                "example": "BL7LPApFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrKT9"
+              },
+              "profitFeeMarkup": {
+                "type": "number",
+                "description": "An optional markup applied to the closing profit fee. For example, 0.02 represents a 2% additional markup.",
+                "example": 0.02
+              },
+              "partnerFeeMarkupBps": {
+                "type": "number",
+                "maximum": 2000,
+                "minimum": 1,
+                "description": "The markup percentage for the partner fee. For example: \"200\" represents a 2% markup on the total trade amount (margin + borrow amount) * 0.02.",
+                "example": 200
+              },
+              "repaymentBps": {
+                "type": "number",
+                "description": "The percentage (in basis points) of the position to be repaid. For example, 200 represents a 2% repayment.",
+                "example": 200
+              },
+              "quoteToken": {
+                "type": "string",
+                "description": "The token used for quoting the loan offer, can be SOL or USDC.",
+                "example": "So11111111111111111111111111111111111111112"
+              },
+              "userPubKey": {
+                "type": "string",
+                "description": "The public key of the user initiating the trade. This identifies the trader and links the trade to their account.",
+                "example": "CL7LTBpFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTA9"
+              },
+              "priorityFeeMicroLamports": {
+                "type": "number",
+                "minimum": 1,
+                "description": "The priority fee in micro-lamports. If not provided, the default priority fee will be used.",
+                "example": 1000000
+              }
+            },
+            "required": [
+              "positionId",
+              "quoteToken",
+              "userPubKey"
+            ]
+          },
+          "PartialRepayPositionDto": {
+            "type": "object",
+            "properties": {
+              "positionId": {
+                "type": "string",
+                "description": "The unique identifier of the position to be closed. This is obtained from previously opened position queries (e.g., GET Open Positions).",
+                "example": "AezAHf5e6Cfiyyvu35KkWKEuZKLsEAN4XWzA36NvvCBw"
+              },
+              "partnerFeeRecipient": {
+                "type": "string",
+                "description": "The wallet address (public key) of a partner to receive any associated fees for facilitating this trade.",
+                "example": "BK7LPApFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTV9"
+              },
+              "profitFeeMarkup": {
+                "type": "number",
+                "description": "An optional markup applied to the closing profit fee. For example, 0.02 represents a 2% additional markup.",
+                "example": 0.02
+              },
+              "repaymentBps": {
+                "type": "number",
+                "description": "The percentage (in basis points) of the position to be repaid. For example, 200 represents a 2% repayment.",
+                "example": 200
+              },
+              "quoteToken": {
+                "type": "string",
+                "description": "The token used for quoting the loan offer, can be SOL or USDC.",
+                "example": "So11111111111111111111111111111111111111112"
+              },
+              "userPubKey": {
+                "type": "string",
+                "description": "The public key of the user initiating the trade. This identifies the trader and links the trade to their account.",
+                "example": "CL7LTBpFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTA9"
+              }
+            },
+            "required": [
+              "positionId",
+              "quoteToken",
+              "userPubKey"
+            ]
+          },
+          "SplitPositionDto": {
+            "type": "object",
+            "properties": {
+              "positionId": {
+                "type": "string",
+                "description": "The unique identifier of the position to be split. This is obtained from previously opened position queries (e.g., GET Open Positions).",
+                "example": "AezAHf5e6Cfiyyvu35KkWKEuZKLsEAN4XWzA36NvvCBw"
+              },
+              "userPubKey": {
+                "type": "string",
+                "description": "User public key",
+                "example": "CL7LTBpFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTA9"
+              },
+              "splitRatioBps": {
+                "type": "number",
+                "description": "Split ratio in bps.",
+                "example": 1000
+              },
+              "quoteToken": {
+                "type": "string",
+                "description": "Quote token",
+                "example": "So11111111111111111111111111111111111111112"
+              }
+            },
+            "required": [
+              "positionId",
+              "userPubKey",
+              "splitRatioBps",
+              "quoteToken"
+            ]
+          },
+          "MergePositionDto": {
+            "type": "object",
+            "properties": {
+              "firstPositionId": {
+                "type": "string",
+                "description": "The unique identifier of the first position to be merged. This is obtained from previously opened position queries (e.g., GET Open Positions).",
+                "example": "AezAHf5e6Cfiyyvu35KkWKEuZKLsEAN4XWzA36NvvCBw"
+              },
+              "secondPositionId": {
+                "type": "string",
+                "description": "The unique identifier of the second position to be merged. This is obtained from previously opened position queries (e.g., GET Open Positions).",
+                "example": "AezAHf5e6Cfiyyvu35KkWKEuZKLsEAN4XWzA36NvvCBw"
+              },
+              "userPubKey": {
+                "type": "string",
+                "description": "User public key",
+                "example": "CL7LTBpFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTA9"
+              },
+              "quoteToken": {
+                "type": "string",
+                "description": "Quote token",
+                "example": "So11111111111111111111111111111111111111112"
+              }
+            },
+            "required": [
+              "firstPositionId",
+              "secondPositionId",
+              "userPubKey",
+              "quoteToken"
+            ]
+          },
+          "UpdatePositionDto": {
+            "type": "object",
+            "properties": {
+              "positionPublicKey": {
+                "type": "string",
+                "description": "The unique identifier of the position.",
+                "example": "AezAHf5e6Cfiyyvu35KkWKEuZKLsEAN4XWzA36NvvCBw"
+              },
+              "action": {
+                "enum": [
+                  "open",
+                  "close",
+                  "sell",
+                  "repay"
+                ],
+                "type": "string",
+                "description": "Action to be performed on the position",
+                "example": "close"
+              },
+              "quoteToken": {
+                "type": "string",
+                "description": "Quote token",
+                "example": "So11111111111111111111111111111111111111112"
+              },
+              "txid": {
+                "type": "string",
+                "description": "Transaction id",
+                "example": "1234567890"
+              }
+            },
+            "required": [
+              "positionPublicKey",
+              "action",
+              "quoteToken",
+              "txid"
+            ]
+          },
+          "PositionAccount": {
+            "type": "object",
+            "properties": {
+              "pool": {
+                "description": "The public key of the liquidity pool from which funds were borrowed for this position. Links the position to a specific loan offer.",
+                "example": "EnweNn1hjL1UdX4Zm5fLqrxhas2ftyb91SYDxPPMhcWL",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PublicKey"
+                  }
+                ]
+              },
+              "closeStatusRecallTimestamp": {
+                "type": "string",
+                "description": "A timestamp indicating when the position was marked for recall. Default is \"00\" if the position is active and not scheduled for closure.",
+                "example": "00"
+              },
+              "amount": {
+                "type": "string",
+                "description": "The borrowed amount for this position in the smallest unit of the quoteToken.",
+                "example": "cc8cd7"
+              },
+              "userPaid": {
+                "type": "string",
+                "description": "The total amount paid back by the trader so far (partial repay), in the smallest unit of the quoteToken (can be SOL or USDC).",
+                "example": "041e61e0"
+              },
+              "collateralAmount": {
+                "type": "string",
+                "description": "The amount of collateral used to open the position.",
+                "example": "6a7580"
+              },
+              "timestamp": {
+                "type": "string",
+                "description": "The timestamp when the position was opened.",
+                "example": "66f1347a"
+              },
+              "trader": {
+                "description": "The public key of the trader who opened the position.",
+                "example": "9kvVvxJsxA8Sw9tPm2nQm6KahMYtGKo3xbs1dLtP14GV",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PublicKey"
+                  }
+                ]
+              },
+              "seed": {
+                "description": "A unique identifier generated for this position.",
+                "example": "5N1sEVcxYMn8NHX2uSZY9sgFKN9vpiedRiUmJueAFa6W",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PublicKey"
+                  }
+                ]
+              },
+              "closeTimestamp": {
+                "type": "string",
+                "description": "The timestamp when the position was closed. Default is \"00\" if the position is still active.",
+                "example": "00"
+              },
+              "closingPositionSize": {
+                "type": "string",
+                "description": "The size of the position. Default is \"00\" if the position is still open.",
+                "example": "00"
+              },
+              "interestRate": {
+                "type": "number",
+                "description": "The annualized interest rate (%) applied to the borrowed amount for this position.",
+                "example": 50
+              },
+              "lastInterestCollect": {
+                "type": "string",
+                "description": "The timestamp of the most recent interest collection for this position. Default is \"00\" if no interest has been collected yet.",
+                "example": "00"
+              }
+            },
+            "required": [
+              "pool",
+              "closeStatusRecallTimestamp",
+              "amount",
+              "userPaid",
+              "collateralAmount",
+              "timestamp",
+              "trader",
+              "seed",
+              "closeTimestamp",
+              "closingPositionSize",
+              "interestRate",
+              "lastInterestCollect"
+            ]
+          },
+          "PositionModel": {
+            "type": "object",
+            "properties": {
+              "publicKey": {
+                "description": "The unique public key identifying the loan offer.",
+                "example": "EnweNn1hjL1UdX4Zm5fLqrxhas2ftyb91SYDxPPMhcWL",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PublicKey"
+                  }
+                ]
+              },
+              "account": {
+                "$ref": "#/components/schemas/PositionAccount"
+              },
+              "takeProfitPrice": {
+                "type": "string",
+                "description": "The take profit price set for this position.",
+                "example": "2a3b4c"
+              },
+              "onChainStatus": {
+                "type": "object",
+                "description": "The status of the position on chain.",
+                "example": "ONCHAIN"
+              }
+            },
+            "required": [
+              "publicKey",
+              "account"
+            ]
+          },
+          "FullDetailsUI": {
+            "type": "object",
+            "properties": {
+              "entryPrice": {
+                "type": "number",
+                "description": "The entry price at which the trade was opened, displayed in the quoteToken.",
+                "example": 11.8255165334269
+              },
+              "interestAccrued": {
+                "type": "number",
+                "description": "The interest accrued on the position.",
+                "example": 0.3818292026986028
+              },
+              "liquidationPrice": {
+                "type": "number",
+                "description": "The liquidation price of the position.",
+                "example": 0.002517600330448915
+              }
+            },
+            "required": [
+              "entryPrice",
+              "interestAccrued",
+              "liquidationPrice"
+            ]
+          },
+          "OpenPositionModel": {
+            "type": "object",
+            "properties": {
+              "publicKey": {
+                "description": "The unique public key identifying the loan offer.",
+                "example": "EnweNn1hjL1UdX4Zm5fLqrxhas2ftyb91SYDxPPMhcWL",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PublicKey"
+                  }
+                ]
+              },
+              "account": {
+                "$ref": "#/components/schemas/PositionAccount"
+              },
+              "takeProfitPrice": {
+                "type": "string",
+                "description": "The take profit price set for this position.",
+                "example": "2a3b4c"
+              },
+              "onChainStatus": {
+                "type": "object",
+                "description": "The status of the position on chain.",
+                "example": "ONCHAIN"
+              },
+              "offer": {
+                "$ref": "#/components/schemas/OfferModel"
+              },
+              "fullDetailsUI": {
+                "$ref": "#/components/schemas/FullDetailsUI"
+              }
+            },
+            "required": [
+              "publicKey",
+              "account",
+              "offer",
+              "fullDetailsUI"
+            ]
+          },
+          "PositionV3Model": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "description": "The status of the position.",
+                "example": "active",
+                "enum": [
+                  "active",
+                  "sold by take profit",
+                  "repaid",
+                  "sold",
+                  "liquidated"
+                ]
+              },
+              "openTimestamp": {
+                "type": "string",
+                "description": "The timestamp when the position was opened.",
+                "example": "2024-06-01T00:00:00.000Z"
+              },
+              "closeTimestamp": {
+                "type": "string",
+                "description": "The timestamp when the position was closed. Default is \"00\" if the position is still active.",
+                "example": "2024-06-01T00:00:00.000Z"
+              },
+              "quoteToken": {
+                "description": "The token used for quoting the loan offer, can be SOL or USDC.",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/TokenModel"
+                  }
+                ]
+              },
+              "collateralToken": {
+                "description": "The token used as collateral for the loan offer.",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/TokenModel"
+                  }
+                ]
+              },
+              "initialBorrowQuote": {
+                "type": "string",
+                "description": "The borrowed amount for this position in the smallest unit of the quoteToken.",
+                "example": "cc8cd7"
+              },
+              "initialMarginQuote": {
+                "type": "string",
+                "description": "The total amount paid back by the trader so far (partial repay), in the smallest unit of the quoteToken (can be SOL or USDC).",
+                "example": "041e61e0"
+              },
+              "apr": {
+                "type": "number",
+                "description": "The annualized interest rate (%) applied to the borrowed amount for this position.",
+                "example": 50
+              },
+              "lastInterestCollectTimestamp": {
+                "type": "string",
+                "description": "The timestamp of the most recent interest collection for this position.",
+                "example": "2024-06-01T00:00:00.000Z"
+              },
+              "initialPositionBase": {
+                "type": "string",
+                "description": "The amount of collateral used to open the position.",
+                "example": "6a7580"
+              },
+              "closePositionQuote": {
+                "type": "string",
+                "description": "The size of the position. Only for closed positions.",
+                "example": "10"
+              },
+              "currentPrice": {
+                "type": "number",
+                "description": "The current price of the token.",
+                "example": 11.8255165334269
+              },
+              "currentPositionBase": {
+                "type": "string",
+                "description": "The current size of the position.",
+                "example": "10"
+              },
+              "currentLtv": {
+                "type": "string",
+                "description": "The current LTV of the position.",
+                "example": "0.5"
+              },
+              "entryPrice": {
+                "type": "number",
+                "description": "The entry price at which the trade was opened, displayed in the quoteToken.",
+                "example": 11.8255165334269
+              },
+              "interestAccrued": {
+                "type": "number",
+                "description": "The interest accrued on the position.",
+                "example": 0.3818292026986028
+              },
+              "liquidationPrice": {
+                "type": "number",
+                "description": "The liquidation price of the position.",
+                "example": 0.002517600330448915
+              },
+              "positionAddress": {
+                "description": "The unique public key identifying the loan offer.",
+                "example": "EnweNn1hjL1UdX4Zm5fLqrxhas2ftyb91SYDxPPMhcWL",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PublicKey"
+                  }
+                ]
+              },
+              "offerAddress": {
+                "description": "The unique public key identifying the loan offer.",
+                "example": "EnweNn1hjL1UdX4Zm5fLqrxhas2ftyb91SYDxPPMhcWL",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PublicKey"
+                  }
+                ]
+              },
+              "traderAddress": {
+                "description": "The public key of the trader who opened the position.",
+                "example": "9kvVvxJsxA8Sw9tPm2nQm6KahMYtGKo3xbs1dLtP14GV",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PublicKey"
+                  }
+                ]
+              },
+              "offerCreatedAt": {
+                "type": "string",
+                "description": "The timestamp when the offer was created.",
+                "example": "2024-06-01T00:00:00.000Z"
+              },
+              "updatedAt": {
+                "type": "string",
+                "description": "The timestamp when the position was updated.",
+                "example": "2024-06-01T00:00:00.000Z"
+              },
+              "takeProfitPrice": {
+                "type": "string",
+                "description": "The take profit price set for this position.",
+                "example": "0.004319511"
+              },
+              "onChainStatus": {
+                "type": "object",
+                "description": "The status of the position on chain.",
+                "example": "ONCHAIN"
+              },
+              "isActionable": {
+                "type": "boolean",
+                "description": "The position is actionable or not.",
+                "example": true
+              }
+            },
+            "required": [
+              "status",
+              "openTimestamp",
+              "closeTimestamp",
+              "quoteToken",
+              "collateralToken",
+              "initialBorrowQuote",
+              "initialMarginQuote",
+              "apr",
+              "lastInterestCollectTimestamp",
+              "initialPositionBase",
+              "currentPrice",
+              "currentPositionBase",
+              "currentLtv",
+              "entryPrice",
+              "interestAccrued",
+              "liquidationPrice",
+              "positionAddress",
+              "offerAddress",
+              "traderAddress",
+              "offerCreatedAt",
+              "updatedAt",
+              "isActionable"
+            ]
+          },
+          "UpsertTpDto": {
+            "type": "object",
+            "properties": {
+              "positionId": {
+                "type": "string",
+                "description": "The unique identifier of the position to be closed. This is obtained from previously opened trades or position queries (e.g., GET Open Positions).",
+                "example": "AezAHf5e6Cfiyyvu35KkWKEuZKLsEAN4XWzA36NvvCBw"
+              },
+              "partnerFeeRecipient": {
+                "type": "string",
+                "description": "The wallet address (public key) of a partner to receive any associated fees for facilitating this trade.",
+                "example": "BK7LPApFgEcMrDkTfQpet9VvsGJas1iTxRJ6m1tXrTV9"
+              },
+              "quoteToken": {
+                "type": "string",
+                "description": "The token used for quoting the loan offer, can be SOL or USDC.",
+                "example": "So11111111111111111111111111111111111111112"
+              },
+              "targetPrice": {
+                "type": "number",
+                "minimum": 1,
+                "description": "The target price for the take profit order. The price at which the take profit order will be triggered.",
+                "example": 1000000000
+              },
+              "retriggerAt": {
+                "type": "number",
+                "minimum": 1,
+                "description": "The retrigger price for the take profit order. The price at which the take profit order will be invalidated and needs retriggering if the price moves in the opposite direction before the order is executed.",
+                "example": 1000000000
+              }
+            },
+            "required": [
+              "positionId",
+              "quoteToken",
+              "targetPrice",
+              "retriggerAt"
+            ]
+          },
+          "DeleteTpDto": {
+            "type": "object",
+            "properties": {
+              "positionId": {
+                "type": "string",
+                "description": "The unique identifier of the position to be closed. This is obtained from previously opened trades or position queries (e.g., GET Open Positions).",
+                "example": "AezAHf5e6Cfiyyvu35KkWKEuZKLsEAN4XWzA36NvvCBw"
+              },
+              "quoteToken": {
+                "type": "string",
+                "description": "The token used for quoting the loan offer, can be SOL or USDC.",
+                "example": "So11111111111111111111111111111111111111112"
+              }
+            },
+            "required": [
+              "positionId",
+              "quoteToken"
+            ]
+          },
+          "OpenBscPositionDto": {
+            "type": "object",
+            "properties": {
+              "collateralAddress": {
+                "type": "string",
+                "description": "The collateral address of the loan offer.",
+                "example": "0x92f36fbc2B7CffE67E1d1BEED6D3CdC3F7CE9f75"
+              },
+              "margin": {
+                "type": "number",
+                "minimum": 1,
+                "description": "The amount of collateral being deposited.",
+                "example": 300000000
+              },
+              "leverage": {
+                "type": "number",
+                "minimum": 1,
+                "description": "The leverage multiplier applied to the position.",
+                "example": 2
+              },
+              "partnerFeeRecipient": {
+                "type": "string",
+                "description": "The wallet address (public key) of the partner that will receive any applicable fees for facilitating this trade.",
+                "example": "0x92f36fbc2B7CffE67E1d1BEED6D3CdC3F7CE9f75"
+              },
+              "quoteToken": {
+                "type": "string",
+                "description": "The token used for quoting the loan offer.",
+                "example": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+              },
+              "userPubKey": {
+                "type": "string",
+                "description": "The wallet address (public key) of the signer.",
+                "example": "0x92f36fbc2B7CffE67E1d1BEED6D3CdC3F7CE9f75"
+              },
+              "slippage": {
+                "type": "number",
+                "description": "slippage",
+                "example": 500
+              }
+            },
+            "required": [
+              "collateralAddress",
+              "margin",
+              "leverage",
+              "quoteToken",
+              "userPubKey"
+            ]
+          },
+          "TransactionBscModel": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "string",
+                "description": "The data of the transaction",
+                "example": "0x1234567890abcdef"
+              },
+              "to": {
+                "type": "string",
+                "description": "The to address",
+                "example": "0x92f36fbc2B7CffE67E1d1BEED6D3CdC3F7CE9f75"
+              },
+              "gasLimit": {
+                "type": "string",
+                "description": "The estimated gas limit that should be used to send the swap transaction to guarantee settlement",
+                "example": 100000
+              },
+              "gasPrice": {
+                "type": "string",
+                "description": "The gas price (in wei) that should be used to send the swap transaction",
+                "example": 100000
+              },
+              "txHash": {
+                "type": "string",
+                "description": "The transaction hash calculated from the transaction data",
+                "example": "0xe75fb554e433e03763a1560646ee22dcb74e5274b34c5ad644e7c0f619a7e1d0"
+              }
+            },
+            "required": [
+              "data",
+              "to"
+            ]
+          },
+          "CloseBscPositionDto": {
+            "type": "object",
+            "properties": {
+              "loanId": {
+                "type": "number",
+                "minimum": 1,
+                "description": "The loan ID of the position to close",
+                "example": 1
+              },
+              "userPubKey": {
+                "type": "string",
+                "description": "The wallet address (public key) of the signer",
+                "example": "0x92f36fbc2B7CffE67E1d1BEED6D3CdC3F7CE9f75"
+              },
+              "partnerFeeRecipient": {
+                "type": "string",
+                "description": "The wallet address (public key) of the partner that will receive any applicable fees for facilitating this trade",
+                "example": "0x92f36fbc2B7CffE67E1d1BEED6D3CdC3F7CE9f75"
+              },
+              "quoteToken": {
+                "type": "string",
+                "description": "The token used for quoting the loan offer",
+                "example": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
+              },
+              "slippage": {
+                "type": "number",
+                "description": "slippage",
+                "example": 500
+              }
+            },
+            "required": [
+              "loanId",
+              "userPubKey",
+              "quoteToken"
+            ]
+          },
+          "DepositDto": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "number",
+                "minimum": 1,
+                "description": "Amount to deposit",
+                "example": 100
+              },
+              "quoteToken": {
+                "type": "string",
+                "description": "Quote token address",
+                "example": "So11111111111111111111111111111111111111112"
+              },
+              "userWallet": {
+                "type": "string",
+                "description": "User wallet address",
+                "example": "7xK8L9pVaLuZKfXzJtWd3QtyKhjGfBHoX7h8rzZfFyGx"
+              }
+            },
+            "required": [
+              "amount",
+              "quoteToken",
+              "userWallet"
+            ]
+          },
+          "WithdrawDto": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "number",
+                "minimum": 1,
+                "description": "Amount to withdraw",
+                "example": 50
+              },
+              "quoteToken": {
+                "type": "string",
+                "description": "Quote token address",
+                "example": "So11111111111111111111111111111111111111112"
+              },
+              "userWallet": {
+                "type": "string",
+                "description": "User wallet address",
+                "example": "7xK8L9pVaLuZKfXzJtWd3QtyKhjGfBHoX7h8rzZfFyGx"
+              }
+            },
+            "required": [
+              "amount",
+              "quoteToken",
+              "userWallet"
+            ]
+          },
+          "CreateLenderOfferDto": {
+            "type": "object",
+            "properties": {
+              "collateralToken": {
+                "type": "string",
+                "description": "Collateral token mint address",
+                "example": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+              },
+              "maxExposure": {
+                "type": "number",
+                "description": "Maximum exposure",
+                "example": 1000
+              },
+              "interestRate": {
+                "type": "number",
+                "minimum": 1,
+                "description": "Annual interest rate (in percentage, e.g., 15 for 15%)",
+                "example": 1500
+              },
+              "userWallet": {
+                "type": "string",
+                "description": "User wallet address",
+                "example": "7xKzL8pVaLuZKfXzJtWd3QtyKhjGfBHoX7h8rzZfFyGx"
+              },
+              "quoteToken": {
+                "type": "string",
+                "description": "Quote token mint address",
+                "example": "So11111111111111111111111111111111111111112"
+              }
+            },
+            "required": [
+              "collateralToken",
+              "maxExposure",
+              "interestRate",
+              "userWallet",
+              "quoteToken"
+            ]
+          },
+          "UpdateLenderOfferDto": {
+            "type": "object",
+            "properties": {
+              "nodeWallet": {
+                "type": "string",
+                "description": "Node wallet address",
+                "example": "7xKzL8pVaLuZKfXzJtWd3QtyKhjGfBHoX7h8rzZfFyGx"
+              },
+              "userWallet": {
+                "type": "string",
+                "description": "User wallet address",
+                "example": "7xKzL8pVaLuZKfXzJtWd3QtyKhjGfBHoX7h8rzZfFyGx"
+              },
+              "collateralToken": {
+                "type": "string",
+                "description": "Collateral token mint address",
+                "example": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+              },
+              "quoteToken": {
+                "type": "string",
+                "description": "Quote token mint address",
+                "example": "So11111111111111111111111111111111111111112"
+              },
+              "maxExposure": {
+                "type": "number",
+                "minimum": 1,
+                "description": "Maximum exposure",
+                "example": 1500
+              },
+              "interestRate": {
+                "type": "number",
+                "minimum": 1,
+                "description": "Annual interest rate (in basis points, e.g., 1500 for 15%)",
+                "example": 1500
+              }
+            },
+            "required": [
+              "nodeWallet",
+              "userWallet",
+              "collateralToken",
+              "quoteToken",
+              "maxExposure",
+              "interestRate"
+            ]
+          },
+          "ChangeLTVDto": {
+            "type": "object",
+            "properties": {
+              "offerAddress": {
+                "type": "string",
+                "description": "Public key of the offer to update",
+                "example": "EnweNn1hjL1UdX4Zm5fLqrxhas2ftyb91SYDxPPMhcWL"
+              },
+              "signature": {
+                "type": "string",
+                "description": "Signature of the change request signed by the offer owner",
+                "example": "5YUzWkU3SpNtcJ8YtJv1vZ1tcHTfb3e8DqRL3QjaxAgq6MqxsVXni4eWhv14jArtyTcKVxJ3Adxpv8uKUaX4nHCQ"
+              },
+              "newLTV": {
+                "type": "number",
+                "description": "New LTV ratio",
+                "example": 0.8
+              }
+            },
+            "required": [
+              "offerAddress",
+              "signature",
+              "newLTV"
+            ]
+          }
+        }
+      }
+    },
+    "customOptions": {}
+  };
