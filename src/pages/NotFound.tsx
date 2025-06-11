@@ -11,7 +11,7 @@ const NotFound: React.FC = () => {
         <CardContent className="pt-6">
           <div className="mb-6">
             <h1 className="mb-2 text-4xl font-bold">404</h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-red-200">
               Oops! The page you're looking for doesn't exist.
             </p>
           </div>
