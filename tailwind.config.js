@@ -11,6 +11,12 @@ module.exports = {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         border: 'hsl(var(--border))',
+        ios: {
+          'light-gray': '#F2F2F7',
+          'dark-gray': '#1C1C1E',
+          'menu-bg': 'rgba(0, 0, 0, 0.75)',
+          'separator': 'rgba(255, 255, 255, 0.15)',
+        },
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',
@@ -74,6 +80,13 @@ module.exports = {
           '0%': { transform: 'translateY(10px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
+      },
+      backdropBlur: {
+        'ios': '20px',
+      },
+      borderRadius: {
+        'ios': '13px',
+        'ios-xl': '22px',
       },
     },
   },

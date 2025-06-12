@@ -1,36 +1,43 @@
-import * as React from 'react';
+import React from 'react';
 import { cn } from '@/utils/cn';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  variant?: 'default' | 'glass';
-  error?: boolean;
-  helperText?: string;
+  variant?: 'default' | 'message';
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, variant = 'glass', type, error, helperText, ...props }, ref) => {
+  ({ className, variant = 'default', leftIcon, rightIcon, ...props }, ref) => {
+    const variants = {
+      default: 'bg-white border border-gray-300 focus:border-primary-500 focus:ring-primary-500',
+      message: 'bg-[#F2F2F7] dark:bg-[#1C1C1E] border-none rounded-3xl py-3 px-4 text-base',
+    };
+
     return (
-      <div className="relative">
+      <div className="relative flex items-center">
+        {leftIcon && (
+          <div className="absolute left-3 flex items-center pointer-events-none text-gray-400">
+            {leftIcon}
+          </div>
+        )}
         <input
-          type={type}
+          ref={ref}
           className={cn(
-            'flex h-10 w-full rounded-md border px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
-            variant === 'glass' 
-              ? 'bg-white/10 backdrop-blur-md border-white/40 focus:border-white/60 focus:ring-2 focus:ring-white/20'
-              : 'bg-white border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500',
-            error && 'border-error-500 focus:ring-error-500',
+            'block w-full rounded-md shadow-sm transition-colors',
+            'placeholder:text-gray-400',
+            'focus:outline-none focus:ring-0',
+            leftIcon && 'pl-10',
+            rightIcon && 'pr-10',
+            variants[variant],
             className
           )}
-          ref={ref}
           {...props}
         />
-        {helperText && (
-          <p className={cn(
-            'mt-1 text-sm',
-            error ? 'text-error-500' : 'text-gray-500'
-          )}>
-            {helperText}
-          </p>
+        {rightIcon && (
+          <div className="absolute right-3 flex items-center">
+            {rightIcon}
+          </div>
         )}
       </div>
     );

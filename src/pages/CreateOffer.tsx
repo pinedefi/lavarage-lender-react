@@ -72,6 +72,7 @@ const CreateOffer: React.FC = () => {
                   Amount (SOL)
                 </label>
                 <Input
+                  variant="message"
                   type="number"
                   placeholder="Enter amount to lend"
                   min="0"
@@ -85,6 +86,7 @@ const CreateOffer: React.FC = () => {
                   Interest Rate (APR %)
                 </label>
                 <Input
+                variant="message"
                   type="number"
                   placeholder="Enter annual interest rate"
                   min="0"
@@ -99,6 +101,7 @@ const CreateOffer: React.FC = () => {
                   Duration (Days)
                 </label>
                 <Input
+                variant="message"
                   type="number"
                   placeholder="Enter loan duration in days"
                   min="1"
@@ -125,6 +128,7 @@ const CreateOffer: React.FC = () => {
                   Base Token Address
                 </label>
                 <Input
+                variant="message"
                   placeholder="Enter base token address"
                   value={baseToken}
                   onChange={(e) => setBaseToken(e.target.value.trim())}

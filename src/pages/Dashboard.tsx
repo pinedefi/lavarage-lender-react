@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   TrendingUp,
@@ -13,6 +13,9 @@ import {
   AlertTriangle,
   Wallet,
   BarChart3,
+  Save,
+  FileText,
+  Trash2,
 } from 'lucide-react';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -22,6 +25,7 @@ import { useOffers } from '@/hooks/useOffers';
 import { usePositions } from '@/hooks/usePositions';
 import { useWallet } from '@/contexts/WalletContext';
 import { formatCurrency, formatNumber, formatPercentage, formatDate } from '@/utils';
+import { QuickActionMenu, QuickActionItem } from '@/components/ui/QuickActionMenu';
 
 const Dashboard: React.FC = () => {
   const { connected, publicKey } = useWallet();
@@ -302,26 +306,45 @@ const Dashboard: React.FC = () => {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <Link to="/create-offer">
-                  <Button fullWidth variant="glass">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create New Offer
-                  </Button>
-                </Link>
-                <Link to="/positions">
-                  <Button fullWidth variant="glass">
-                    <Users className="h-4 w-4 mr-2" />
-                    View All Positions
-                  </Button>
-                </Link>
-                <Link to="/liquidations">
-                  <Button fullWidth variant="glass">
-                    <Activity className="h-4 w-4 mr-2" />
-                    Check Liquidations
-                  </Button>
-                </Link>
-              </div>
+              <QuickActionMenu>
+                <QuickActionItem
+                  icon={<Plus className="h-5 w-5" />}
+                  onClick={() => window.location.href = '/create-offer'}
+                >
+                  Create New Offer
+                </QuickActionItem>
+                <QuickActionItem
+                  icon={<Users className="h-5 w-5" />}
+                  onClick={() => window.location.href = '/positions'}
+                >
+                  View All Positions
+                </QuickActionItem>
+                <QuickActionItem
+                  icon={<Activity className="h-5 w-5" />}
+                  onClick={() => window.location.href = '/liquidations'}
+                >
+                  Check Liquidations
+                </QuickActionItem>
+                <QuickActionItem
+                  icon={<FileText className="h-5 w-5" />}
+                  onClick={() => window.location.href = '/analytics'}
+                >
+                  View Analytics
+                </QuickActionItem>
+                <QuickActionItem
+                  icon={<Save className="h-5 w-5" />}
+                  onClick={() => {/* Add export functionality */}}
+                >
+                  Export Data
+                </QuickActionItem>
+                <QuickActionItem
+                  icon={<Trash2 className="h-5 w-5" />}
+                  destructive
+                  onClick={() => {/* Add clear data functionality */}}
+                >
+                  Clear All Data
+                </QuickActionItem>
+              </QuickActionMenu>
             </CardContent>
           </Card>
         </div>
