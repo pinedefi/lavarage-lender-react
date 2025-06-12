@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -13,9 +14,11 @@ import {
   AlertTriangle,
   Wallet,
   BarChart3,
-  Save,
+    Save,
   FileText,
   Trash2,
+
+
 } from 'lucide-react';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -27,10 +30,15 @@ import { useWallet } from '@/contexts/WalletContext';
 import { formatCurrency, formatNumber, formatPercentage, formatDate } from '@/utils';
 import { QuickActionMenu, QuickActionItem } from '@/components/ui/QuickActionMenu';
 
+
 const Dashboard: React.FC = () => {
   const { connected, publicKey } = useWallet();
   const { offers, loading: offersLoading } = useOffers({ autoRefresh: true });
-  const { positions, loading: positionsLoading, stats: positionStats } = usePositions({ autoRefresh: true });
+  const {
+    positions,
+    loading: positionsLoading,
+    stats: positionStats,
+  } = usePositions({ autoRefresh: true });
 
   // Calculate dashboard metrics
   const dashboardStats = {
@@ -38,41 +46,48 @@ const Dashboard: React.FC = () => {
       const currentExposure = parseInt(offer.currentExposure, 16) || 0;
       return sum + currentExposure / 1e9; // Convert lamports to SOL
     }, 0),
-    activeOffersCount: offers.filter(offer => offer.active).length,
-    portfolioUtilization: offers.length > 0 ? 
-      offers.reduce((sum, offer) => {
-        const maxExposure = parseInt(offer.maxExposure, 16) || 0;
-        const currentExposure = parseInt(offer.currentExposure, 16) || 0;
-        return sum + (maxExposure > 0 ? (currentExposure / maxExposure) * 100 : 0);
-      }, 0) / offers.length : 0,
+    activeOffersCount: offers.filter((offer) => offer.active).length,
+    portfolioUtilization:
+      offers.length > 0
+        ? offers.reduce((sum, offer) => {
+            const maxExposure = parseInt(offer.maxExposure, 16) || 0;
+            const currentExposure = parseInt(offer.currentExposure, 16) || 0;
+            return (
+              sum +
+              (maxExposure > 0 ? (currentExposure / maxExposure) * 100 : 0)
+            );
+          }, 0) / offers.length
+        : 0,
     totalInterestEarned: positionStats.totalInterestEarned,
     activePositionsCount: positionStats.activePositions,
-    averageAPR: offers.length > 0 ? 
-      offers.reduce((sum, offer) => sum + offer.apr, 0) / offers.length : 0,
+    averageAPR:
+      offers.length > 0
+        ? offers.reduce((sum, offer) => sum + offer.apr, 0) / offers.length
+        : 0,
   };
 
   const atRiskPositions = positions.filter(
-    (p) => parseFloat(p.currentLtv) >= 0.75
+    (p) => parseFloat(p.currentLtv) >= 0.75,
   ).length;
 
   const statCards = [
     {
-      title: 'Total Liquidity Deployed',
+      title: "Total Liquidity Deployed",
       value: `${formatNumber(dashboardStats.totalLiquidityDeployed, 2)} SOL`,
       icon: TrendingUp,
     },
     {
-      title: 'Active Positions',
+      title: "Active Positions",
       value: positionStats.activePositions.toString(),
       icon: Users,
     },
     {
-      title: 'At Risk Positions',
+      title: "At Risk Positions",
       value: atRiskPositions.toString(),
       icon: AlertTriangle,
     },
     {
-      title: 'Total Earnings',
+      title: "Total Earnings",
       value: `${formatNumber(dashboardStats.totalInterestEarned, 2)} SOL`,
       icon: BarChart3,
     },
@@ -82,7 +97,7 @@ const Dashboard: React.FC = () => {
     title: string;
     value: string;
     change?: string;
-    changeType?: 'positive' | 'negative';
+    changeType?: "positive" | "negative";
     icon: React.ReactNode;
   }> = ({ title, value, change, changeType, icon }) => (
     <Card variant="glass">
@@ -92,10 +107,14 @@ const Dashboard: React.FC = () => {
             <p className="text-sm font-medium text-gray-600">{title}</p>
             <p className="text-2xl font-bold text-gray-900">{value}</p>
             {change && (
-              <p className={`text-sm flex items-center mt-1 ${
-                changeType === 'positive' ? 'text-success-600' : 'text-error-600'
-              }`}>
-                {changeType === 'positive' ? (
+              <p
+                className={`text-sm flex items-center mt-1 ${
+                  changeType === "positive"
+                    ? "text-success-600"
+                    : "text-error-600"
+                }`}
+              >
+                {changeType === "positive" ? (
                   <ArrowUpRight className="h-4 w-4 mr-1" />
                 ) : (
                   <ArrowDownRight className="h-4 w-4 mr-1" />
@@ -104,9 +123,7 @@ const Dashboard: React.FC = () => {
               </p>
             )}
           </div>
-          <div className="p-3 bg-primary-50 rounded-lg">
-            {icon}
-          </div>
+          <div className="p-3 bg-primary-50 rounded-lg">{icon}</div>
         </div>
       </CardContent>
     </Card>
@@ -124,8 +141,8 @@ const Dashboard: React.FC = () => {
               Connect Your Wallet
             </h2>
             <p className="text-gray-600 mb-6">
-              Connect your Solana wallet to start managing your lending positions
-              and view your dashboard statistics.
+              Connect your Solana wallet to start managing your lending
+              positions and view your dashboard statistics.
             </p>
             <WalletMultiButton className="w-full !bg-primary-600 !rounded-md hover:!bg-primary-700" />
           </CardContent>
@@ -210,6 +227,7 @@ const Dashboard: React.FC = () => {
               ) : offers.length > 0 ? (
                 <div className="divide-y divide-white/10">
                   {offers.slice(0, 5).map((offer) => (
+
                     <div key={offer.publicKey.toString()} className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
                       <div className="flex items-center space-x-4">
                         <div className="h-10 w-10 bg-white/10 rounded-full flex items-center justify-center">
@@ -220,6 +238,7 @@ const Dashboard: React.FC = () => {
                         <div>
                           <p className="font-medium text-black">
                             {offer.collateralToken?.symbol || 'Unknown Token'}
+
                           </p>
                           <p className="text-sm text-black/70">
                             {formatPercentage(offer.apr)} APR
@@ -227,14 +246,16 @@ const Dashboard: React.FC = () => {
                         </div>
                       </div>
                       <div className="text-right">
+
                         <p className="font-medium text-black">
                           {formatNumber(parseInt(offer.availableForOpen) / 1e9, 2)} SOL
+
                         </p>
-                        <Badge 
-                          variant={offer.active ? 'success' : 'gray'} 
+                        <Badge
+                          variant={offer.active ? "success" : "gray"}
                           size="sm"
                         >
-                          {offer.active ? 'Active' : 'Inactive'}
+                          {offer.active ? "Active" : "Inactive"}
                         </Badge>
                       </div>
                     </div>
@@ -271,8 +292,10 @@ const Dashboard: React.FC = () => {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
+
                   <span className="text-sm text-black/70">Total Interest Earned</span>
                   <span className="font-medium text-black">
+
                     {formatCurrency(dashboardStats.totalInterestEarned)}
                   </span>
                 </div>
@@ -306,6 +329,7 @@ const Dashboard: React.FC = () => {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent>
+
               <QuickActionMenu>
                 <QuickActionItem
                   icon={<Plus className="h-5 w-5" />}
@@ -325,26 +349,9 @@ const Dashboard: React.FC = () => {
                 >
                   Check Liquidations
                 </QuickActionItem>
-                <QuickActionItem
-                  icon={<FileText className="h-5 w-5" />}
-                  onClick={() => window.location.href = '/analytics'}
-                >
-                  View Analytics
-                </QuickActionItem>
-                <QuickActionItem
-                  icon={<Save className="h-5 w-5" />}
-                  onClick={() => {/* Add export functionality */}}
-                >
-                  Export Data
-                </QuickActionItem>
-                <QuickActionItem
-                  icon={<Trash2 className="h-5 w-5" />}
-                  destructive
-                  onClick={() => {/* Add clear data functionality */}}
-                >
-                  Clear All Data
-                </QuickActionItem>
+                
               </QuickActionMenu>
+
             </CardContent>
           </Card>
         </div>
