@@ -4,7 +4,7 @@ import { BarChart3 } from 'lucide-react';
 
 const Analytics: React.FC = () => {
   return (
-    <div className="space-y-6">
+    <div className="card-glass p-8 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Analytics</h1>
       </div>

@@ -4,15 +4,26 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 356 50% 95%;
     --foreground: 222.2 47.4% 11.2%;
     --border: 214.3 31.8% 91.4%;
+    
+    /* Glass Effect Variables */
+    --shadow-offset: 0;
+    --shadow-blur: 20px;
+    --shadow-spread: -5px;
+    --shadow-color: rgba(255, 255, 255, 0.7);
+    --tint-opacity: 0.4;
+    --frost-blur: 8px;
+    --outer-shadow-blur: 24px;
   }
 
   .dark {
-    --background: 224 71% 4%;
+    --background: 356 30% 15%;
     --foreground: 213 31% 91%;
     --border: 216 34% 17%;
+    --shadow-color: rgba(255, 255, 255, 0.15);
+    --tint-opacity: 0.1;
   }
 
   * {
@@ -20,9 +31,10 @@
   }
   
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground min-h-screen;
     font-family: 'Inter', sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background: linear-gradient(135deg, #1a1f2c 0%, #2d3748 50%, #1a1f2c 100%);
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -56,7 +68,15 @@
   }
 
   .btn-glass {
-    @apply bg-white/20 backdrop-blur-sm text-gray-900 dark:text-white border border-white/40 dark:border-gray-500 hover:bg-white/30 hover:backdrop-blur-md focus-visible:ring-white/50;
+    @apply relative overflow-hidden;
+    background: rgba(255, 255, 255, var(--tint-opacity));
+    backdrop-filter: blur(var(--frost-blur));
+    -webkit-backdrop-filter: blur(var(--frost-blur));
+    box-shadow: 
+      inset var(--shadow-offset) var(--shadow-offset) var(--shadow-blur) var(--shadow-spread) var(--shadow-color),
+      0px 6px var(--outer-shadow-blur) rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    @apply text-gray-900 dark:text-white hover:bg-white/40 transition-all duration-300;
   }
   
   .btn-sm {
@@ -76,7 +96,14 @@
   }
 
   .card-glass {
-    @apply bg-white/30 dark:bg-gray-700/30 backdrop-blur-lg border border-white/50 dark:border-gray-500 shadow-md;
+    @apply relative overflow-hidden rounded-[28px];
+    background: rgba(255, 255, 255, var(--tint-opacity));
+    backdrop-filter: blur(var(--frost-blur));
+    -webkit-backdrop-filter: blur(var(--frost-blur));
+    box-shadow: 
+      inset var(--shadow-offset) var(--shadow-offset) var(--shadow-blur) var(--shadow-spread) var(--shadow-color),
+      0px 6px var(--outer-shadow-blur) rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.4);
   }
   
   .input {

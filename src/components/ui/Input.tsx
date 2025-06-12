@@ -2,32 +2,42 @@ import React from 'react';
 import { cn } from '@/utils/cn';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  error?: boolean;
-  helperText?: string;
+  variant?: 'default' | 'message';
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, error, helperText, ...props }, ref) => {
+  ({ className, variant = 'default', leftIcon, rightIcon, ...props }, ref) => {
+    const variants = {
+      default: 'bg-white border border-gray-300 focus:border-primary-500 focus:ring-primary-500',
+      message: 'bg-[#F2F2F7] dark:bg-[#1C1C1E] border-none rounded-3xl py-3 px-4 text-base',
+    };
+
     return (
-      <div className="relative">
+      <div className="relative flex items-center">
+        {leftIcon && (
+          <div className="absolute left-3 flex items-center pointer-events-none text-gray-400">
+            {leftIcon}
+          </div>
+        )}
         <input
           ref={ref}
           className={cn(
-            'flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400',
-            'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent',
-            'disabled:cursor-not-allowed disabled:opacity-50',
-            error && 'border-error-500 focus:ring-error-500',
+            'block w-full rounded-md shadow-sm transition-colors',
+            'placeholder:text-gray-400',
+            'focus:outline-none focus:ring-0',
+            leftIcon && 'pl-10',
+            rightIcon && 'pr-10',
+            variants[variant],
             className
           )}
           {...props}
         />
-        {helperText && (
-          <p className={cn(
-            'mt-1 text-sm',
-            error ? 'text-error-500' : 'text-gray-500'
-          )}>
-            {helperText}
-          </p>
+        {rightIcon && (
+          <div className="absolute right-3 flex items-center">
+            {rightIcon}
+          </div>
         )}
       </div>
     );

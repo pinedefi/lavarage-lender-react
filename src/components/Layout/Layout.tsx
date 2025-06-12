@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { WalletMultiButton } from '@/contexts/WalletContext';
 import {
@@ -8,10 +8,17 @@ import {
   AlertTriangle,
   PlusCircle,
   BarChart2,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const Layout = ({ children }: LayoutProps): JSX.Element => {
   const location = useLocation();
+  const [collapsed, setCollapsed] = React.useState(false);
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -23,53 +30,55 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <nav className="fixed top-0 z-50 w-full border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-        <div className="px-3 py-3 lg:px-5 lg:pl-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Link to="/" className="flex items-center">
-                <span className="self-center text-xl font-semibold dark:text-white">
-                  Leverage Lender
-                </span>
-              </Link>
-            </div>
-            <div className="flex items-center">
-              <WalletMultiButton className="!bg-primary-600 !rounded-md hover:!bg-primary-700" />
-            </div>
-          </div>
+    <div className="min-h-screen flex">
+      {/* Sidebar */}
+      <aside className={`card-glass fixed top-4 bottom-4 left-4 z-50 flex flex-col transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'}`}>
+        <div className="flex items-center justify-between p-4 border-b border-white/10">
+          {!collapsed && <h1 className="text-xl font-bold">Leverage Lender</h1>}
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+          >
+            {collapsed ? (
+              <ChevronRight className="h-5 w-5" />
+            ) : (
+              <ChevronLeft className="h-5 w-5" />
+            )}
+          </button>
         </div>
-      </nav>
+        
+        <nav className="flex-1 overflow-y-auto p-4 space-y-2">
+          {navigation.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-colors ${
+                  isActive 
+                    ? 'bg-white/20 text-white' 
+                    : 'hover:bg-white/10 text-white/70'
+                }`}
+              >
+                <Icon className="h-5 w-5 flex-shrink-0" />
+                {!collapsed && <span>{item.name}</span>}
+              </Link>
+            );
+          })}
+        </nav>
 
-      <aside className="fixed left-0 top-0 z-40 mt-16 h-screen w-64 border-r border-gray-200 bg-white pt-6 transition-transform dark:border-gray-700 dark:bg-gray-800">
-        <div className="h-full overflow-y-auto px-3 pb-4">
-          <ul className="space-y-2 font-medium">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.href;
-              return (
-                <li key={item.name}>
-                  <Link
-                    to={item.href}
-                    className={`flex items-center rounded-lg p-2 text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 ${
-                      isActive ? 'bg-gray-100 dark:bg-gray-700' : ''
-                    }`}
-                  >
-                    <Icon className="h-5 w-5 text-gray-500 transition duration-75 dark:text-gray-400" />
-                    <span className="ml-3">{item.name}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+        <div className="p-4 border-t border-white/10">
+          <WalletMultiButton className="btn-glass w-full !bg-transparent" />
         </div>
       </aside>
 
-      <div className="mt-16 p-4 sm:ml-64">
-        <div className="rounded-lg border-2 border-dashed border-gray-200 p-4 dark:border-gray-700">
+      {/* Main Content */}
+      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-24' : 'ml-72'} p-4`}>
+        <div className="card-glass min-h-[calc(100vh-2rem)] p-6">
           {children}
         </div>
-      </div>
+      </main>
     </div>
   );
 };

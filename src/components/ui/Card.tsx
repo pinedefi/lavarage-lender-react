@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { cn } from '@/utils/cn';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -6,14 +6,14 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant = 'default', ...props }, ref) => (
+  ({ className, variant = 'glass', ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
         'rounded-lg border shadow-sm',
         variant === 'glass'
-          ? 'card-glass'
-          : 'bg-white dark:bg-gray-800',
+          ? 'card-glass border-white/40'
+          : 'bg-white dark:bg-gray-800 border-gray-200',
         className
       )}
       {...props}
@@ -42,7 +42,7 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
     <h3
       ref={ref}
       className={cn(
-        'text-2xl font-semibold leading-none tracking-tight',
+        'text-2xl font-semibold leading-none tracking-tight text-gray-900 dark:text-white',
         className
       )}
       {...props}

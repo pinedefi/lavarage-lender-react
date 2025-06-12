@@ -4,6 +4,7 @@ import { apiService } from '@/services/api';
 import { useWallet } from '@/contexts/WalletContext';
 import { useWallet as useSolanaWallet } from '@solana/wallet-adapter-react';
 import toast from 'react-hot-toast';
+import bs58 from 'bs58';
 
 interface UseOffersOptions {
   includeTokens?: boolean;
@@ -138,10 +139,10 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
         setError(null);
 
         const message = new TextEncoder().encode(
-          `Change LTV of ${offerAddress} to ${newLTV}`,
+          `${offerAddress}:${newLTV}`,
         );
         const signedMessage = await signMessage(message);
-        const signature = Buffer.from(signedMessage).toString('base64');
+        const signature = bs58.encode(signedMessage);
 
         await apiService.changeLTV({
           offerAddress,
