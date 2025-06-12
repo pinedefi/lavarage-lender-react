@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 import {
   TrendingUp,
   DollarSign,
@@ -13,20 +13,29 @@ import {
   AlertTriangle,
   Wallet,
   BarChart3,
-} from 'lucide-react';
-import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import { WalletMultiButton } from '@/contexts/WalletContext';
-import Badge from '@/components/ui/Badge';
-import { useOffers } from '@/hooks/useOffers';
-import { usePositions } from '@/hooks/usePositions';
-import { useWallet } from '@/contexts/WalletContext';
-import { formatCurrency, formatNumber, formatPercentage, formatDate } from '@/utils';
+} from "lucide-react";
+import Card, { CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import { WalletMultiButton } from "@/contexts/WalletContext";
+import Badge from "@/components/ui/Badge";
+import { useOffers } from "@/hooks/useOffers";
+import { usePositions } from "@/hooks/usePositions";
+import { useWallet } from "@/contexts/WalletContext";
+import {
+  formatCurrency,
+  formatNumber,
+  formatPercentage,
+  formatDate,
+} from "@/utils";
 
 const Dashboard: React.FC = () => {
   const { connected, publicKey } = useWallet();
   const { offers, loading: offersLoading } = useOffers({ autoRefresh: true });
-  const { positions, loading: positionsLoading, stats: positionStats } = usePositions({ autoRefresh: true });
+  const {
+    positions,
+    loading: positionsLoading,
+    stats: positionStats,
+  } = usePositions({ autoRefresh: true });
 
   // Calculate dashboard metrics
   const dashboardStats = {
@@ -34,41 +43,48 @@ const Dashboard: React.FC = () => {
       const currentExposure = parseInt(offer.currentExposure, 16) || 0;
       return sum + currentExposure / 1e9; // Convert lamports to SOL
     }, 0),
-    activeOffersCount: offers.filter(offer => offer.active).length,
-    portfolioUtilization: offers.length > 0 ? 
-      offers.reduce((sum, offer) => {
-        const maxExposure = parseInt(offer.maxExposure, 16) || 0;
-        const currentExposure = parseInt(offer.currentExposure, 16) || 0;
-        return sum + (maxExposure > 0 ? (currentExposure / maxExposure) * 100 : 0);
-      }, 0) / offers.length : 0,
+    activeOffersCount: offers.filter((offer) => offer.active).length,
+    portfolioUtilization:
+      offers.length > 0
+        ? offers.reduce((sum, offer) => {
+            const maxExposure = parseInt(offer.maxExposure, 16) || 0;
+            const currentExposure = parseInt(offer.currentExposure, 16) || 0;
+            return (
+              sum +
+              (maxExposure > 0 ? (currentExposure / maxExposure) * 100 : 0)
+            );
+          }, 0) / offers.length
+        : 0,
     totalInterestEarned: positionStats.totalInterestEarned,
     activePositionsCount: positionStats.activePositions,
-    averageAPR: offers.length > 0 ? 
-      offers.reduce((sum, offer) => sum + offer.apr, 0) / offers.length : 0,
+    averageAPR:
+      offers.length > 0
+        ? offers.reduce((sum, offer) => sum + offer.apr, 0) / offers.length
+        : 0,
   };
 
   const atRiskPositions = positions.filter(
-    (p) => parseFloat(p.currentLtv) >= 0.75
+    (p) => parseFloat(p.currentLtv) >= 0.75,
   ).length;
 
   const statCards = [
     {
-      title: 'Total Liquidity Deployed',
+      title: "Total Liquidity Deployed",
       value: `${formatNumber(dashboardStats.totalLiquidityDeployed, 2)} SOL`,
       icon: TrendingUp,
     },
     {
-      title: 'Active Positions',
+      title: "Active Positions",
       value: positionStats.activePositions.toString(),
       icon: Users,
     },
     {
-      title: 'At Risk Positions',
+      title: "At Risk Positions",
       value: atRiskPositions.toString(),
       icon: AlertTriangle,
     },
     {
-      title: 'Total Earnings',
+      title: "Total Earnings",
       value: `${formatNumber(dashboardStats.totalInterestEarned, 2)} SOL`,
       icon: BarChart3,
     },
@@ -78,7 +94,7 @@ const Dashboard: React.FC = () => {
     title: string;
     value: string;
     change?: string;
-    changeType?: 'positive' | 'negative';
+    changeType?: "positive" | "negative";
     icon: React.ReactNode;
   }> = ({ title, value, change, changeType, icon }) => (
     <Card variant="glass">
@@ -88,10 +104,14 @@ const Dashboard: React.FC = () => {
             <p className="text-sm font-medium text-gray-600">{title}</p>
             <p className="text-2xl font-bold text-gray-900">{value}</p>
             {change && (
-              <p className={`text-sm flex items-center mt-1 ${
-                changeType === 'positive' ? 'text-success-600' : 'text-error-600'
-              }`}>
-                {changeType === 'positive' ? (
+              <p
+                className={`text-sm flex items-center mt-1 ${
+                  changeType === "positive"
+                    ? "text-success-600"
+                    : "text-error-600"
+                }`}
+              >
+                {changeType === "positive" ? (
                   <ArrowUpRight className="h-4 w-4 mr-1" />
                 ) : (
                   <ArrowDownRight className="h-4 w-4 mr-1" />
@@ -100,9 +120,7 @@ const Dashboard: React.FC = () => {
               </p>
             )}
           </div>
-          <div className="p-3 bg-primary-50 rounded-lg">
-            {icon}
-          </div>
+          <div className="p-3 bg-primary-50 rounded-lg">{icon}</div>
         </div>
       </CardContent>
     </Card>
@@ -120,8 +138,8 @@ const Dashboard: React.FC = () => {
               Connect Your Wallet
             </h2>
             <p className="text-gray-600 mb-6">
-              Connect your Solana wallet to start managing your lending positions
-              and view your dashboard statistics.
+              Connect your Solana wallet to start managing your lending
+              positions and view your dashboard statistics.
             </p>
             <WalletMultiButton className="w-full !bg-primary-600 !rounded-md hover:!bg-primary-700" />
           </CardContent>
@@ -206,16 +224,19 @@ const Dashboard: React.FC = () => {
               ) : offers.length > 0 ? (
                 <div className="space-y-4">
                   {offers.slice(0, 5).map((offer) => (
-                    <div key={offer.publicKey.toString()} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <div
+                      key={offer.publicKey.toString()}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                    >
                       <div className="flex items-center space-x-4">
                         <div className="h-10 w-10 bg-primary-100 rounded-full flex items-center justify-center">
                           <span className="text-primary-600 font-semibold text-sm">
-                            {offer.collateralToken?.symbol?.charAt(0) || 'T'}
+                            {offer.collateralToken?.symbol?.charAt(0) || "T"}
                           </span>
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">
-                            {offer.collateralToken?.symbol || 'Unknown Token'}
+                            {offer.collateralToken?.symbol || "Unknown Token"}
                           </p>
                           <p className="text-sm text-gray-500">
                             {formatPercentage(offer.apr)} APR
@@ -224,13 +245,17 @@ const Dashboard: React.FC = () => {
                       </div>
                       <div className="text-right">
                         <p className="font-medium text-gray-900">
-                          {formatNumber(parseInt(offer.availableForOpen) / 1e9, 2)} SOL
+                          {formatNumber(
+                            parseInt(offer.availableForOpen) / 1e9,
+                            2,
+                          )}{" "}
+                          SOL
                         </p>
-                        <Badge 
-                          variant={offer.active ? 'success' : 'gray'} 
+                        <Badge
+                          variant={offer.active ? "success" : "gray"}
                           size="sm"
                         >
-                          {offer.active ? 'Active' : 'Inactive'}
+                          {offer.active ? "Active" : "Inactive"}
                         </Badge>
                       </div>
                     </div>
@@ -267,7 +292,9 @@ const Dashboard: React.FC = () => {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Total Interest Earned</span>
+                  <span className="text-sm text-gray-600">
+                    Total Interest Earned
+                  </span>
                   <span className="font-medium">
                     {formatCurrency(dashboardStats.totalInterestEarned)}
                   </span>
@@ -319,6 +346,12 @@ const Dashboard: React.FC = () => {
                   <Button fullWidth variant="glass">
                     <Activity className="h-4 w-4 mr-2" />
                     Check Liquidations
+                  </Button>
+                </Link>
+                <Link to="/balances">
+                  <Button fullWidth variant="glass">
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    Manage Funds
                   </Button>
                 </Link>
               </div>
