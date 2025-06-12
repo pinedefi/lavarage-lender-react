@@ -209,21 +209,21 @@ const Dashboard: React.FC = () => {
                     <div key={offer.publicKey.toString()} className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
                       <div className="flex items-center space-x-4">
                         <div className="h-10 w-10 bg-white/10 rounded-full flex items-center justify-center">
-                          <span className="text-white font-semibold text-sm">
+                          <span className="text-black font-semibold text-sm">
                             {offer.collateralToken?.symbol?.charAt(0) || 'T'}
                           </span>
                         </div>
                         <div>
-                          <p className="font-medium text-white">
+                          <p className="font-medium text-black">
                             {offer.collateralToken?.symbol || 'Unknown Token'}
                           </p>
-                          <p className="text-sm text-white/70">
+                          <p className="text-sm text-black/70">
                             {formatPercentage(offer.apr)} APR
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium text-white">
+                        <p className="font-medium text-black">
                           {formatNumber(parseInt(offer.availableForOpen) / 1e9, 2)} SOL
                         </p>
                         <Badge 
@@ -238,11 +238,11 @@ const Dashboard: React.FC = () => {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <Activity className="h-12 w-12 text-white/40 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-white mb-2">
+                  <Activity className="h-12 w-12 text-black/40 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-black mb-2">
                     No offers yet
                   </h3>
-                  <p className="text-white/70 mb-4">
+                  <p className="text-black/70 mb-4">
                     Create your first loan offer to start earning interest
                   </p>
                   <Link to="/create-offer">
@@ -267,20 +267,20 @@ const Dashboard: React.FC = () => {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-white/70">Total Interest Earned</span>
-                  <span className="font-medium text-white">
+                  <span className="text-sm text-black/70">Total Interest Earned</span>
+                  <span className="font-medium text-black">
                     {formatCurrency(dashboardStats.totalInterestEarned)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-white/70">Average APR</span>
-                  <span className="font-medium text-white">
+                  <span className="text-sm text-black/70">Average APR</span>
+                  <span className="font-medium text-black">
                     {formatPercentage(dashboardStats.averageAPR)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-white/70">Total Positions</span>
-                  <span className="font-medium text-white">
+                  <span className="text-sm text-black/70">Total Positions</span>
+                  <span className="font-medium text-black">
                     {positionStats.totalPositions}
                   </span>
                 </div>
