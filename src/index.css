@@ -34,7 +34,7 @@
     @apply bg-background text-foreground min-h-screen;
     font-family: 'Inter', sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
-    background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+    background: linear-gradient(135deg, #1a1f2c 0%, #2d3748 50%, #1a1f2c 100%);
   }
   
   h1, h2, h3, h4, h5, h6 {
