@@ -7,6 +7,7 @@ import {
   ApiResponse,
   TransactionModel,
   TokenModel,
+  HeliusTokenModel,
 } from "@/types";
 
 class ApiService {
@@ -15,7 +16,7 @@ class ApiService {
 
   constructor(
     baseURL: string = process.env.REACT_APP_API_URL ||
-      "https://api.lavarage.com",
+      "https://api.lavarage.com"
   ) {
     this.apiKey = process.env.REACT_APP_API_KEY || "";
 
@@ -44,7 +45,7 @@ class ApiService {
         }
         return config;
       },
-      (error) => Promise.reject(error),
+      (error) => Promise.reject(error)
     );
 
     // Response interceptor
@@ -55,7 +56,7 @@ class ApiService {
           error.response?.data?.message || error.message || "An error occurred";
         console.error("API Error:", message);
         return Promise.reject(new Error(message));
-      },
+      }
     );
   }
 
@@ -67,7 +68,7 @@ class ApiService {
       includeRawData?: boolean;
       chain?: "solana" | "bsc";
       tags?: string[];
-    } = {},
+    } = {}
   ): Promise<OfferV2Model[]> {
     const response = await this.api.get("/api/sdk/v1.0/offers/v2", { params });
     return response.data;
@@ -89,7 +90,7 @@ class ApiService {
   async createOffer(data: CreateOfferFormData): Promise<TransactionModel> {
     const response = await this.api.post(
       "/api/sdk/v1.0/lender/offers/create",
-      data,
+      data
     );
     return response.data;
   }
@@ -97,7 +98,7 @@ class ApiService {
   async updateOffer(data: UpdateOfferFormData): Promise<TransactionModel> {
     const response = await this.api.put(
       "/api/sdk/v1.0/lender/offers/update",
-      data,
+      data
     );
     return response.data;
   }
@@ -109,7 +110,7 @@ class ApiService {
   }): Promise<void> {
     const response = await this.api.put(
       "/api/sdk/v1.0/lender/offers/changeLTV",
-      data,
+      data
     );
     return response.data;
   }
@@ -131,7 +132,7 @@ class ApiService {
       userPubKey?: string;
       status?: "open" | "closed" | "liquidated" | "all";
       includeInactionable?: boolean;
-    } = {},
+    } = {}
   ): Promise<PositionV3Model[]> {
     const response = await this.api.get("/api/sdk/v1.0/positions/v3", {
       params,
@@ -158,7 +159,7 @@ class ApiService {
   }): Promise<TransactionModel> {
     const response = await this.api.post(
       "/api/sdk/v1.0/lender/pools/deposit",
-      data,
+      data
     );
     return response.data;
   }
@@ -170,23 +171,43 @@ class ApiService {
   }): Promise<TransactionModel> {
     const response = await this.api.post(
       "/api/sdk/v1.0/lender/pools/withdraw",
-      data,
+      data
     );
     return response.data;
   }
 
   async getTokenMetadata(tokenAddress: string): Promise<TokenModel> {
     const apiKey = process.env.REACT_APP_HELIUS_API_KEY || "";
-    const response = await axios.get(
-      "https://api.helius.xyz/v0/token-metadata",
-      {
-        params: {
-          "api-key": apiKey,
-          tokenAddress,
-        },
+
+    const requestBody = {
+      jsonrpc: "2.0",
+      id: "1",
+      method: "getAsset",
+      params: {
+        id: tokenAddress,
       },
+    };
+
+    const response = await axios.post(
+      `https://mainnet.helius-rpc.com/?api-key=${apiKey}`,
+      requestBody,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
-    return response.data;
+
+    const heliusData: HeliusTokenModel = response.data.result;
+
+    // Convert Helius response to our TokenModel format
+    return {
+      address: heliusData.id,
+      name: heliusData.content.metadata.name,
+      symbol: heliusData.content.metadata.symbol,
+      logoURI: heliusData.content.links?.image,
+      decimals: heliusData.token_info?.decimals || 9,
+    };
   }
 
   // Utility Methods
