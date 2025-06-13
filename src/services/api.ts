@@ -188,17 +188,21 @@ class ApiService {
       },
     };
 
-    const response = await axios.post(
-      `https://mainnet.helius-rpc.com/?api-key=${apiKey}`,
-      requestBody,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
+    let heliusData: HeliusTokenModel;
+    try {
+      const { data } = await axios.post(
+        `https://mainnet.helius-rpc.com/?api-key=${apiKey}`,
+        requestBody,
+        { headers: { "Content-Type": "application/json" } }
+      );
+      if (!data.result) {
+        throw new Error("Helius RPC returned no result");
       }
-    );
-
-    const heliusData: HeliusTokenModel = response.data.result;
+      heliusData = data.result;
+    } catch (e) {
+      console.error("getTokenMetadata error:", e);
+      throw new Error("Failed to fetch token metadata");
+    }
 
     // Convert Helius response to our TokenModel format
     return {
@@ -206,7 +210,7 @@ class ApiService {
       name: heliusData.content.metadata.name,
       symbol: heliusData.content.metadata.symbol,
       logoURI: heliusData.content.links?.image,
-      decimals: heliusData.token_info?.decimals || 9,
+      decimals: heliusData.token_info?.decimals ?? 9,
     };
   }
 

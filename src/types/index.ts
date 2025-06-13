@@ -217,11 +217,12 @@ export interface CreateOfferFormData {
   maxExposure: number;
   interestRate: number;
   quoteToken: string;
-  tokenData?: TokenModel;
+  userWallet: string;
 }
 
 export interface UpdateOfferFormData {
   nodeWallet: string;
+  userWallet: string;
   collateralToken: string;
   quoteToken: string;
   maxExposure: number;
