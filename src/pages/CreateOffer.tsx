@@ -7,13 +7,17 @@ import { useOffers } from "@/hooks/useOffers";
 import { apiService } from "@/services/api";
 import { TokenModel } from "@/types";
 import { isValidSolanaAddress } from "@/utils";
+import {
+  QUOTE_TOKENS,
+  getQuoteTokenAddress,
+  QUOTE_TOKEN_SYMBOLS,
+} from "@/utils/tokens";
 
 const CreateOffer: React.FC = () => {
   const { createOffer } = useOffers();
 
   const [amount, setAmount] = useState("");
   const [interestRate, setInterestRate] = useState("");
-  const [duration, setDuration] = useState("");
   const [quoteToken, setQuoteToken] = useState("SOL");
   const [baseToken, setBaseToken] = useState("");
   const [tokenData, setTokenData] = useState<TokenModel | null>(null);
@@ -49,7 +53,7 @@ const CreateOffer: React.FC = () => {
       collateralToken: baseToken,
       maxExposure: parseFloat(amount),
       interestRate: parseFloat(interestRate),
-      quoteToken,
+      quoteToken: getQuoteTokenAddress(quoteToken as keyof typeof QUOTE_TOKENS),
       tokenData: tokenData || undefined,
     });
   };
@@ -69,7 +73,7 @@ const CreateOffer: React.FC = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Amount (SOL)
+                  Amount (Quote Token)
                 </label>
                 <Input
                   variant="message"
@@ -86,7 +90,7 @@ const CreateOffer: React.FC = () => {
                   Interest Rate (APR %)
                 </label>
                 <Input
-                variant="message"
+                  variant="message"
                   type="number"
                   placeholder="Enter annual interest rate"
                   min="0"
@@ -98,20 +102,6 @@ const CreateOffer: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Duration (Days)
-                </label>
-                <Input
-                variant="message"
-                  type="number"
-                  placeholder="Enter loan duration in days"
-                  min="1"
-                  step="1"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Quote Token
                 </label>
                 <select
@@ -119,8 +109,11 @@ const CreateOffer: React.FC = () => {
                   value={quoteToken}
                   onChange={(e) => setQuoteToken(e.target.value)}
                 >
-                  <option value="SOL">SOL</option>
-                  <option value="USDC">USDC</option>
+                  {QUOTE_TOKEN_SYMBOLS.map((symbol) => (
+                    <option key={symbol} value={symbol}>
+                      {symbol}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
@@ -128,7 +121,7 @@ const CreateOffer: React.FC = () => {
                   Base Token Address
                 </label>
                 <Input
-                variant="message"
+                  variant="message"
                   placeholder="Enter base token address"
                   value={baseToken}
                   onChange={(e) => setBaseToken(e.target.value.trim())}
