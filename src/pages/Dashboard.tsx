@@ -46,19 +46,14 @@ const Dashboard: React.FC = () => {
       const currentExposure = parseInt(offer.currentExposure, 16) || 0;
       return sum + currentExposure / 1e9; // Convert lamports to SOL
     }, 0),
-    activeOffersCount: offers.filter((offer) => offer.active).length,
-    portfolioUtilization:
-      offers.length > 0
-        ? offers.reduce((sum, offer) => {
-            const maxExposure = parseInt(offer.maxExposure, 16) || 0;
-            const currentExposure = parseInt(offer.currentExposure, 16) || 0;
-            return (
-              sum +
-              (maxExposure > 0 ? (currentExposure / maxExposure) * 100 : 0)
-            );
-          }, 0) / offers.length
-        : 0,
-    totalInterestEarned: positionStats.totalInterestEarned,
+    activeOffersCount: offers.filter(offer => offer.active).length,
+    portfolioUtilization: offers.length > 0 ? 
+      offers.reduce((sum, offer) => {
+        const maxExposure = parseInt(offer.maxExposure, 16) || 0;
+        const currentExposure = parseInt(offer.currentExposure, 16) || 0;
+        return sum + (maxExposure > 0 ? (currentExposure / maxExposure) * 100 : 0);
+      }, 0) / offers.length : 0,
+    totalInterestEarned: positionStats.totalInterestEarned as Record<string, number>,
     activePositionsCount: positionStats.activePositions,
     averageAPR:
       offers.length > 0
@@ -87,8 +82,10 @@ const Dashboard: React.FC = () => {
       icon: AlertTriangle,
     },
     {
-      title: "Total Earnings",
-      value: `${formatNumber(dashboardStats.totalInterestEarned, 2)} SOL`,
+      title: 'Total Pending Interest',
+      value: Object.entries(dashboardStats.totalInterestEarned)
+        .map(([currency, amount]) => `${formatNumber(amount, 2)} ${currency}`)
+        .join(' + '),
       icon: BarChart3,
     },
   ];
@@ -291,13 +288,18 @@ const Dashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex justify-between items-center">
-
+                <div>
                   <span className="text-sm text-black/70">Total Interest Earned</span>
-                  <span className="font-medium text-black">
-
-                    {formatCurrency(dashboardStats.totalInterestEarned)}
-                  </span>
+                  <div className="mt-2 space-y-2">
+                    {Object.entries(dashboardStats.totalInterestEarned).map(([currency, amount]) => (
+                      <div key={currency} className="flex justify-between items-center">
+                        <span className="text-sm text-black/70">{currency}</span>
+                        <span className="font-medium text-black">
+                          {formatNumber(amount, 4)} {currency}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-black/70">Average APR</span>

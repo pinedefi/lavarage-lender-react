@@ -232,7 +232,7 @@ const Offers: React.FC = () => {
         const decimals = quoteToken?.decimals ?? 9;
         setApr(offer.apr.toString());
         setExposure((parseInt(offer.maxExposure, 16) / (10 ** decimals)).toString());
-        setLtv('');
+        setLtv((offer.targetLtv || 0.75).toString());
       }
     }, [offer]);
 

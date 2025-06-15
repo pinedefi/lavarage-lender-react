@@ -20,7 +20,7 @@ interface UsePositionsReturn {
     totalPositions: number;
     activePositions: number;
     totalBorrowed: number;
-    totalInterestEarned: number;
+    totalInterestEarned: Record<string, number>;
     averageLTV: number;
   };
 }
@@ -73,9 +73,17 @@ export function usePositions(options: UsePositionsOptions = {}): UsePositionsRet
       return sum + borrowed;
     }, 0);
 
-    const totalInterestEarned = positions.reduce((sum, position) => {
-      return sum + (position.interestAccrued || 0);
-    }, 0);
+    const totalInterestEarned = positions.reduce((acc: Record<string, number>, position) => {
+      const quoteCurrency = position.quoteToken.symbol;
+      const interest = position.interestAccrued || 0;
+      
+      if (!acc[quoteCurrency]) {
+        acc[quoteCurrency] = 0;
+      }
+      acc[quoteCurrency] += interest;
+      
+      return acc;
+    }, { SOL: 0, USDC: 0 });
 
     const averageLTV = positions.length > 0 
       ? positions.reduce((sum, position) => {

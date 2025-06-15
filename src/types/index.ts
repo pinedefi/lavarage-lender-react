@@ -124,6 +124,7 @@ export interface OfferV2Model {
   active: boolean;
   account: OfferAccount;
   createdAt: string;
+  targetLtv?: number;
 }
 
 // Position Types
