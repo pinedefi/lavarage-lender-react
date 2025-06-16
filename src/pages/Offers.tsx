@@ -184,9 +184,11 @@ const Offers: React.FC = () => {
               <p className="text-sm text-gray-500">Current LTV</p>
               <div className="flex items-center space-x-2">
                 <p className="text-lg font-semibold text-gray-900">
-                  {offer.targetLtv ? formatPercentage(offer.targetLtv) : "N/A"}
+                  {offer.targetLtv !== null && offer.targetLtv !== undefined
+                    ? formatPercentage(offer.targetLtv * 100)
+                    : "N/A"}
                 </p>
-                {offer.targetLtv && (
+                {offer.targetLtv !== null && offer.targetLtv !== undefined && (
                   <span
                     className={`text-xs font-medium ${getRiskLevel(offer.targetLtv).color}`}
                   >
@@ -273,7 +275,8 @@ const Offers: React.FC = () => {
         setExposure(
           (parseInt(offer.maxExposure, 16) / 10 ** decimals).toString()
         );
-        setLtv((offer.targetLtv || 0.75).toString());
+        // Convert decimal to percentage for display (0.75 -> 75)
+        setLtv(((offer.targetLtv || 0.75) * 100).toString());
       }
     }, [offer]);
 
@@ -300,7 +303,8 @@ const Offers: React.FC = () => {
 
     const handleLtvSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      await changeLTV(offer.publicKey.toString(), parseFloat(ltv));
+      // Convert percentage to decimal for API (75 -> 0.75)
+      await changeLTV(offer.publicKey.toString(), parseFloat(ltv) / 100);
       onClose();
     };
 
@@ -356,6 +360,7 @@ const Offers: React.FC = () => {
                 step="0.1"
                 min="0"
                 max="100"
+                placeholder="e.g., 75 for 75%"
               />
             </div>
             <div className="flex justify-end pt-2">
