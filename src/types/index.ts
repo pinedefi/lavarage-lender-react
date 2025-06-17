@@ -1,4 +1,4 @@
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey } from '@solana/web3.js';
 
 // Solana Types
 export interface SolanaPublicKey {
@@ -162,7 +162,7 @@ export interface OpenPositionModel extends PositionModel {
 }
 
 export interface PositionV3Model {
-  status: "active" | "sold by take profit" | "repaid" | "sold" | "liquidated";
+  status: 'active' | 'sold by take profit' | 'repaid' | 'sold' | 'liquidated';
   openTimestamp: string;
   closeTimestamp: string;
   quoteToken: TokenModel;
@@ -207,7 +207,7 @@ export interface LiquidationEvent {
   liquidationPrice: number;
   saleProceeds: number;
   pnl: number;
-  status: "cooldown" | "processing" | "deposited";
+  status: 'cooldown' | 'processing' | 'deposited';
   timestamp: string;
   cooldownEndsAt?: string;
 }

@@ -1,16 +1,16 @@
-import { useState, useEffect, useCallback } from "react";
-import { OfferV2Model } from "@/types";
-import { apiService } from "@/services/api";
-import { useWallet } from "@/contexts/WalletContext";
-import { useWallet as useSolanaWallet } from "@solana/wallet-adapter-react";
-import toast from "react-hot-toast";
-import bs58 from "bs58";
+import { useState, useEffect, useCallback } from 'react';
+import { OfferV2Model } from '@/types';
+import { apiService } from '@/services/api';
+import { useWallet } from '@/contexts/WalletContext';
+import { useWallet as useSolanaWallet } from '@solana/wallet-adapter-react';
+import toast from 'react-hot-toast';
+import bs58 from 'bs58';
 
 interface UseOffersOptions {
   includeTokens?: boolean;
   inactiveOffers?: boolean;
   includeRawData?: boolean;
-  chain?: "solana" | "bsc";
+  chain?: 'solana' | 'bsc';
   tags?: string[];
   autoRefresh?: boolean;
   refreshInterval?: number;
@@ -36,7 +36,7 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
     includeTokens = true,
     inactiveOffers = false,
     includeRawData = false,
-    chain = "solana",
+    chain = 'solana',
     tags,
     autoRefresh = true,
     refreshInterval = 30000, // 30 seconds
@@ -60,9 +60,9 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
       });
       setOffers(data);
     } catch (err: any) {
-      const errorMessage = err.message || "Failed to fetch offers";
+      const errorMessage = err.message || 'Failed to fetch offers';
       setError(errorMessage);
-      console.error("Error fetching offers:", err);
+      console.error('Error fetching offers:', err);
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -72,7 +72,7 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
   const createOffer = useCallback(
     async (data: any) => {
       if (!publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error('Wallet not connected');
       }
 
       try {
@@ -85,12 +85,12 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
         const transaction = await apiService.createOffer(offerData);
 
         // TODO: Sign and send transaction
-        toast.success("Offer created successfully");
+        toast.success('Offer created successfully');
 
         // Refresh offers after creation
         await fetchOffers();
       } catch (err: any) {
-        const errorMessage = err.message || "Failed to create offer";
+        const errorMessage = err.message || 'Failed to create offer';
         setError(errorMessage);
         toast.error(errorMessage);
         throw err;
@@ -102,7 +102,7 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
   const updateOffer = useCallback(
     async (data: any) => {
       if (!publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error('Wallet not connected');
       }
 
       try {
@@ -115,12 +115,12 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
         const transaction = await apiService.updateOffer(updateData);
 
         // TODO: Sign and send transaction
-        toast.success("Offer updated successfully");
+        toast.success('Offer updated successfully');
 
         // Refresh offers after update
         await fetchOffers();
       } catch (err: any) {
-        const errorMessage = err.message || "Failed to update offer";
+        const errorMessage = err.message || 'Failed to update offer';
         setError(errorMessage);
         toast.error(errorMessage);
         throw err;
@@ -134,11 +134,11 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
   const changeLTV = useCallback(
     async (offerAddress: string, newLTV: number) => {
       if (!publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error('Wallet not connected');
       }
 
       if (!signMessage) {
-        throw new Error("Wallet does not support message signing");
+        throw new Error('Wallet does not support message signing');
       }
 
       try {
@@ -154,12 +154,12 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
           newLTV,
         });
 
-        toast.success("LTV updated successfully");
+        toast.success('LTV updated successfully');
 
         // Refresh offers after LTV change
         await fetchOffers();
       } catch (err: any) {
-        const errorMessage = err.message || "Failed to update LTV";
+        const errorMessage = err.message || 'Failed to update LTV';
         setError(errorMessage);
         toast.error(errorMessage);
         throw err;
@@ -202,7 +202,7 @@ export function useAllOffers(options: UseOffersOptions = {}) {
     includeTokens = true,
     inactiveOffers = false,
     includeRawData = false,
-    chain = "solana",
+    chain = 'solana',
     tags,
     autoRefresh = true,
     refreshInterval = 30000,
@@ -220,9 +220,9 @@ export function useAllOffers(options: UseOffersOptions = {}) {
       });
       setOffers(data);
     } catch (err: any) {
-      const errorMessage = err.message || "Failed to fetch offers";
+      const errorMessage = err.message || 'Failed to fetch offers';
       setError(errorMessage);
-      console.error("Error fetching all offers:", err);
+      console.error('Error fetching all offers:', err);
     } finally {
       setLoading(false);
     }

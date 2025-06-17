@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
-import { apiService } from "@/services/api";
-import { useWallet } from "@/contexts/WalletContext";
-import toast from "react-hot-toast";
+import { useState, useEffect, useCallback } from 'react';
+import { apiService } from '@/services/api';
+import { useWallet } from '@/contexts/WalletContext';
+import toast from 'react-hot-toast';
 
 interface UsePoolOptions {
   quoteToken?: string;
@@ -24,11 +24,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const {
-    quoteToken = "SOL",
-    autoRefresh = true,
-    refreshInterval = 30000,
-  } = options;
+  const { quoteToken = 'SOL', autoRefresh = true, refreshInterval = 30000 } = options;
 
   const fetchBalance = useCallback(async () => {
     if (!connected || !publicKey) {
@@ -45,7 +41,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
       const bal = parseFloat((data && data.balance) || data || 0);
       setBalance(bal);
     } catch (err: any) {
-      const message = err.message || "Failed to fetch balance";
+      const message = err.message || 'Failed to fetch balance';
       setError(message);
       toast.error(message);
     } finally {
@@ -56,7 +52,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
   const deposit = useCallback(
     async (amount: number) => {
       if (!publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error('Wallet not connected');
       }
       try {
         setError(null);
@@ -65,22 +61,22 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
           quoteToken,
           userWallet: publicKey.toBase58(),
         });
-        toast.success("Deposit submitted");
+        toast.success('Deposit submitted');
         await fetchBalance();
       } catch (err: any) {
-        const message = err.message || "Deposit failed";
+        const message = err.message || 'Deposit failed';
         setError(message);
         toast.error(message);
         throw err;
       }
     },
-    [publicKey, quoteToken, fetchBalance],
+    [publicKey, quoteToken, fetchBalance]
   );
 
   const withdraw = useCallback(
     async (amount: number) => {
       if (!publicKey) {
-        throw new Error("Wallet not connected");
+        throw new Error('Wallet not connected');
       }
       try {
         setError(null);
@@ -89,16 +85,16 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
           quoteToken,
           userWallet: publicKey.toBase58(),
         });
-        toast.success("Withdrawal submitted");
+        toast.success('Withdrawal submitted');
         await fetchBalance();
       } catch (err: any) {
-        const message = err.message || "Withdrawal failed";
+        const message = err.message || 'Withdrawal failed';
         setError(message);
         toast.error(message);
         throw err;
       }
     },
-    [publicKey, quoteToken, fetchBalance],
+    [publicKey, quoteToken, fetchBalance]
   );
 
   useEffect(() => {

@@ -64,7 +64,11 @@ export function solToLamports(sol: number): number {
 /**
  * Formats token amount with proper decimals
  */
-export function formatTokenAmount(amount: string | number, decimals: number = 9, displayDecimals: number = 4): string {
+export function formatTokenAmount(
+  amount: string | number,
+  decimals: number = 9,
+  displayDecimals: number = 4
+): string {
   const amountNum = typeof amount === 'string' ? parseFloat(amount) : amount;
   const adjusted = amountNum / Math.pow(10, decimals);
   return formatNumber(adjusted, displayDecimals);
@@ -101,7 +105,7 @@ export function getTimeRemaining(targetDate: Date | string): {
  */
 export function formatTimeRemaining(targetDate: Date | string): string {
   const { days, hours, minutes } = getTimeRemaining(targetDate);
-  
+
   if (days > 0) {
     return `${days}d ${hours}h`;
   } else if (hours > 0) {
@@ -191,9 +195,12 @@ export async function copyToClipboard(text: string): Promise<boolean> {
 /**
  * Formats date for display
  */
-export function formatDate(date: Date | string, format: 'short' | 'long' | 'relative' = 'short'): string {
+export function formatDate(
+  date: Date | string,
+  format: 'short' | 'long' | 'relative' = 'short'
+): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  
+
   switch (format) {
     case 'long':
       return dateObj.toLocaleDateString('en-US', {
@@ -207,7 +214,7 @@ export function formatDate(date: Date | string, format: 'short' | 'long' | 'rela
       const now = new Date();
       const diffMs = now.getTime() - dateObj.getTime();
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-      
+
       if (diffDays === 0) return 'Today';
       if (diffDays === 1) return 'Yesterday';
       if (diffDays < 7) return `${diffDays} days ago`;
