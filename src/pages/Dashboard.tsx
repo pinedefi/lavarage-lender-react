@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   TrendingUp,
@@ -57,9 +57,13 @@ const Dashboard: React.FC = () => {
       offers.length > 0 ? offers.reduce((sum, offer) => sum + offer.apr, 0) / offers.length : 0,
   };
 
-  const atRiskPositions = positions.filter(
-    (p) => p.status === 'active' && parseFloat(p.currentLtv) >= 0.75
-  ).length;
+  const atRiskPositions = useMemo(
+    () =>
+      positions.filter(
+        (p) => p.status === 'active' && (parseFloat(p.currentLtv ?? '0') || 0) >= 0.75
+      ).length,
+    [positions]
+  );
 
   const statCards = [
     {
