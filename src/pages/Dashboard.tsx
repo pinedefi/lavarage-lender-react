@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -14,11 +13,9 @@ import {
   AlertTriangle,
   Wallet,
   BarChart3,
-    Save,
+  Save,
   FileText,
   Trash2,
-
-
 } from 'lucide-react';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -29,7 +26,6 @@ import { usePositions } from '@/hooks/usePositions';
 import { useWallet } from '@/contexts/WalletContext';
 import { formatCurrency, formatNumber, formatPercentage, formatDate } from '@/utils';
 import { QuickActionMenu, QuickActionItem } from '@/components/ui/QuickActionMenu';
-
 
 const Dashboard: React.FC = () => {
   const { connected, publicKey } = useWallet();
@@ -46,38 +42,36 @@ const Dashboard: React.FC = () => {
       const currentExposure = parseInt(offer.currentExposure, 16) || 0;
       return sum + currentExposure / 1e9; // Convert lamports to SOL
     }, 0),
-    activeOffersCount: offers.filter(offer => offer.active).length,
-    portfolioUtilization: offers.length > 0 ? 
-      offers.reduce((sum, offer) => {
-        const maxExposure = parseInt(offer.maxExposure, 16) || 0;
-        const currentExposure = parseInt(offer.currentExposure, 16) || 0;
-        return sum + (maxExposure > 0 ? (currentExposure / maxExposure) * 100 : 0);
-      }, 0) / offers.length : 0,
+    activeOffersCount: offers.filter((offer) => offer.active).length,
+    portfolioUtilization:
+      offers.length > 0
+        ? offers.reduce((sum, offer) => {
+            const maxExposure = parseInt(offer.maxExposure, 16) || 0;
+            const currentExposure = parseInt(offer.currentExposure, 16) || 0;
+            return sum + (maxExposure > 0 ? (currentExposure / maxExposure) * 100 : 0);
+          }, 0) / offers.length
+        : 0,
     totalInterestEarned: positionStats.totalInterestEarned as Record<string, number>,
     activePositionsCount: positionStats.activePositions,
     averageAPR:
-      offers.length > 0
-        ? offers.reduce((sum, offer) => sum + offer.apr, 0) / offers.length
-        : 0,
+      offers.length > 0 ? offers.reduce((sum, offer) => sum + offer.apr, 0) / offers.length : 0,
   };
 
-  const atRiskPositions = positions.filter(
-    (p) => parseFloat(p.currentLtv) >= 0.75,
-  ).length;
+  const atRiskPositions = positions.filter((p) => parseFloat(p.currentLtv) >= 0.75).length;
 
   const statCards = [
     {
-      title: "Total Liquidity Deployed",
+      title: 'Total Liquidity Deployed',
       value: `${formatNumber(dashboardStats.totalLiquidityDeployed, 2)} SOL`,
       icon: TrendingUp,
     },
     {
-      title: "Active Positions",
+      title: 'Active Positions',
       value: positionStats.activePositions.toString(),
       icon: Users,
     },
     {
-      title: "At Risk Positions",
+      title: 'At Risk Positions',
       value: atRiskPositions.toString(),
       icon: AlertTriangle,
     },
@@ -94,7 +88,7 @@ const Dashboard: React.FC = () => {
     title: string;
     value: string;
     change?: string;
-    changeType?: "positive" | "negative";
+    changeType?: 'positive' | 'negative';
     icon: React.ReactNode;
   }> = ({ title, value, change, changeType, icon }) => (
     <Card variant="glass">
@@ -106,12 +100,10 @@ const Dashboard: React.FC = () => {
             {change && (
               <p
                 className={`text-sm flex items-center mt-1 ${
-                  changeType === "positive"
-                    ? "text-success-600"
-                    : "text-error-600"
+                  changeType === 'positive' ? 'text-success-600' : 'text-error-600'
                 }`}
               >
-                {changeType === "positive" ? (
+                {changeType === 'positive' ? (
                   <ArrowUpRight className="h-4 w-4 mr-1" />
                 ) : (
                   <ArrowDownRight className="h-4 w-4 mr-1" />
@@ -134,12 +126,10 @@ const Dashboard: React.FC = () => {
             <div className="h-16 w-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Wallet className="h-8 w-8 text-primary-600" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Connect Your Wallet
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Connect Your Wallet</h2>
             <p className="text-gray-600 mb-6">
-              Connect your Solana wallet to start managing your lending
-              positions and view your dashboard statistics.
+              Connect your Solana wallet to start managing your lending positions and view your
+              dashboard statistics.
             </p>
             <WalletMultiButton className="w-full !bg-primary-600 !rounded-md hover:!bg-primary-700" />
           </CardContent>
@@ -224,8 +214,10 @@ const Dashboard: React.FC = () => {
               ) : offers.length > 0 ? (
                 <div className="divide-y divide-white/10">
                   {offers.slice(0, 5).map((offer) => (
-
-                    <div key={offer.publicKey.toString()} className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
+                    <div
+                      key={offer.publicKey.toString()}
+                      className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
+                    >
                       <div className="flex items-center space-x-4">
                         <div className="h-10 w-10 bg-white/10 rounded-full flex items-center justify-center">
                           <span className="text-black font-semibold text-sm">
@@ -235,24 +227,16 @@ const Dashboard: React.FC = () => {
                         <div>
                           <p className="font-medium text-black">
                             {offer.collateralToken?.symbol || 'Unknown Token'}
-
                           </p>
-                          <p className="text-sm text-black/70">
-                            {formatPercentage(offer.apr)} APR
-                          </p>
+                          <p className="text-sm text-black/70">{formatPercentage(offer.apr)} APR</p>
                         </div>
                       </div>
                       <div className="text-right">
-
                         <p className="font-medium text-black">
                           {formatNumber(parseInt(offer.availableForOpen) / 1e9, 2)} SOL
-
                         </p>
-                        <Badge
-                          variant={offer.active ? "success" : "gray"}
-                          size="sm"
-                        >
-                          {offer.active ? "Active" : "Inactive"}
+                        <Badge variant={offer.active ? 'success' : 'gray'} size="sm">
+                          {offer.active ? 'Active' : 'Inactive'}
                         </Badge>
                       </div>
                     </div>
@@ -261,9 +245,7 @@ const Dashboard: React.FC = () => {
               ) : (
                 <div className="text-center py-8">
                   <Activity className="h-12 w-12 text-black/40 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-black mb-2">
-                    No offers yet
-                  </h3>
+                  <h3 className="text-lg font-medium text-black mb-2">No offers yet</h3>
                   <p className="text-black/70 mb-4">
                     Create your first loan offer to start earning interest
                   </p>
@@ -291,14 +273,16 @@ const Dashboard: React.FC = () => {
                 <div>
                   <span className="text-sm text-black/70">Total Interest Earned</span>
                   <div className="mt-2 space-y-2">
-                    {Object.entries(dashboardStats.totalInterestEarned).map(([currency, amount]) => (
-                      <div key={currency} className="flex justify-between items-center">
-                        <span className="text-sm text-black/70">{currency}</span>
-                        <span className="font-medium text-black">
-                          {formatNumber(amount, 4)} {currency}
-                        </span>
-                      </div>
-                    ))}
+                    {Object.entries(dashboardStats.totalInterestEarned).map(
+                      ([currency, amount]) => (
+                        <div key={currency} className="flex justify-between items-center">
+                          <span className="text-sm text-black/70">{currency}</span>
+                          <span className="font-medium text-black">
+                            {formatNumber(amount, 4)} {currency}
+                          </span>
+                        </div>
+                      )
+                    )}
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
@@ -309,9 +293,7 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-black/70">Total Positions</span>
-                  <span className="font-medium text-black">
-                    {positionStats.totalPositions}
-                  </span>
+                  <span className="font-medium text-black">{positionStats.totalPositions}</span>
                 </div>
                 <div className="pt-4 border-t border-white/10">
                   <Link to="/analytics">
@@ -331,29 +313,26 @@ const Dashboard: React.FC = () => {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent>
-
               <QuickActionMenu>
                 <QuickActionItem
                   icon={<Plus className="h-5 w-5" />}
-                  onClick={() => window.location.href = '/create-offer'}
+                  onClick={() => (window.location.href = '/create-offer')}
                 >
                   Create New Offer
                 </QuickActionItem>
                 <QuickActionItem
                   icon={<Users className="h-5 w-5" />}
-                  onClick={() => window.location.href = '/positions'}
+                  onClick={() => (window.location.href = '/positions')}
                 >
                   View All Positions
                 </QuickActionItem>
                 <QuickActionItem
                   icon={<Activity className="h-5 w-5" />}
-                  onClick={() => window.location.href = '/liquidations'}
+                  onClick={() => (window.location.href = '/liquidations')}
                 >
                   Check Liquidations
                 </QuickActionItem>
-                
               </QuickActionMenu>
-
             </CardContent>
           </Card>
         </div>

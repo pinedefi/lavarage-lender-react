@@ -35,10 +35,9 @@ export const useWallet = () => {
   return context;
 };
 
-export const WalletContextProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const network = (process.env.REACT_APP_SOLANA_NETWORK as WalletAdapterNetwork) || WalletAdapterNetwork.Devnet;
+export const WalletContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const network =
+    (process.env.REACT_APP_SOLANA_NETWORK as WalletAdapterNetwork) || WalletAdapterNetwork.Devnet;
   const endpoint = useMemo(() => {
     return process.env.REACT_APP_SOLANA_RPC_URL || clusterApiUrl(network);
   }, [network]);
@@ -65,17 +64,8 @@ export const WalletContextProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-const WalletContextContent: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const {
-    connected,
-    publicKey,
-    select,
-    connect,
-    disconnect,
-    wallet,
-  } = useSolanaWallet();
+const WalletContextContent: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { connected, publicKey, select, connect, disconnect, wallet } = useSolanaWallet();
 
   const value = useMemo(
     () => ({
@@ -92,9 +82,7 @@ const WalletContextContent: React.FC<{ children: React.ReactNode }> = ({
     [connected, publicKey, connect, disconnect, select, wallet]
   );
 
-  return (
-    <WalletContext.Provider value={value}>{children}</WalletContext.Provider>
-  );
+  return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
 };
 
 export { WalletMultiButton };

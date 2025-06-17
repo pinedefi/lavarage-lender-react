@@ -1,25 +1,21 @@
-import React, { useState, useEffect } from "react";
-import Card, { CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
-import Button from "@/components/ui/Button";
-import Input from "@/components/ui/Input";
-import { Plus } from "lucide-react";
-import { useOffers } from "@/hooks/useOffers";
-import { apiService } from "@/services/api";
-import { TokenModel } from "@/types";
-import { isValidSolanaAddress } from "@/utils";
-import {
-  QUOTE_TOKENS,
-  getQuoteTokenAddress,
-  QUOTE_TOKEN_SYMBOLS,
-} from "@/utils/tokens";
+import React, { useState, useEffect } from 'react';
+import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import { Plus } from 'lucide-react';
+import { useOffers } from '@/hooks/useOffers';
+import { apiService } from '@/services/api';
+import { TokenModel } from '@/types';
+import { isValidSolanaAddress } from '@/utils';
+import { QUOTE_TOKENS, getQuoteTokenAddress, QUOTE_TOKEN_SYMBOLS } from '@/utils/tokens';
 
 const CreateOffer: React.FC = () => {
   const { createOffer } = useOffers();
 
-  const [amount, setAmount] = useState("");
-  const [interestRate, setInterestRate] = useState("");
-  const [quoteToken, setQuoteToken] = useState("SOL");
-  const [baseToken, setBaseToken] = useState("");
+  const [amount, setAmount] = useState('');
+  const [interestRate, setInterestRate] = useState('');
+  const [quoteToken, setQuoteToken] = useState('SOL');
+  const [baseToken, setBaseToken] = useState('');
   const [tokenData, setTokenData] = useState<TokenModel | null>(null);
   const [metaError, setMetaError] = useState<string | null>(null);
 
@@ -35,7 +31,7 @@ const CreateOffer: React.FC = () => {
         setMetaError(null);
       } catch (err) {
         console.error(err);
-        setMetaError("Failed to fetch token metadata");
+        setMetaError('Failed to fetch token metadata');
         setTokenData(null);
       }
     };
@@ -101,9 +97,7 @@ const CreateOffer: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Quote Token
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Quote Token</label>
                 <select
                   className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                   value={quoteToken}
@@ -131,9 +125,7 @@ const CreateOffer: React.FC = () => {
                     {tokenData.name} ({tokenData.symbol})
                   </p>
                 )}
-                {metaError && (
-                  <p className="mt-1 text-sm text-error-600">{metaError}</p>
-                )}
+                {metaError && <p className="mt-1 text-sm text-error-600">{metaError}</p>}
               </div>
             </div>
             <Button className="w-full" type="submit">

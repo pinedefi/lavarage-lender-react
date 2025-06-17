@@ -66,31 +66,35 @@ export function usePositions(options: UsePositionsOptions = {}): UsePositionsRet
   // Calculate statistics
   const stats = useCallback(() => {
     const totalPositions = positions.length;
-    const activePositions = positions.filter(p => p.status === 'active').length;
-    
+    const activePositions = positions.filter((p) => p.status === 'active').length;
+
     const totalBorrowed = positions.reduce((sum, position) => {
       const borrowed = parseFloat(position.initialBorrowQuote) || 0;
       return sum + borrowed;
     }, 0);
 
-    const totalInterestEarned = positions.reduce((acc: Record<string, number>, position) => {
-      const quoteCurrency = position.quoteToken.symbol;
-      const interest = position.interestAccrued || 0;
-      
-      if (!acc[quoteCurrency]) {
-        acc[quoteCurrency] = 0;
-      }
-      acc[quoteCurrency] += interest;
-      
-      return acc;
-    }, { SOL: 0, USDC: 0 });
+    const totalInterestEarned = positions.reduce(
+      (acc: Record<string, number>, position) => {
+        const quoteCurrency = position.quoteToken.symbol;
+        const interest = position.interestAccrued || 0;
 
-    const averageLTV = positions.length > 0 
-      ? positions.reduce((sum, position) => {
-          const ltv = parseFloat(position.currentLtv) || 0;
-          return sum + ltv;
-        }, 0) / positions.length
-      : 0;
+        if (!acc[quoteCurrency]) {
+          acc[quoteCurrency] = 0;
+        }
+        acc[quoteCurrency] += interest;
+
+        return acc;
+      },
+      { SOL: 0, USDC: 0 }
+    );
+
+    const averageLTV =
+      positions.length > 0
+        ? positions.reduce((sum, position) => {
+            const ltv = parseFloat(position.currentLtv) || 0;
+            return sum + ltv;
+          }, 0) / positions.length
+        : 0;
 
     return {
       totalPositions,
@@ -144,21 +148,26 @@ export function usePositionFilters(positions: PositionV3Model[]) {
 
     // Filter by status
     if (filters.status !== 'all') {
-      filtered = filtered.filter(position => position.status === filters.status);
+      filtered = filtered.filter((position) => position.status === filters.status);
     }
 
     // Filter by collateral token
     if (filters.collateralToken) {
-      filtered = filtered.filter(position => 
-        position.collateralToken.symbol.toLowerCase().includes(filters.collateralToken.toLowerCase()) ||
-        position.collateralToken.name.toLowerCase().includes(filters.collateralToken.toLowerCase())
+      filtered = filtered.filter(
+        (position) =>
+          position.collateralToken.symbol
+            .toLowerCase()
+            .includes(filters.collateralToken.toLowerCase()) ||
+          position.collateralToken.name
+            .toLowerCase()
+            .includes(filters.collateralToken.toLowerCase())
       );
     }
 
     // Filter by amount range
     if (filters.minAmount) {
       const minAmount = parseFloat(filters.minAmount);
-      filtered = filtered.filter(position => {
+      filtered = filtered.filter((position) => {
         const borrowed = parseFloat(position.initialBorrowQuote) || 0;
         return borrowed >= minAmount;
       });
@@ -166,7 +175,7 @@ export function usePositionFilters(positions: PositionV3Model[]) {
 
     if (filters.maxAmount) {
       const maxAmount = parseFloat(filters.maxAmount);
-      filtered = filtered.filter(position => {
+      filtered = filtered.filter((position) => {
         const borrowed = parseFloat(position.initialBorrowQuote) || 0;
         return borrowed <= maxAmount;
       });
@@ -175,10 +184,11 @@ export function usePositionFilters(positions: PositionV3Model[]) {
     // Search filter
     if (filters.searchTerm) {
       const term = filters.searchTerm.toLowerCase();
-      filtered = filtered.filter(position =>
-        position.traderAddress.toString().toLowerCase().includes(term) ||
-        position.collateralToken.symbol.toLowerCase().includes(term) ||
-        position.collateralToken.name.toLowerCase().includes(term)
+      filtered = filtered.filter(
+        (position) =>
+          position.traderAddress.toString().toLowerCase().includes(term) ||
+          position.collateralToken.symbol.toLowerCase().includes(term) ||
+          position.collateralToken.name.toLowerCase().includes(term)
       );
     }
 
@@ -210,11 +220,11 @@ export function usePositionFilters(positions: PositionV3Model[]) {
   }, [positions, filters, sortConfig]);
 
   const updateFilter = (key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const updateSort = (key: string) => {
-    setSortConfig(prev => ({
+    setSortConfig((prev) => ({
       key,
       direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
     }));

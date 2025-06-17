@@ -7,7 +7,7 @@
     --background: 356 50% 95%;
     --foreground: 222.2 47.4% 11.2%;
     --border: 214.3 31.8% 91.4%;
-    
+
     /* Glass Effect Variables */
     --shadow-offset: 0;
     --shadow-blur: 20px;
@@ -29,15 +29,22 @@
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply bg-background text-foreground min-h-screen;
     font-family: 'Inter', sans-serif;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
     background: linear-gradient(135deg, #1a1f2c 0%, #2d3748 50%, #1a1f2c 100%);
   }
-  
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-semibold;
   }
 }
@@ -46,23 +53,23 @@
   .btn {
     @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
   }
-  
+
   .btn-primary {
     @apply bg-primary-600 text-white hover:bg-primary-700 focus-visible:ring-primary-500;
   }
-  
+
   .btn-secondary {
     @apply bg-gray-100 text-gray-900 hover:bg-gray-200 focus-visible:ring-gray-500;
   }
-  
+
   .btn-success {
     @apply bg-success-600 text-white hover:bg-success-700 focus-visible:ring-success-500;
   }
-  
+
   .btn-warning {
     @apply bg-warning-600 text-white hover:bg-warning-700 focus-visible:ring-warning-500;
   }
-  
+
   .btn-error {
     @apply bg-error-600 text-white hover:bg-error-700 focus-visible:ring-error-500;
   }
@@ -72,25 +79,26 @@
     background: rgba(255, 255, 255, var(--tint-opacity));
     backdrop-filter: blur(var(--frost-blur));
     -webkit-backdrop-filter: blur(var(--frost-blur));
-    box-shadow: 
-      inset var(--shadow-offset) var(--shadow-offset) var(--shadow-blur) var(--shadow-spread) var(--shadow-color),
+    box-shadow:
+      inset var(--shadow-offset) var(--shadow-offset) var(--shadow-blur) var(--shadow-spread)
+        var(--shadow-color),
       0px 6px var(--outer-shadow-blur) rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.4);
     @apply text-gray-900 dark:text-white hover:bg-white/40 transition-all duration-300;
   }
-  
+
   .btn-sm {
     @apply px-3 py-1.5 text-xs;
   }
-  
+
   .btn-md {
     @apply px-4 py-2 text-sm;
   }
-  
+
   .btn-lg {
     @apply px-6 py-3 text-base;
   }
-  
+
   .card {
     @apply bg-white rounded-lg border border-gray-200 shadow-sm;
   }
@@ -100,32 +108,33 @@
     background: rgba(255, 255, 255, var(--tint-opacity));
     backdrop-filter: blur(var(--frost-blur));
     -webkit-backdrop-filter: blur(var(--frost-blur));
-    box-shadow: 
-      inset var(--shadow-offset) var(--shadow-offset) var(--shadow-blur) var(--shadow-spread) var(--shadow-color),
+    box-shadow:
+      inset var(--shadow-offset) var(--shadow-offset) var(--shadow-blur) var(--shadow-spread)
+        var(--shadow-color),
       0px 6px var(--outer-shadow-blur) rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.4);
   }
-  
+
   .input {
     @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm;
   }
-  
+
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
-  
+
   .badge-success {
     @apply bg-success-100 text-success-800;
   }
-  
+
   .badge-warning {
     @apply bg-warning-100 text-warning-800;
   }
-  
+
   .badge-error {
     @apply bg-error-100 text-error-800;
   }
-  
+
   .badge-gray {
     @apply bg-gray-100 text-gray-800;
   }
