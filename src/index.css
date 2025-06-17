@@ -4,15 +4,23 @@
 
 @layer base {
   :root {
-    --background: 356 50% 95%;
+    /* LAVARAGE Brand Colors */
+    --background: 0 0% 100%;
     --foreground: 222.2 47.4% 11.2%;
     --border: 214.3 31.8% 91.4%;
 
-    /* Glass Effect Variables */
+    /* LAVARAGE Primary Gradient Variables */
+    --lavarage-yellow: #FFDD6F;
+    --lavarage-orange: #FFB467;
+    --lavarage-coral: #FF845C;
+    --lavarage-red: #FF433F;
+    --lavarage-burgundy: #A51809;
+
+    /* Glass Effect Variables with LAVARAGE tints */
     --shadow-offset: 0;
     --shadow-blur: 20px;
     --shadow-spread: -5px;
-    --shadow-color: rgba(255, 255, 255, 0.7);
+    --shadow-color: rgba(255, 221, 111, 0.7);
     --tint-opacity: 0.4;
     --frost-blur: 8px;
     --outer-shadow-blur: 24px;
@@ -22,7 +30,7 @@
     --background: 356 30% 15%;
     --foreground: 213 31% 91%;
     --border: 216 34% 17%;
-    --shadow-color: rgba(255, 255, 255, 0.15);
+    --shadow-color: rgba(255, 132, 92, 0.15);
     --tint-opacity: 0.1;
   }
 
@@ -36,7 +44,10 @@
     font-feature-settings:
       'rlig' 1,
       'calt' 1;
-    background: linear-gradient(135deg, #1a1f2c 0%, #2d3748 50%, #1a1f2c 100%);
+    /* LAVARAGE Brand Background */
+    background: linear-gradient(135deg, #1a1f2c 0%, #2d3748 25%, #4a5568 50%, #2d3748 75%, #1a1f2c 100%);
+    background-size: 400% 400%;
+    animation: gradient-xy 20s ease infinite;
   }
 
   h1,
@@ -46,16 +57,32 @@
   h5,
   h6 {
     @apply font-semibold;
+    /* LAVARAGE Brand Typography - Bold and Geometric */
+    font-weight: 700;
+    letter-spacing: -0.025em;
   }
 }
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
   }
 
   .btn-primary {
-    @apply bg-primary-600 text-white hover:bg-primary-700 focus-visible:ring-primary-500;
+    @apply bg-lavarage-primary text-white hover:opacity-90 focus-visible:ring-lavarage-coral;
+    background: linear-gradient(135deg, #FF845C 0%, #FF433F 100%);
+    box-shadow: 0 4px 20px rgba(255, 67, 63, 0.3);
+  }
+
+  .btn-lavarage {
+    @apply text-white font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300;
+    background: linear-gradient(135deg, #FFDD6F 0%, #FFB467 25%, #FF845C 75%, #FF433F 100%);
+    background-size: 200% 200%;
+    animation: gradient-x 3s ease infinite;
+  }
+
+  .btn-lavarage:hover {
+    background-position: right center;
   }
 
   .btn-secondary {
@@ -82,8 +109,8 @@
     box-shadow:
       inset var(--shadow-offset) var(--shadow-offset) var(--shadow-blur) var(--shadow-spread)
         var(--shadow-color),
-      0px 6px var(--outer-shadow-blur) rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+      0px 6px var(--outer-shadow-blur) rgba(255, 132, 92, 0.1);
+    border: 1px solid rgba(255, 221, 111, 0.4);
     @apply text-gray-900 dark:text-white hover:bg-white/40 transition-all duration-300;
   }
 
@@ -111,16 +138,34 @@
     box-shadow:
       inset var(--shadow-offset) var(--shadow-offset) var(--shadow-blur) var(--shadow-spread)
         var(--shadow-color),
-      0px 6px var(--outer-shadow-blur) rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+      0px 6px var(--outer-shadow-blur) rgba(255, 132, 92, 0.1);
+    border: 1px solid rgba(255, 221, 111, 0.4);
+  }
+
+  .card-lavarage {
+    @apply relative overflow-hidden rounded-lg;
+    background: linear-gradient(135deg, rgba(255, 221, 111, 0.1) 0%, rgba(255, 67, 63, 0.1) 100%);
+    border: 1px solid rgba(255, 132, 92, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(255, 132, 92, 0.2);
   }
 
   .input {
-    @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm;
+    @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-lavarage-coral focus:ring-lavarage-coral sm:text-sm transition-all duration-300;
+  }
+
+  .input:focus {
+    box-shadow: 0 0 0 3px rgba(255, 132, 92, 0.1);
   }
 
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-lavarage {
+    @apply text-white font-bold;
+    background: linear-gradient(135deg, #FF845C 0%, #FF433F 100%);
   }
 
   .badge-success {
@@ -138,12 +183,50 @@
   .badge-gray {
     @apply bg-gray-100 text-gray-800;
   }
+
+  /* LAVARAGE Logo Container */
+  .lavarage-logo-container {
+    @apply flex items-center justify-center;
+  }
+
+  .lavarage-text {
+    @apply font-bold text-2xl tracking-tight;
+    background: linear-gradient(135deg, #FF845C 0%, #FF433F 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Navigation enhancements */
+  .nav-link-active {
+    @apply border-lavarage-coral text-lavarage-red;
+    position: relative;
+  }
+
+  .nav-link-active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(135deg, #FF845C 0%, #FF433F 100%);
+    border-radius: 1px;
+  }
 }
 
-/* Custom scrollbar */
+/* LAVARAGE Brand Header Styling */
+.lavarage-header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 132, 92, 0.1);
+}
+
+/* Custom scrollbar with LAVARAGE branding */
 .scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: #d1d5db transparent;
+  scrollbar-color: #FF845C transparent;
 }
 
 .scrollbar-thin::-webkit-scrollbar {
@@ -155,15 +238,15 @@
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: #d1d5db;
+  background: linear-gradient(135deg, #FF845C 0%, #FF433F 100%);
   border-radius: 3px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: #9ca3af;
+  background: linear-gradient(135deg, #FF433F 0%, #A51809 100%);
 }
 
-/* Loading animation */
+/* Loading animation with LAVARAGE colors */
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -174,7 +257,14 @@
   animation: spin 1s linear infinite;
 }
 
-/* Wallet adapter overrides */
+.loading-lavarage {
+  border: 2px solid rgba(255, 132, 92, 0.2);
+  border-left: 2px solid #FF845C;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Wallet adapter overrides with LAVARAGE branding */
 .wallet-adapter-modal {
   @apply z-50;
 }
@@ -185,4 +275,48 @@
 
 .wallet-adapter-modal-container {
   @apply bg-white rounded-lg shadow-xl max-w-md mx-auto;
+  border: 1px solid rgba(255, 132, 92, 0.2);
+}
+
+.wallet-adapter-button {
+  background: linear-gradient(135deg, #FF845C 0%, #FF433F 100%) !important;
+}
+
+.wallet-adapter-button:hover {
+  background: linear-gradient(135deg, #FF433F 0%, #A51809 100%) !important;
+}
+
+/* Enhanced glass effects for LAVARAGE */
+.glass-lavarage {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 221, 111, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(255, 132, 92, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.glass-lavarage:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 132, 92, 0.3);
+}
+
+/* Notification styles with LAVARAGE colors */
+.notification-dot {
+  background: linear-gradient(135deg, #FF845C 0%, #FF433F 100%);
+  box-shadow: 0 0 10px rgba(255, 67, 63, 0.5);
+}
+
+/* Status indicators */
+.status-connected {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.status-warning {
+  background: linear-gradient(135deg, #FFDD6F 0%, #FFB467 100%);
+}
+
+.status-error {
+  background: linear-gradient(135deg, #FF845C 0%, #FF433F 100%);
 }

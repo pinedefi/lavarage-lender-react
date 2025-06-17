@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
+import { LavarageLogo } from '@/components/brand';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -40,7 +41,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+    <header className="lavarage-header sticky top-0 z-40">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Left side - Logo and Navigation */}
@@ -48,21 +49,25 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
             {/* Mobile menu button */}
             <button
               onClick={onMenuToggle}
-              className="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="md:hidden p-2 rounded-md text-gray-400 hover:text-lavarage-coral hover:bg-lavarage-subtle focus:outline-none focus:ring-2 focus:ring-lavarage-coral transition-all duration-300"
             >
               <Menu className="h-6 w-6" />
             </button>
 
-            {/* Logo */}
-            <Link to="/" className="flex items-center">
-              <div className="flex-shrink-0 flex items-center">
-                <div className="h-8 w-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-white" />
-                </div>
-                <span className="ml-3 text-xl font-bold text-gray-900">
-                  Lavarage
-                </span>
-                <Badge variant="primary" size="sm" className="ml-2">
+            {/* LAVARAGE Logo */}
+            <Link to="/" className="flex items-center group">
+              <div className="flex-shrink-0 flex items-center transition-transform duration-300 group-hover:scale-105">
+                <LavarageLogo 
+                  variant="horizontal" 
+                  size="lg" 
+                  priority={true}
+                  className="transition-all duration-300"
+                />
+                <Badge 
+                  variant="primary" 
+                  size="sm" 
+                  className="ml-3 badge-lavarage shadow-md"
+                >
                   Lender
                 </Badge>
               </div>
@@ -72,17 +77,20 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
             <nav className="hidden md:flex ml-10 space-x-8">
               {navigation.map((item) => {
                 const Icon = item.icon;
+                const active = isActive(item.href);
                 return (
                   <Link
                     key={item.name}
                     to={item.href}
-                    className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors ${
-                      isActive(item.href)
-                        ? 'border-primary-500 text-primary-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-all duration-300 ${
+                      active
+                        ? 'nav-link-active'
+                        : 'border-transparent text-gray-500 hover:text-lavarage-coral hover:border-lavarage-orange/50'
                     }`}
                   >
-                    <Icon className="h-4 w-4 mr-2" />
+                    <Icon className={`h-4 w-4 mr-2 transition-colors duration-300 ${
+                      active ? 'text-lavarage-red' : ''
+                    }`} />
                     {item.name}
                   </Link>
                 );
@@ -93,17 +101,17 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
           {/* Right side - Wallet and User Actions */}
           <div className="flex items-center space-x-4">
             {/* Notifications */}
-            <button className="p-2 text-gray-400 hover:text-gray-500 relative">
-              <Bell className="h-6 w-6" />
-              <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-error-400 ring-2 ring-white"></span>
+            <button className="p-2 text-gray-400 hover:text-lavarage-coral relative transition-colors duration-300 group">
+              <Bell className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
+              <span className="notification-dot absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white"></span>
             </button>
 
             {/* Wallet Connection */}
             {connected && publicKey ? (
               <div className="flex items-center space-x-3">
                 {/* Wallet Address Display */}
-                <div className="hidden sm:flex items-center space-x-2 bg-gray-50 rounded-lg px-3 py-2">
-                  <div className="h-2 w-2 bg-success-400 rounded-full"></div>
+                <div className="hidden sm:flex items-center space-x-2 glass-lavarage rounded-lg px-3 py-2 transition-all duration-300 hover:shadow-lg">
+                  <div className="status-connected h-2 w-2 rounded-full shadow-sm"></div>
                   <span className="text-sm font-medium text-gray-700">
                     {truncateAddress(publicKey.toBase58())}
                   </span>
@@ -111,16 +119,16 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
 
                 {/* User Menu */}
                 <div className="relative">
-                  <button className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                    <div className="h-8 w-8 bg-primary-100 rounded-full flex items-center justify-center">
-                      <User className="h-5 w-5 text-primary-600" />
+                  <button className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lavarage-coral transition-all duration-300 group">
+                    <div className="h-8 w-8 bg-lavarage-primary rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
+                      <User className="h-5 w-5 text-white" />
                     </div>
                   </button>
                 </div>
 
                 {/* Settings */}
-                <button className="p-2 text-gray-400 hover:text-gray-500">
-                  <Settings className="h-5 w-5" />
+                <button className="p-2 text-gray-400 hover:text-lavarage-coral transition-colors duration-300 group">
+                  <Settings className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
                 </button>
 
                 {/* Disconnect */}
@@ -128,14 +136,14 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                   variant="ghost"
                   size="sm"
                   onClick={disconnect}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-500 hover:text-lavarage-red hover:bg-lavarage-subtle transition-all duration-300"
                 >
                   <LogOut className="h-4 w-4" />
                 </Button>
               </div>
             ) : (
               <div className="flex items-center space-x-4">
-                <WalletMultiButton className="!bg-primary-600 !rounded-md hover:!bg-primary-700" />
+                <WalletMultiButton className="btn-lavarage !text-white !font-bold !shadow-lg hover:!shadow-xl !transition-all !duration-300" />
               </div>
             )}
           </div>
@@ -143,21 +151,24 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
       </div>
 
       {/* Mobile Navigation */}
-      <div className="md:hidden border-t border-gray-200 bg-gray-50">
+      <div className="md:hidden border-t border-lavarage-orange/10 bg-gradient-to-r from-lavarage-subtle to-transparent">
         <div className="px-2 py-3 space-y-1">
           {navigation.map((item) => {
             const Icon = item.icon;
+            const active = isActive(item.href);
             return (
               <Link
                 key={item.name}
                 to={item.href}
-                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive(item.href)
-                    ? 'bg-primary-100 text-primary-700'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ${
+                  active
+                    ? 'bg-lavarage-primary text-white shadow-md'
+                    : 'text-gray-600 hover:text-lavarage-red hover:bg-lavarage-subtle'
                 }`}
               >
-                <Icon className="h-5 w-5 mr-3" />
+                <Icon className={`h-5 w-5 mr-3 transition-colors duration-300 ${
+                  active ? 'text-white' : ''
+                }`} />
                 {item.name}
               </Link>
             );
