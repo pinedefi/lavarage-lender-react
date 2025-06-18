@@ -59,17 +59,13 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
             {/* LAVARAGE Logo */}
             <Link to="/" className="flex items-center group">
               <div className="flex-shrink-0 flex items-center transition-transform duration-300 group-hover:scale-105">
-                <LavarageLogo 
-                  variant="horizontal" 
-                  size="lg" 
+                <LavarageLogo
+                  variant="horizontal"
+                  size="lg"
                   priority={true}
                   className="transition-all duration-300"
                 />
-                <Badge 
-                  variant="primary" 
-                  size="sm" 
-                  className="ml-3 badge-lavarage shadow-md"
-                >
+                <Badge variant="primary" size="sm" className="ml-3 badge-lavarage shadow-md">
                   Lender
                 </Badge>
               </div>
@@ -90,9 +86,11 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                         : 'border-transparent text-gray-500 hover:text-lavarage-coral hover:border-lavarage-orange/50'
                     }`}
                   >
-                    <Icon className={`h-4 w-4 mr-2 transition-colors duration-300 ${
-                      active ? 'text-lavarage-red' : ''
-                    }`} />
+                    <Icon
+                      className={`h-4 w-4 mr-2 transition-colors duration-300 ${
+                        active ? 'text-lavarage-red' : ''
+                      }`}
+                    />
                     {item.name}
                   </Link>
                 );
@@ -103,10 +101,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
           {/* Right side - Wallet and User Actions */}
           <div className="flex items-center space-x-4">
             {/* Notifications */}
-            <button className="p-2 text-gray-400 hover:text-lavarage-coral relative transition-colors duration-300 group">
+            {/* <button className="p-2 text-gray-400 hover:text-lavarage-coral relative transition-colors duration-300 group">
               <Bell className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
               <span className="notification-dot absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white"></span>
-            </button>
+            </button> */}
 
             {/* Wallet Connection */}
             {connected && publicKey ? (
@@ -168,9 +166,11 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                     : 'text-gray-600 hover:text-lavarage-red hover:bg-lavarage-subtle'
                 }`}
               >
-                <Icon className={`h-5 w-5 mr-3 transition-colors duration-300 ${
-                  active ? 'text-white' : ''
-                }`} />
+                <Icon
+                  className={`h-5 w-5 mr-3 transition-colors duration-300 ${
+                    active ? 'text-white' : ''
+                  }`}
+                />
                 {item.name}
               </Link>
             );
