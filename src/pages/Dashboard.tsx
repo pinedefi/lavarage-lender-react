@@ -288,16 +288,16 @@ const Dashboard: React.FC = () => {
         {/* Quick Stats & Actions */}
         <div className="space-y-6">
           {/* Performance Summary */}
-          <div className="card-lavarage-readable">
-            <div className="p-6 border-b border-lavarage-coral/45">
-              <h3 className="text-lg font-bold enhanced-gradient-text">
+          <div className="card-lavarage">
+            <div className="p-6 border-b border-lavarage-orange/20">
+              <GradientText variant="primary" size="lg" weight="bold">
                 Performance Summary
-              </h3>
+              </GradientText>
             </div>
             <div className="p-6">
               <div className="space-y-6">
                 <div>
-                  <span className="text-sm font-medium text-gray-700 mb-3 block">
+                  <span className="text-sm font-medium text-gray-600 mb-3 block">
                     Total Interest Earned
                   </span>
                   <div className="space-y-3">
@@ -305,7 +305,7 @@ const Dashboard: React.FC = () => {
                       ([currency, amount]) => (
                         <div
                           key={currency}
-                          className="flex justify-between items-center p-3 rounded-lg bg-lavarage-readable-item"
+                          className="flex justify-between items-center p-3 rounded-lg bg-lavarage-subtle"
                         >
                           <span className="text-sm font-medium text-gray-700">{currency}</span>
                           <GradientText variant="primary" weight="bold">
@@ -316,13 +316,13 @@ const Dashboard: React.FC = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex justify-between items-center p-3 rounded-lg bg-lavarage-readable-item">
+                <div className="flex justify-between items-center p-3 rounded-lg bg-lavarage-subtle">
                   <span className="text-sm font-medium text-gray-700">Average APR</span>
                   <GradientText variant="primary" weight="bold">
                     {formatPercentage(dashboardStats.averageAPR)}
                   </GradientText>
                 </div>
-                <div className="flex justify-between items-center p-3 rounded-lg bg-lavarage-readable-item">
+                <div className="flex justify-between items-center p-3 rounded-lg bg-lavarage-subtle">
                   <span className="text-sm font-medium text-gray-700">Total Positions</span>
                   <GradientText variant="primary" weight="bold">
                     {positionStats.totalPositions}
@@ -341,11 +341,11 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Quick Actions */}
-          <div className="card-lavarage-readable">
-            <div className="p-6 border-b border-lavarage-coral/45">
-              <h3 className="text-lg font-bold enhanced-gradient-text">
+          <div className="card-lavarage">
+            <div className="p-6 border-b border-lavarage-orange/20">
+              <GradientText variant="primary" size="lg" weight="bold">
                 Quick Actions
-              </h3>
+              </GradientText>
             </div>
             <div className="p-6">
               <QuickActionMenu>
