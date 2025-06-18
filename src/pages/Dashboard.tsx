@@ -34,7 +34,8 @@ const Dashboard: React.FC = () => {
   const {
     positions,
     loading: positionsLoading,
-    stats: positionStats,  } = usePositions({ autoRefresh: true });
+    stats: positionStats,
+  } = usePositions({ autoRefresh: true });
 
   // Calculate dashboard metrics
   const dashboardStats = {
@@ -89,9 +90,10 @@ const Dashboard: React.FC = () => {
     },
     {
       title: 'Total Pending Interest',
-      value: Object.entries(dashboardStats.totalInterestEarned)
-        .map(([currency, amount]) => `${formatNumber(amount, 2)} ${currency}`)
-        .join(' + ') || '0 SOL',
+      value:
+        Object.entries(dashboardStats.totalInterestEarned)
+          .map(([currency, amount]) => `${formatNumber(amount, 2)} ${currency}`)
+          .join(' + ') || '0 SOL',
       icon: BarChart3,
       trend: '+5.2%',
       trendType: 'positive' as const,
@@ -112,22 +114,19 @@ const Dashboard: React.FC = () => {
         <div className="flex-1">
           <p className="text-sm font-medium text-gray-600 mb-2">{title}</p>
           <div className="space-y-2">
-            <GradientText 
-              variant="primary" 
-              size="2xl" 
-              weight="bold"
-              className="block"
-            >
+            <GradientText variant="primary" size="2xl" weight="bold" className="block">
               {value}
             </GradientText>
             {trend && (
-              <div className={`flex items-center text-sm ${
-                trendType === 'positive' 
-                  ? 'text-success-600' 
-                  : trendType === 'negative' 
-                    ? 'text-error-600' 
-                    : 'text-gray-500'
-              }`}>
+              <div
+                className={`flex items-center text-sm ${
+                  trendType === 'positive'
+                    ? 'text-success-600'
+                    : trendType === 'negative'
+                      ? 'text-error-600'
+                      : 'text-gray-500'
+                }`}
+              >
                 {trendType === 'positive' ? (
                   <ArrowUpRight className="h-4 w-4 mr-1" />
                 ) : trendType === 'negative' ? (
@@ -139,9 +138,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
         <div className="p-4 rounded-full bg-gradient-to-br from-lavarage-subtle to-lavarage-orange/20 group-hover:scale-110 transition-transform duration-300">
-          <div className="text-lavarage-red">
-            {icon}
-          </div>
+          <div className="text-lavarage-red">{icon}</div>
         </div>
       </div>
     </div>
@@ -156,18 +153,12 @@ const Dashboard: React.FC = () => {
               <LavarageLogo variant="mark" size="xl" priority={true} />
             </div>
           </div>
-          <GradientText 
-            variant="primary" 
-            size="xl" 
-            weight="bold"
-            as="h2"
-            className="mb-4"
-          >
+          <GradientText variant="primary" size="xl" weight="bold" as="h2" className="mb-4">
             Connect Your Wallet
           </GradientText>
           <p className="text-gray-600 mb-8 leading-relaxed">
-            Connect your Solana wallet to start managing your LAVARAGE lending positions and view your
-            performance dashboard.
+            Connect your Solana wallet to start managing your LAVARAGE lending positions and view
+            your performance dashboard.
           </p>
           <WalletMultiButton className="btn-lavarage w-full" />
         </div>
@@ -180,16 +171,12 @@ const Dashboard: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="space-y-2">
-          <GradientText 
-            variant="primary" 
-            size="3xl" 
-            weight="bold"
-            as="h1"
-          >
+          <GradientText variant="primary" size="3xl" weight="bold" as="h1">
             Dashboard
           </GradientText>
           <p className="text-gray-600">
-            Monitor your <span className="font-semibold text-lavarage-coral">LAVARAGE</span> lending performance and manage your offers
+            Monitor your <span className="font-semibold text-lavarage-coral">LAVARAGE</span> lending
+            performance and manage your offers
           </p>
         </div>
         <div className="flex space-x-3">
@@ -240,11 +227,7 @@ const Dashboard: React.FC = () => {
             <div className="p-6">
               {offersLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <LoadingSpinner 
-                    size="lg" 
-                    showLogo={true} 
-                    message="Loading your offers..."
-                  />
+                  <LoadingSpinner size="lg" showLogo={true} message="Loading your offers..." />
                 </div>
               ) : offers.length > 0 ? (
                 <div className="space-y-4">
@@ -305,20 +288,25 @@ const Dashboard: React.FC = () => {
         {/* Quick Stats & Actions */}
         <div className="space-y-6">
           {/* Performance Summary */}
-          <div className="card-lavarage">
-            <div className="p-6 border-b border-lavarage-orange/20">
-              <GradientText variant="primary" size="lg" weight="bold">
+          <div className="card-lavarage-readable">
+            <div className="p-6 border-b border-lavarage-coral/45">
+              <h3 className="text-lg font-bold enhanced-gradient-text">
                 Performance Summary
-              </GradientText>
+              </h3>
             </div>
             <div className="p-6">
               <div className="space-y-6">
                 <div>
-                  <span className="text-sm font-medium text-gray-600 mb-3 block">Total Interest Earned</span>
+                  <span className="text-sm font-medium text-gray-700 mb-3 block">
+                    Total Interest Earned
+                  </span>
                   <div className="space-y-3">
                     {Object.entries(dashboardStats.totalInterestEarned).map(
                       ([currency, amount]) => (
-                        <div key={currency} className="flex justify-between items-center p-3 rounded-lg bg-lavarage-subtle">
+                        <div
+                          key={currency}
+                          className="flex justify-between items-center p-3 rounded-lg bg-lavarage-readable-item"
+                        >
                           <span className="text-sm font-medium text-gray-700">{currency}</span>
                           <GradientText variant="primary" weight="bold">
                             {formatNumber(amount, 4)} {currency}
@@ -328,13 +316,13 @@ const Dashboard: React.FC = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex justify-between items-center p-3 rounded-lg bg-lavarage-subtle">
+                <div className="flex justify-between items-center p-3 rounded-lg bg-lavarage-readable-item">
                   <span className="text-sm font-medium text-gray-700">Average APR</span>
                   <GradientText variant="primary" weight="bold">
                     {formatPercentage(dashboardStats.averageAPR)}
                   </GradientText>
                 </div>
-                <div className="flex justify-between items-center p-3 rounded-lg bg-lavarage-subtle">
+                <div className="flex justify-between items-center p-3 rounded-lg bg-lavarage-readable-item">
                   <span className="text-sm font-medium text-gray-700">Total Positions</span>
                   <GradientText variant="primary" weight="bold">
                     {positionStats.totalPositions}
@@ -353,11 +341,11 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Quick Actions */}
-          <div className="card-lavarage">
-            <div className="p-6 border-b border-lavarage-orange/20">
-              <GradientText variant="primary" size="lg" weight="bold">
+          <div className="card-lavarage-readable">
+            <div className="p-6 border-b border-lavarage-coral/45">
+              <h3 className="text-lg font-bold enhanced-gradient-text">
                 Quick Actions
-              </GradientText>
+              </h3>
             </div>
             <div className="p-6">
               <QuickActionMenu>

@@ -12,9 +12,9 @@ const QuickActionMenu = React.forwardRef<HTMLDivElement, QuickActionMenuProps>(
       <div
         ref={ref}
         className={cn(
-          'bg-black/75 backdrop-blur-xl rounded-xl overflow-hidden',
+          'bg-gray-900/90 backdrop-blur-xl rounded-xl overflow-hidden',
           'p-2 space-y-1 min-w-[200px]',
-          'shadow-lg border border-white/10',
+          'shadow-xl border border-lavarage-orange/20',
           className
         )}
         {...props}
@@ -40,10 +40,11 @@ const QuickActionItem = React.forwardRef<HTMLButtonElement, QuickActionItemProps
         ref={ref}
         className={cn(
           'w-full flex items-center px-4 py-2.5 rounded-lg',
-          'text-sm font-medium transition-colors',
+          'text-sm font-medium transition-all duration-200',
           destructive 
-            ? 'text-red-500 hover:bg-red-500/10' 
-            : 'text-white hover:bg-white/10',
+            ? 'text-red-400 hover:bg-red-500/10 hover:text-red-300' 
+            : 'text-gray-100 hover:bg-white/10 hover:text-white',
+          'hover:shadow-md hover:scale-105 transform',
           className
         )}
         onClick={onClick}
