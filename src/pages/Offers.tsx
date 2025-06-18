@@ -13,6 +13,11 @@ import {
   TrendingUp,
   TrendingDown,
   Activity,
+  ChevronUp,
+  ChevronDown,
+  ArrowUpDown,
+  Copy,
+  Check,
 } from 'lucide-react';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -24,6 +29,7 @@ import { useOffers } from '@/hooks/useOffers';
 import { useWallet } from '@/contexts/WalletContext';
 import { formatNumber, formatPercentage, formatDate, truncateAddress, getRiskLevel } from '@/utils';
 import { OfferV2Model } from '@/types';
+import { copyToClipboard } from '@/utils';
 
 const Offers: React.FC = () => {
   const { connected } = useWallet();
@@ -32,10 +38,21 @@ const Offers: React.FC = () => {
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
-  const [sortBy, setSortBy] = useState<'created' | 'apr' | 'utilization'>('created');
+  const [sortBy, setSortBy] = useState<
+    'created' | 'apr' | 'utilization' | 'exposure' | 'token' | 'available'
+  >('created');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedOffer, setSelectedOffer] = useState<OfferV2Model | null>(null);
   const [pauseOffer, setPauseOffer] = useState<OfferV2Model | null>(null);
+  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+
+  const handleCopyToClipboard = async (address: string) => {
+    const success = await copyToClipboard(address);
+    if (success) {
+      setCopiedAddress(address);
+      setTimeout(() => setCopiedAddress(null), 2000); // Reset after 2 seconds
+    }
+  };
 
   // Filter and sort offers
   const filteredOffers = offers
@@ -48,7 +65,7 @@ const Offers: React.FC = () => {
         return (
           offer.collateralToken?.symbol?.toLowerCase().includes(term) ||
           offer.collateralToken?.name?.toLowerCase().includes(term) ||
-          offer.publicKey.toString().toLowerCase().includes(term)
+          offer.collateralToken?.address?.toLowerCase().includes(term)
         );
       }
       return true;
@@ -65,6 +82,18 @@ const Offers: React.FC = () => {
           aValue = (parseInt(a.currentExposure, 16) / parseInt(a.maxExposure, 16)) * 100;
           bValue = (parseInt(b.currentExposure, 16) / parseInt(b.maxExposure, 16)) * 100;
           break;
+        case 'exposure':
+          aValue = parseInt(a.maxExposure, 16);
+          bValue = parseInt(b.maxExposure, 16);
+          break;
+        case 'available':
+          aValue = parseInt(a.availableForOpen);
+          bValue = parseInt(b.availableForOpen);
+          break;
+        case 'token':
+          aValue = a.collateralToken?.symbol || 'Z';
+          bValue = b.collateralToken?.symbol || 'Z';
+          return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
         default:
           aValue = new Date(a.createdAt).getTime();
           bValue = new Date(b.createdAt).getTime();
@@ -73,7 +102,9 @@ const Offers: React.FC = () => {
       return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
     });
 
-  const handleSort = (key: 'created' | 'apr' | 'utilization') => {
+  const handleSort = (
+    key: 'created' | 'apr' | 'utilization' | 'exposure' | 'token' | 'available'
+  ) => {
     if (sortBy === key) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
@@ -88,147 +119,14 @@ const Offers: React.FC = () => {
     return maxExposure > 0 ? (currentExposure / maxExposure) * 100 : 0;
   };
 
-  const OfferCard: React.FC<{ offer: OfferV2Model }> = ({ offer }) => {
-    const utilization = getUtilization(offer);
-    const quoteToken = typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
-    const decimals = quoteToken?.decimals ?? 9;
-    const symbol = quoteToken?.symbol ?? 'SOL';
-    const availableAmount = parseInt(offer.availableForOpen) / 10 ** decimals;
-    const totalExposure = parseInt(offer.maxExposure, 16) / 10 ** decimals;
-
-    return (
-      <Card
-        onClick={() => setSelectedOffer(offer)}
-        className="hover:shadow-md transition-shadow cursor-pointer"
-      >
-        <CardContent className="p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-12 w-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                <span className="text-primary-600 font-semibold">
-                  {offer.collateralToken?.symbol?.charAt(0) || 'T'}
-                </span>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">
-                  {offer.collateralToken?.symbol || 'Unknown Token'}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  {offer.collateralToken?.name || 'Token Name'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Badge variant={offer.active ? 'success' : 'gray'}>
-                {offer.active ? 'Active' : 'Inactive'}
-              </Badge>
-              <Button variant="ghost" size="sm">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div>
-              <p className="text-sm text-gray-500">APR</p>
-              <p className="text-lg font-semibold text-gray-900">{formatPercentage(offer.apr)}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Utilization</p>
-              <div className="flex items-center space-x-2">
-                <p className="text-lg font-semibold text-gray-900">
-                  {formatPercentage(utilization, 1)}
-                </p>
-                {utilization > 80 ? (
-                  <TrendingUp className="h-4 w-4 text-success-500" />
-                ) : utilization > 50 ? (
-                  <Activity className="h-4 w-4 text-warning-500" />
-                ) : (
-                  <TrendingDown className="h-4 w-4 text-gray-400" />
-                )}
-              </div>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Available</p>
-              <p className="text-lg font-semibold text-gray-900">
-                {formatNumber(availableAmount, 2)} {symbol}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Max Exposure</p>
-              <p className="text-lg font-semibold text-gray-900">
-                {formatNumber(totalExposure, 2)} {symbol}
-              </p>
-            </div>
-            <div className="col-span-2 md:col-span-1">
-              <p className="text-sm text-gray-500">Current LTV</p>
-              <div className="flex items-center space-x-2">
-                <p className="text-lg font-semibold text-gray-900">
-                  {offer.targetLtv !== null && offer.targetLtv !== undefined
-                    ? formatPercentage(offer.targetLtv * 100)
-                    : 'N/A'}
-                </p>
-                {offer.targetLtv !== null && offer.targetLtv !== undefined && (
-                  <span className={`text-xs font-medium ${getRiskLevel(offer.targetLtv).color}`}>
-                    {getRiskLevel(offer.targetLtv).label}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Utilization Bar */}
-          <div className="mb-4">
-            <div className="flex justify-between text-sm text-gray-600 mb-1">
-              <span>Utilization</span>
-              <span>{formatPercentage(utilization, 1)}</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  utilization > 80
-                    ? 'bg-success-500'
-                    : utilization > 50
-                      ? 'bg-warning-500'
-                      : 'bg-primary-500'
-                }`}
-                style={{ width: `${Math.min(utilization, 100)}%` }}
-              ></div>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-            <div className="text-sm text-gray-500">
-              Created {formatDate(offer.createdAt, 'relative')}
-            </div>
-            <div className="flex space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedOffer(offer);
-                }}
-              >
-                <Edit3 className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setPauseOffer(offer);
-                }}
-              >
-                {offer.active ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              </Button>
-              <Button variant="ghost" size="sm">
-                <ExternalLink className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+  const getSortIcon = (column: string) => {
+    if (sortBy !== column) {
+      return <ArrowUpDown className="h-4 w-4 text-gray-400" />;
+    }
+    return sortOrder === 'asc' ? (
+      <ChevronUp className="h-4 w-4 text-primary-600" />
+    ) : (
+      <ChevronDown className="h-4 w-4 text-primary-600" />
     );
   };
 
@@ -400,30 +298,290 @@ const Offers: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Active Offers</CardTitle>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+            <CardTitle>Your Offers</CardTitle>
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none z-10" />
+                <Input
+                  type="text"
+                  placeholder="Search offers..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-2 w-full sm:w-64"
+                />
+              </div>
+
+              {/* Status Filter */}
+              <div className="flex items-center space-x-2">
+                <Filter className="h-4 w-4 text-gray-400" />
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
+                  className="px-3 py-2 pr-8 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white appearance-none cursor-pointer"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                    backgroundPosition: 'right 0.5rem center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: '1.5em 1.5em',
+                  }}
+                >
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="text-center py-8">Loading...</div>
           ) : filteredOffers.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredOffers.map((offer) => (
-                <OfferCard key={offer.publicKey.toString()} offer={offer} />
-              ))}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th
+                      className="text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-50"
+                      onClick={() => handleSort('token')}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Token</span>
+                        {getSortIcon('token')}
+                      </div>
+                    </th>
+                    <th
+                      className="text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-50"
+                      onClick={() => handleSort('apr')}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>APR</span>
+                        {getSortIcon('apr')}
+                      </div>
+                    </th>
+                    <th
+                      className="text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-50"
+                      onClick={() => handleSort('utilization')}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Utilization</span>
+                        {getSortIcon('utilization')}
+                      </div>
+                    </th>
+                    <th
+                      className="text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-50"
+                      onClick={() => handleSort('exposure')}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Max Exposure</span>
+                        {getSortIcon('exposure')}
+                      </div>
+                    </th>
+                    <th
+                      className="text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-50"
+                      onClick={() => handleSort('available')}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Available</span>
+                        {getSortIcon('available')}
+                      </div>
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">LTV</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                    <th
+                      className="text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-50"
+                      onClick={() => handleSort('created')}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Created</span>
+                        {getSortIcon('created')}
+                      </div>
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredOffers.map((offer) => {
+                    const utilization = getUtilization(offer);
+                    const quoteToken =
+                      typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
+                    const decimals = quoteToken?.decimals ?? 9;
+                    const symbol = quoteToken?.symbol ?? 'SOL';
+                    const availableAmount = parseInt(offer.availableForOpen) / 10 ** decimals;
+                    const totalExposure = parseInt(offer.maxExposure, 16) / 10 ** decimals;
+
+                    return (
+                      <tr
+                        key={offer.publicKey.toString()}
+                        className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="py-4 px-4">
+                          <div className="flex items-center space-x-3">
+                            <div className="h-8 w-8 rounded-lg flex items-center justify-center overflow-hidden">
+                              {offer.collateralToken?.logoURI ? (
+                                <img
+                                  src={offer.collateralToken.logoURI}
+                                  alt={offer.collateralToken.symbol || 'Token'}
+                                  className="h-8 w-8 rounded-lg object-cover"
+                                  onError={(e) => {
+                                    // Fallback to text avatar if image fails to load
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                      parent.className =
+                                        'h-8 w-8 bg-primary-100 rounded-lg flex items-center justify-center';
+                                      parent.innerHTML = `<span class="text-primary-600 font-semibold text-sm">${offer.collateralToken?.symbol?.charAt(0) || 'T'}</span>`;
+                                    }
+                                  }}
+                                />
+                              ) : (
+                                <div className="h-8 w-8 bg-primary-100 rounded-lg flex items-center justify-center">
+                                  <span className="text-primary-600 font-semibold text-sm">
+                                    {offer.collateralToken?.symbol?.charAt(0) || 'T'}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900 text-sm">
+                                {offer.collateralToken?.symbol || 'Unknown'}
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <span className="text-xs text-gray-500">
+                                  {offer.collateralToken?.address
+                                    ? truncateAddress(offer.collateralToken.address)
+                                    : 'Unknown Address'}
+                                </span>
+                                {offer.collateralToken?.address && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleCopyToClipboard(offer.collateralToken?.address || '');
+                                    }}
+                                    className="p-0.5 rounded hover:bg-gray-100 transition-colors"
+                                    title="Copy address"
+                                  >
+                                    {copiedAddress === offer.collateralToken.address ? (
+                                      <Check className="h-3 w-3 text-green-500" />
+                                    ) : (
+                                      <Copy className="h-3 w-3 text-gray-400 hover:text-gray-600" />
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="font-semibold text-gray-900">
+                            {formatPercentage(offer.apr)}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-semibold text-gray-900">
+                              {formatPercentage(utilization, 1)}
+                            </span>
+                            <div className="w-16 bg-gray-200 rounded-full h-1.5">
+                              <div
+                                className={`h-1.5 rounded-full transition-all duration-300 ${
+                                  utilization > 80
+                                    ? 'bg-success-500'
+                                    : utilization > 50
+                                      ? 'bg-warning-500'
+                                      : 'bg-primary-500'
+                                }`}
+                                style={{ width: `${Math.min(utilization, 100)}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="font-semibold text-gray-900">
+                            {formatNumber(totalExposure, 2)} {symbol}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="font-semibold text-gray-900">
+                            {formatNumber(availableAmount, 2)} {symbol}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-semibold text-gray-900">
+                              {offer.targetLtv !== null && offer.targetLtv !== undefined
+                                ? formatPercentage(offer.targetLtv * 100)
+                                : 'N/A'}
+                            </span>
+                            {offer.targetLtv !== null && offer.targetLtv !== undefined && (
+                              <span
+                                className={`text-xs font-medium px-1.5 py-0.5 rounded ${getRiskLevel(offer.targetLtv).color}`}
+                              >
+                                {getRiskLevel(offer.targetLtv).label}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <Badge variant={offer.active ? 'success' : 'gray'} size="sm">
+                            {offer.active ? 'Active' : 'Inactive'}
+                          </Badge>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="text-sm text-gray-500">
+                            {formatDate(offer.createdAt, 'relative')}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center space-x-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedOffer(offer)}
+                              className="p-1 h-8 w-8"
+                            >
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setPauseOffer(offer)}
+                              className="p-1 h-8 w-8"
+                            >
+                              {offer.active ? (
+                                <Pause className="h-4 w-4" />
+                              ) : (
+                                <Play className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12">
               <TrendingUp className="h-12 w-12 text-gray-400" />
-              <h3 className="mt-4 text-lg font-medium">No Active Offers</h3>
+              <h3 className="mt-4 text-lg font-medium">No Offers Found</h3>
               <p className="mt-2 text-center text-gray-600">
-                Create your first lending offer to start earning interest on your assets.
+                {searchTerm || statusFilter !== 'all'
+                  ? 'Try adjusting your filters to see more results.'
+                  : 'Create your first lending offer to start earning interest on your assets.'}
               </p>
-              <Link to="/create-offer">
-                <Button variant="glass" size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Offer
-                </Button>
-              </Link>
+              {!searchTerm && statusFilter === 'all' && (
+                <Link to="/create-offer">
+                  <Button variant="glass" size="sm" className="mt-4">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Offer
+                  </Button>
+                </Link>
+              )}
             </div>
           )}
         </CardContent>

@@ -41,9 +41,7 @@ const QuickActionItem = React.forwardRef<HTMLButtonElement, QuickActionItemProps
         className={cn(
           'w-full flex items-center px-4 py-2.5 rounded-lg',
           'text-sm font-medium transition-colors',
-          destructive 
-            ? 'text-red-500 hover:bg-red-500/10' 
-            : 'text-white hover:bg-white/10',
+          destructive ? 'text-red-500 hover:bg-red-500/10' : 'text-white hover:bg-white/10',
           className
         )}
         onClick={onClick}
@@ -59,4 +57,4 @@ const QuickActionItem = React.forwardRef<HTMLButtonElement, QuickActionItemProps
 QuickActionMenu.displayName = 'QuickActionMenu';
 QuickActionItem.displayName = 'QuickActionItem';
 
-export { QuickActionMenu, QuickActionItem }; 
+export { QuickActionMenu, QuickActionItem };
