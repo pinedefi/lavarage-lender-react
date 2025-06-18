@@ -13,6 +13,7 @@ import {
   BarChart3,
   Coins,
   Wallet,
+  DollarSign,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -30,6 +31,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
     { name: 'My Offers', href: '/offers', icon: Coins },
     { name: 'Positions', href: '/positions', icon: TrendingUp },
     { name: 'Liquidations', href: '/liquidations', icon: Wallet },
+    { name: 'Balances', href: '/balances', icon: DollarSign },
   ];
 
   const isActive = (path: string) => {

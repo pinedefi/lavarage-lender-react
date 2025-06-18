@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   PlusCircle,
   BarChart2,
+  DollarSign,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
@@ -27,6 +28,7 @@ const Layout = ({ children }: LayoutProps): JSX.Element => {
     { name: 'Liquidations', href: '/liquidations', icon: AlertTriangle },
     { name: 'Create Offer', href: '/create-offer', icon: PlusCircle },
     { name: 'Analytics', href: '/analytics', icon: BarChart2 },
+    { name: 'Balances', href: '/balances', icon: DollarSign },
   ];
 
   return (

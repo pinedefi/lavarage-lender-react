@@ -187,6 +187,7 @@ export interface PositionV3Model {
   takeProfitPrice?: string;
   onChainStatus?: any;
   isActionable: boolean;
+  positionLtv: number;
 }
 
 // Dashboard Types

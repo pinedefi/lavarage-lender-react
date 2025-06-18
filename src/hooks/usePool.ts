@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
-import { apiService } from '@/services/api';
-import { useWallet } from '@/contexts/WalletContext';
-import toast from 'react-hot-toast';
+import { useState, useEffect, useCallback } from "react";
+import { apiService } from "@/services/api";
+import { useWallet } from "@/contexts/WalletContext";
+import toast from "react-hot-toast";
+import bs58 from "bs58";
+import { VersionedTransaction } from "@solana/web3.js";
 
 interface UsePoolOptions {
   quoteToken?: string;
@@ -19,7 +21,7 @@ interface UsePoolReturn {
 }
 
 export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
-  const { publicKey, connected } = useWallet();
+  const { publicKey, connected, signTransaction, sendTransaction } = useWallet();
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +40,9 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         userWallet: publicKey.toBase58(),
         quoteToken,
       });
-      const bal = parseFloat((data && data.balance) || data || 0);
+      console.log(quoteToken, data);
+      const bal = parseFloat((data && data.balances && data.balances.available) ?? 0);
+      console.log(quoteToken, bal);
       setBalance(bal);
     } catch (err: any) {
       const message = err.message || 'Failed to fetch balance';
@@ -56,12 +60,22 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
       }
       try {
         setError(null);
-        await apiService.depositFunds({
-          amount,
+        const tx = await apiService.depositFunds({
+          amount: amount * 10 ** (quoteToken === "So11111111111111111111111111111111111111112" ? 9 : 6),
           quoteToken,
           userWallet: publicKey.toBase58(),
         });
-        toast.success('Deposit submitted');
+        console.log("Deposit submitted", tx);
+        
+        // Decode the transaction from base58
+        const transactionBuffer = bs58.decode(tx.transaction);
+        const transaction = VersionedTransaction.deserialize(transactionBuffer);
+        
+        // Send the transaction directly
+        const signature = await sendTransaction(transaction);
+        
+        console.log("Transaction sent with signature:", signature);
+        toast.success("Deposit submitted successfully");
         await fetchBalance();
       } catch (err: any) {
         const message = err.message || 'Deposit failed';
@@ -70,7 +84,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         throw err;
       }
     },
-    [publicKey, quoteToken, fetchBalance]
+    [publicKey, quoteToken, fetchBalance, sendTransaction],
   );
 
   const withdraw = useCallback(
@@ -80,12 +94,22 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
       }
       try {
         setError(null);
-        await apiService.withdrawFunds({
+        const tx = await apiService.withdrawFunds({
           amount,
           quoteToken,
           userWallet: publicKey.toBase58(),
         });
-        toast.success('Withdrawal submitted');
+        console.log("Withdraw submitted", tx);
+        
+        // Decode the transaction from base58
+        const transactionBuffer = bs58.decode(tx.transaction);
+        const transaction = VersionedTransaction.deserialize(transactionBuffer);
+        
+        // Send the transaction directly
+        const signature = await sendTransaction(transaction);
+        
+        console.log("Transaction sent with signature:", signature);
+        toast.success("Withdrawal submitted successfully");
         await fetchBalance();
       } catch (err: any) {
         const message = err.message || 'Withdrawal failed';
@@ -94,7 +118,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         throw err;
       }
     },
-    [publicKey, quoteToken, fetchBalance]
+    [publicKey, quoteToken, fetchBalance, sendTransaction],
   );
 
   useEffect(() => {
