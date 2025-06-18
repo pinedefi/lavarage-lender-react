@@ -24,7 +24,7 @@ import Badge from '@/components/ui/Badge';
 import { useOffers } from '@/hooks/useOffers';
 import { usePositions } from '@/hooks/usePositions';
 import { useWallet } from '@/contexts/WalletContext';
-import { formatCurrency, formatNumber, formatPercentage, formatDate } from '@/utils';
+import { formatNumber, formatPercentage } from '@/utils';
 import { QuickActionMenu, QuickActionItem } from '@/components/ui/QuickActionMenu';
 import { GradientText, LoadingSpinner, LavarageLogo } from '@/components/brand';
 

@@ -55,11 +55,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, mobileMenuOpen = false })
               onClick={onMenuToggle}
               className="md:hidden p-2 rounded-md text-gray-400 hover:text-lavarage-coral hover:bg-lavarage-subtle focus:outline-none focus:ring-2 focus:ring-lavarage-coral transition-all duration-300"
             >
-              {mobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
 
             {/* LAVARAGE Logo */}
@@ -107,7 +103,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, mobileMenuOpen = false })
           {/* Right side - Wallet and User Actions */}
           <div className="flex items-center space-x-4">
             {/* Notifications */}
-            {/* <button className="p-2 text-gray-400 hover:text-lavarage-coral relative transition-colors duration-300 group">
+            {/* <button className="p-2 text-gray-400 hover:text-lavarage-coral relative transition-colors duration-300 group" aria-label="Notifications">
               <Bell className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
               <span className="notification-dot absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white"></span>
             </button> */}
@@ -133,7 +129,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, mobileMenuOpen = false })
                 </div>
 
                 {/* Settings */}
-                <button className="p-2 text-gray-400 hover:text-lavarage-coral transition-colors duration-300 group">
+                <button
+                  className="p-2 text-gray-400 hover:text-lavarage-coral transition-colors duration-300 group"
+                  aria-label="Settings"
+                >
                   <Settings className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
                 </button>
 
@@ -142,6 +141,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, mobileMenuOpen = false })
                   variant="ghost"
                   size="sm"
                   onClick={disconnect}
+                  aria-label="Disconnect wallet"
                   className="text-gray-500 hover:text-lavarage-red hover:bg-lavarage-subtle transition-all duration-300"
                 >
                   <LogOut className="h-4 w-4" />
@@ -173,6 +173,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, mobileMenuOpen = false })
                       ? 'bg-lavarage-primary text-white shadow-md'
                       : 'text-gray-600 hover:text-lavarage-red hover:bg-lavarage-subtle'
                   }`}
+                  aria-label="Open navigation menu"
                 >
                   <Icon
                     className={`h-5 w-5 mr-3 transition-colors duration-300 ${

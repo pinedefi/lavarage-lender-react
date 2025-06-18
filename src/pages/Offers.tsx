@@ -29,6 +29,7 @@ import { useOffers } from '@/hooks/useOffers';
 import { useWallet } from '@/contexts/WalletContext';
 import { formatNumber, formatPercentage, formatDate, truncateAddress, getRiskLevel } from '@/utils';
 import { OfferV2Model } from '@/types';
+import { copyToClipboard } from '@/utils';
 
 const Offers: React.FC = () => {
   const { connected } = useWallet();
@@ -45,13 +46,11 @@ const Offers: React.FC = () => {
   const [pauseOffer, setPauseOffer] = useState<OfferV2Model | null>(null);
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
 
-  const copyToClipboard = async (address: string) => {
-    try {
-      await navigator.clipboard.writeText(address);
+  const handleCopyToClipboard = async (address: string) => {
+    const success = await copyToClipboard(address);
+    if (success) {
       setCopiedAddress(address);
       setTimeout(() => setCopiedAddress(null), 2000); // Reset after 2 seconds
-    } catch (err) {
-      console.error('Failed to copy to clipboard:', err);
     }
   };
 
@@ -460,7 +459,7 @@ const Offers: React.FC = () => {
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      copyToClipboard(offer.collateralToken?.address || '');
+                                      handleCopyToClipboard(offer.collateralToken?.address || '');
                                     }}
                                     className="p-0.5 rounded hover:bg-gray-100 transition-colors"
                                     title="Copy address"

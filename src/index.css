@@ -279,11 +279,11 @@
 }
 
 .wallet-adapter-button {
-  background: linear-gradient(135deg, #FF845C 0%, #FF433F 100%) !important;
+  background: linear-gradient(135deg, #FF845C 0%, #FF433F 100%);
 }
 
 .wallet-adapter-button:hover {
-  background: linear-gradient(135deg, #FF433F 0%, #A51809 100%) !important;
+  background: linear-gradient(135deg, #FF433F 0%, #A51809 100%);
 }
 
 /* Enhanced glass effects for LAVARAGE */

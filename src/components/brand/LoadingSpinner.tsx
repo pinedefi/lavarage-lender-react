@@ -29,7 +29,12 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   };
 
   return (
-    <div className={`flex flex-col items-center justify-center space-y-4 ${className}`}>
+    <div
+      role="status"
+      aria-live="polite"
+      className={`flex flex-col items-center justify-center space-y-4 ${className}`}
+    >
+      <span className="sr-only">Loading…</span>
       {showLogo && <LavarageLogo variant="mark" size={size} className="animate-pulse" />}
 
       <div className={`relative ${containerSizeClasses[size]}`}>

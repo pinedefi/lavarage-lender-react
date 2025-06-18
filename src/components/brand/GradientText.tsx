@@ -1,23 +1,25 @@
 import React from 'react';
 import { cn } from '@/utils/cn';
 
-interface GradientTextProps extends React.HTMLAttributes<HTMLSpanElement> {
+type GradientTextProps<T extends React.ElementType = 'span'> = {
   variant?: 'primary' | 'secondary' | 'subtle';
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   weight?: 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
-  as?: 'span' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p';
+  as?: T;
   children: React.ReactNode;
-}
+} & React.ComponentPropsWithoutRef<T>;
 
-const GradientText: React.FC<GradientTextProps> = ({
+const GradientText = <T extends React.ElementType = 'span'>({
   variant = 'primary',
   size = 'md',
   weight = 'semibold',
-  as: Component = 'span',
+  as,
   className,
   children,
   ...props
-}) => {
+}: GradientTextProps<T>) => {
+  const Component = as || 'span';
+
   const variants = {
     primary: 'bg-gradient-to-r from-lavarage-coral to-lavarage-red',
     secondary: 'bg-gradient-to-r from-lavarage-yellow to-lavarage-orange',
