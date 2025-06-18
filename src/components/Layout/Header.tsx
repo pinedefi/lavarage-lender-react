@@ -5,6 +5,7 @@ import { useWallet } from '@/contexts/WalletContext';
 import { truncateAddress } from '@/utils';
 import {
   Menu,
+  X,
   Bell,
   Settings,
   LogOut,
@@ -21,9 +22,10 @@ import { LavarageLogo } from '@/components/brand';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
+  mobileMenuOpen?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
+const Header: React.FC<HeaderProps> = ({ onMenuToggle, mobileMenuOpen = false }) => {
   const { publicKey, connected, disconnect } = useWallet();
   const location = useLocation();
 
@@ -53,7 +55,11 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
               onClick={onMenuToggle}
               className="md:hidden p-2 rounded-md text-gray-400 hover:text-lavarage-coral hover:bg-lavarage-subtle focus:outline-none focus:ring-2 focus:ring-lavarage-coral transition-all duration-300"
             >
-              <Menu className="h-6 w-6" />
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
 
             {/* LAVARAGE Logo */}
@@ -151,32 +157,35 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
       </div>
 
       {/* Mobile Navigation */}
-      <div className="md:hidden border-t border-lavarage-orange/10 bg-gradient-to-r from-lavarage-subtle to-transparent">
-        <div className="px-2 py-3 space-y-1">
-          {navigation.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.href);
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ${
-                  active
-                    ? 'bg-lavarage-primary text-white shadow-md'
-                    : 'text-gray-600 hover:text-lavarage-red hover:bg-lavarage-subtle'
-                }`}
-              >
-                <Icon
-                  className={`h-5 w-5 mr-3 transition-colors duration-300 ${
-                    active ? 'text-white' : ''
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-lavarage-orange/10 bg-gradient-to-r from-lavarage-subtle to-transparent animate-in slide-in-from-top-2 duration-200">
+          <div className="px-2 py-3 space-y-1">
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={onMenuToggle} // Close menu when link is clicked
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ${
+                    active
+                      ? 'bg-lavarage-primary text-white shadow-md'
+                      : 'text-gray-600 hover:text-lavarage-red hover:bg-lavarage-subtle'
                   }`}
-                />
-                {item.name}
-              </Link>
-            );
-          })}
+                >
+                  <Icon
+                    className={`h-5 w-5 mr-3 transition-colors duration-300 ${
+                      active ? 'text-white' : ''
+                    }`}
+                  />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </header>
   );
 };
