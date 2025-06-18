@@ -193,10 +193,6 @@ const Dashboard: React.FC = () => {
           </p>
         </div>
         <div className="flex space-x-3">
-          <Button variant="outline" size="sm">
-            <ExternalLink className="h-4 w-4 mr-2" />
-            Export Data
-          </Button>
           <Link to="/create-offer">
             <Button variant="lavarage" size="sm">
               <Plus className="h-4 w-4 mr-2" />

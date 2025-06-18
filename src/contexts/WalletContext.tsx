@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useMemo, useCallback } from 'react';
 import {
   ConnectionProvider,
   WalletProvider,
   useWallet as useSolanaWallet,
+  useConnection,
 } from '@solana/wallet-adapter-react';
 import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import {
@@ -12,7 +13,7 @@ import {
   LedgerWalletAdapter,
   CloverWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
-import { Connection, clusterApiUrl, PublicKey } from '@solana/web3.js';
+import { Connection, clusterApiUrl, PublicKey, VersionedTransaction } from '@solana/web3.js';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import '@solana/wallet-adapter-react-ui/styles.css';
 
@@ -23,6 +24,9 @@ interface WalletContextType {
   disconnect: () => Promise<void>;
   select: (walletName: string) => void;
   wallet: any;
+  signTransaction: (transaction: VersionedTransaction) => Promise<VersionedTransaction>;
+  sendTransaction: (transaction: VersionedTransaction) => Promise<string>;
+  connection: Connection;
 }
 
 const WalletContext = createContext<WalletContextType>({} as WalletContextType);
@@ -64,8 +68,34 @@ export const WalletContextProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-const WalletContextContent: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { connected, publicKey, select, connect, disconnect, wallet } = useSolanaWallet();
+const WalletContextContent: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { connection } = useConnection();
+  const {
+    connected,
+    publicKey,
+    select,
+    connect,
+    disconnect,
+    wallet,
+    signTransaction: walletSignTransaction,
+    sendTransaction: walletSendTransaction,
+  } = useSolanaWallet();
+
+  const signTransaction = useCallback(async (transaction: VersionedTransaction): Promise<VersionedTransaction> => {
+    if (!walletSignTransaction) {
+      throw new Error("Wallet does not support transaction signing");
+    }
+    return await walletSignTransaction(transaction);
+  }, [walletSignTransaction]);
+
+  const sendTransaction = useCallback(async (transaction: VersionedTransaction): Promise<string> => {
+    if (!walletSendTransaction) {
+      throw new Error("Wallet does not support transaction sending");
+    }
+    return await walletSendTransaction(transaction, connection);
+  }, [walletSendTransaction, connection]);
 
   const value = useMemo(
     () => ({
@@ -78,8 +108,11 @@ const WalletContextContent: React.FC<{ children: React.ReactNode }> = ({ childre
         select(walletName as any);
       },
       wallet,
+      signTransaction,
+      sendTransaction,
+      connection,
     }),
-    [connected, publicKey, connect, disconnect, select, wallet]
+    [connected, publicKey, connect, disconnect, select, wallet, signTransaction, sendTransaction, connection]
   );
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;

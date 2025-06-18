@@ -24,6 +24,8 @@ export function formatCurrency(amount: number, currency = 'USD', decimals = 2): 
  * Formats a number with commas
  */
 export function formatNumber(num: number, decimals = 2): string {
+  console.log(num, decimals);
+  if (num === 0) return '0';
   return new Intl.NumberFormat('en-US', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,

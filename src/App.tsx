@@ -6,8 +6,8 @@ import Dashboard from "@/pages/Dashboard";
 import Offers from "@/pages/Offers";
 import Positions from "@/pages/Positions";
 import Liquidations from "@/pages/Liquidations";
-import CreateOffer from "@/pages/CreateOffer";
 import Balances from "@/pages/Balances";
+import CreateOffer from "@/pages/CreateOffer";
 import Analytics from "@/pages/Analytics";
 import NotFound from "@/pages/NotFound";
 
