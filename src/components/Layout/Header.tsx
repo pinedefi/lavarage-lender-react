@@ -120,21 +120,21 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, mobileMenuOpen = false })
                 </div>
 
                 {/* User Menu */}
-                <div className="relative">
+                {/* <div className="relative">
                   <button className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lavarage-coral transition-all duration-300 group">
                     <div className="h-8 w-8 bg-lavarage-primary rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
                       <User className="h-5 w-5 text-white" />
                     </div>
                   </button>
-                </div>
+                </div> */}
 
                 {/* Settings */}
-                <button
+                {/* <button
                   className="p-2 text-gray-400 hover:text-lavarage-coral transition-colors duration-300 group"
                   aria-label="Settings"
                 >
                   <Settings className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
-                </button>
+                </button> */}
 
                 {/* Disconnect */}
                 <Button

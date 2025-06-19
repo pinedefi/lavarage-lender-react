@@ -17,7 +17,7 @@ const Layout = ({ children }: LayoutProps): JSX.Element => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col overflow-x-hidden">
       {/* Header */}
       <Header
         onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
