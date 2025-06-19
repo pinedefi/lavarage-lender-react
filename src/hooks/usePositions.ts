@@ -38,30 +38,43 @@ export function usePositions(options: UsePositionsOptions = {}): UsePositionsRet
     refreshInterval = 30000, // 30 seconds
   } = options;
 
-  const fetchPositions = useCallback(async () => {
-    if (!connected || !publicKey) {
-      setPositions([]);
-      setLoading(false);
-      return;
-    }
+  const fetchPositions = useCallback(
+    async (isInitialLoad = false) => {
+      if (!connected || !publicKey) {
+        setPositions([]);
+        setLoading(false);
+        return;
+      }
 
-    try {
-      setError(null);
-      const data = await apiService.getLenderPositions({
-        lenderWallet: publicKey.toBase58(),
-        status,
-        includeInactionable,
-      });
-      setPositions(data);
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to fetch positions';
-      setError(errorMessage);
-      console.error('Error fetching positions:', err);
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, [publicKey, connected, status, includeInactionable]);
+      try {
+        setError(null);
+        const data = await apiService.getLenderPositions({
+          lenderWallet: publicKey.toBase58(),
+          status,
+          includeInactionable,
+        });
+
+        // Only update state if data has actually changed or it's the initial load
+        setPositions((prevPositions) => {
+          if (isInitialLoad || JSON.stringify(prevPositions) !== JSON.stringify(data)) {
+            return data;
+          }
+          return prevPositions;
+        });
+      } catch (err: any) {
+        const errorMessage = err.message || 'Failed to fetch positions';
+        setError(errorMessage);
+        console.error('Error fetching positions:', err);
+        // Only show toast error on initial load or if it's a new error
+        if (isInitialLoad) {
+          toast.error(errorMessage);
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [publicKey, connected, status, includeInactionable]
+  );
 
   // Calculate statistics
   const stats = useCallback(() => {
@@ -107,14 +120,14 @@ export function usePositions(options: UsePositionsOptions = {}): UsePositionsRet
 
   // Initial fetch
   useEffect(() => {
-    fetchPositions();
+    fetchPositions(true);
   }, [fetchPositions]);
 
   // Auto-refresh
   useEffect(() => {
     if (!autoRefresh) return;
 
-    const interval = setInterval(fetchPositions, refreshInterval);
+    const interval = setInterval(() => fetchPositions(false), refreshInterval);
     return () => clearInterval(interval);
   }, [fetchPositions, autoRefresh, refreshInterval]);
 
@@ -122,7 +135,7 @@ export function usePositions(options: UsePositionsOptions = {}): UsePositionsRet
     positions,
     loading,
     error,
-    refetch: fetchPositions,
+    refetch: () => fetchPositions(true),
     stats,
   };
 }
