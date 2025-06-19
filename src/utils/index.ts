@@ -237,7 +237,7 @@ export function formatDate(
  * Formats a number for input fields, handling floating-point precision issues
  */
 export function formatNumberForInput(value: number, decimals: number = 2): string {
-  if (isNaN(value) || !isFinite(value) || value === null || value === undefined) return '';
+  if (isNaN(value) || !Number.isFinite(value) || value === null || value === undefined) return '';
 
   // Handle zero case
   if (value === 0) return '0';
