@@ -255,20 +255,6 @@ export function formatNumberForInput(value: number, decimals: number = 2): strin
   // Use Number.prototype.toFixed() and ensure no scientific notation
   let result = rounded.toFixed(decimals);
 
-  // Double-check that the result doesn't contain scientific notation
-  if (result.includes('e') || result.includes('E')) {
-    // If scientific notation is detected, treat as zero or use a safer formatting approach
-    if (Math.abs(rounded) < 0.01) {
-      return '0';
-    } else {
-      // For larger numbers that somehow got scientific notation, use a different approach
-      result = rounded.toString();
-      if (result.includes('e') || result.includes('E')) {
-        return '0'; // Fallback to zero for safety
-      }
-    }
-  }
-
   // Remove trailing zeros after decimal point, but keep at least one decimal place for percentages
   if (result.includes('.')) {
     result = result.replace(/\.?0+$/, '');
