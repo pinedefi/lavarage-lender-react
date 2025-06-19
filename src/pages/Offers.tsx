@@ -79,16 +79,20 @@ const Offers: React.FC = () => {
           bValue = b.apr;
           break;
         case 'utilization':
-          aValue = (parseInt(a.currentExposure, 16) / parseInt(a.maxExposure, 16)) * 100;
-          bValue = (parseInt(b.currentExposure, 16) / parseInt(b.maxExposure, 16)) * 100;
+          const aMaxExposure = parseFloat(a.maxExposure) || 0;
+          const aCurrentExposure = parseFloat(a.currentExposure) || 0;
+          const bMaxExposure = parseFloat(b.maxExposure) || 0;
+          const bCurrentExposure = parseFloat(b.currentExposure) || 0;
+          aValue = aMaxExposure > 0 ? (aCurrentExposure / aMaxExposure) * 100 : 0;
+          bValue = bMaxExposure > 0 ? (bCurrentExposure / bMaxExposure) * 100 : 0;
           break;
         case 'exposure':
-          aValue = parseInt(a.maxExposure, 16);
-          bValue = parseInt(b.maxExposure, 16);
+          aValue = parseFloat(a.maxExposure) || 0;
+          bValue = parseFloat(b.maxExposure) || 0;
           break;
         case 'available':
-          aValue = parseInt(a.availableForOpen);
-          bValue = parseInt(b.availableForOpen);
+          aValue = parseFloat(a.availableForOpen) || 0;
+          bValue = parseFloat(b.availableForOpen) || 0;
           break;
         case 'token':
           aValue = a.collateralToken?.symbol || 'Z';
@@ -114,8 +118,8 @@ const Offers: React.FC = () => {
   };
 
   const getUtilization = (offer: OfferV2Model) => {
-    const maxExposure = parseInt(offer.maxExposure, 16) || 0;
-    const currentExposure = parseInt(offer.currentExposure, 16) || 0;
+    const maxExposure = parseFloat(offer.maxExposure) || 0;
+    const currentExposure = parseFloat(offer.currentExposure) || 0;
     return maxExposure > 0 ? (currentExposure / maxExposure) * 100 : 0;
   };
 
@@ -143,8 +147,7 @@ const Offers: React.FC = () => {
         const quoteToken = typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
         const decimals = quoteToken?.decimals ?? 9;
         setApr(offer.apr.toString());
-        setExposure((parseInt(offer.maxExposure, 16) / 10 ** decimals).toString());
-        // Convert decimal to percentage for display (0.75 -> 75)
+        setExposure(parseFloat(offer.maxExposure).toString());
         setLtv(((offer.targetLtv || 0.75) * 100).toString());
       }
     }, [offer]);
@@ -409,8 +412,8 @@ const Offers: React.FC = () => {
                       typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
                     const decimals = quoteToken?.decimals ?? 9;
                     const symbol = quoteToken?.symbol ?? 'SOL';
-                    const availableAmount = parseInt(offer.availableForOpen) / 10 ** decimals;
-                    const totalExposure = parseInt(offer.maxExposure, 16) / 10 ** decimals;
+                    const availableAmount = parseFloat(offer.availableForOpen) || 0;
+                    const totalExposure = parseFloat(offer.maxExposure) || 0;
 
                     return (
                       <tr
