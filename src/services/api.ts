@@ -9,10 +9,12 @@ import {
   TokenModel,
   HeliusTokenModel,
 } from '@/types';
+import { nftValidationService } from './nftValidation';
 
 class ApiService {
   private api: AxiosInstance;
   private apiKey: string;
+  private walletAddress: string | null = null;
 
   constructor(baseURL: string = process.env.REACT_APP_API_URL || 'https://api.lavarage.com') {
     this.apiKey = process.env.REACT_APP_API_KEY || '';
@@ -32,13 +34,16 @@ class ApiService {
   private setupInterceptors(): void {
     // Request interceptor
     this.api.interceptors.request.use(
-      (config) => {
+      async (config) => {
         // Add timestamp to prevent caching
         if (config.method === 'get') {
           config.params = {
             ...config.params,
             _t: Date.now(),
           };
+        } else {
+          // For non-GET requests, validate NFT ownership
+          await this.validateNFTForLenderEndpoints(config);
         }
         return config;
       },
@@ -54,6 +59,67 @@ class ApiService {
         return Promise.reject(new Error(message));
       }
     );
+  }
+
+  private async validateNFTForLenderEndpoints(config: any): Promise<void> {
+    // Check if this is a lender endpoint that requires NFT validation
+    const lenderEndpoints = [
+      '/api/sdk/v1.0/lender/offers/create',
+      '/api/sdk/v1.0/lender/offers/update',
+      '/api/sdk/v1.0/lender/offers/changeLTV',
+      '/api/sdk/v1.0/lender/pools/deposit',
+      '/api/sdk/v1.0/lender/pools/withdraw',
+    ];
+
+    const isLenderEndpoint = lenderEndpoints.some((endpoint) => config.url?.includes(endpoint));
+
+    if (!isLenderEndpoint) {
+      return;
+    }
+
+    // Skip validation in development/staging environments
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Skipping NFT validation in development environment');
+      return;
+    }
+
+    // Extract wallet address from request data
+    const walletAddress = this.extractWalletAddress(config);
+    if (!walletAddress) {
+      throw new Error('Wallet address is required for lender operations');
+    }
+
+    // Validate NFT ownership
+    try {
+      const hasNFT = await nftValidationService.hasLavaRockNFT(walletAddress);
+      if (!hasNFT) {
+        throw new Error('Access denied: Lavarock NFT required for lender operations');
+      }
+    } catch (error) {
+      console.error('NFT validation failed:', error);
+      throw new Error('Unable to verify NFT ownership. Please ensure you own a Lavarock NFT.');
+    }
+  }
+
+  private extractWalletAddress(config: any): string | null {
+    // Try to extract wallet address from various sources
+    if (config.data?.userWallet) {
+      return config.data.userWallet;
+    }
+
+    if (config.params?.userWallet) {
+      return config.params.userWallet;
+    }
+
+    // For changeLTV endpoint, we'll need to handle this differently
+    // as it requires looking up the offer owner
+    if (config.url?.includes('/changeLTV') && config.data?.offerAddress) {
+      // Return a placeholder - the backend will handle the validation
+      // since we can't easily look up offer ownership from the frontend
+      return this.walletAddress;
+    }
+
+    return this.walletAddress;
   }
 
   // Offer Management
@@ -218,6 +284,11 @@ class ApiService {
   setApiKey(apiKey: string): void {
     this.apiKey = apiKey;
     this.api.defaults.headers['x-api-key'] = apiKey;
+  }
+
+  // Set wallet address for NFT validation
+  setWalletAddress(walletAddress: string | null): void {
+    this.walletAddress = walletAddress;
   }
 
   // Get current API configuration

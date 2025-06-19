@@ -8,6 +8,7 @@ import { apiService } from '@/services/api';
 import { TokenModel } from '@/types';
 import { isValidSolanaAddress } from '@/utils';
 import { QUOTE_TOKENS, getQuoteTokenAddress, QUOTE_TOKEN_SYMBOLS } from '@/utils/tokens';
+import { RequireNFT } from '@/components/auth/RequireNFT';
 
 const CreateOffer: React.FC = () => {
   const { createOffer } = useOffers();
@@ -128,10 +129,21 @@ const CreateOffer: React.FC = () => {
                 {metaError && <p className="mt-1 text-sm text-error-600">{metaError}</p>}
               </div>
             </div>
-            <Button className="w-full" type="submit">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Offer
-            </Button>
+            <RequireNFT
+              fallback={
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <p className="text-amber-800 text-sm">
+                    ⚠️ You need a Lavarock NFT to create offers. You can still view existing offers
+                    and data.
+                  </p>
+                </div>
+              }
+            >
+              <Button className="w-full" type="submit">
+                <Plus className="mr-2 h-4 w-4" />
+                Create Offer
+              </Button>
+            </RequireNFT>
           </form>
         </CardContent>
       </Card>

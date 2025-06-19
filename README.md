@@ -5,6 +5,7 @@ A comprehensive React application for DeFi lenders to manage loan offers, monito
 ## 🚀 Features
 
 - **Wallet Integration**: Seamless Solana wallet connectivity with multiple wallet support
+- **NFT-Gated Access**: Lavarock NFT ownership required for lender operations
 - **Loan Offer Management**: Create, update, and monitor lending offers
 - **Position Tracking**: Real-time monitoring of borrower positions using your liquidity
 - **Liquidation Management**: Track liquidation events and collateral recovery
@@ -46,6 +47,7 @@ A comprehensive React application for DeFi lenders to manage loan offers, monito
    REACT_APP_API_KEY=your_api_key_here
    REACT_APP_SOLANA_NETWORK=mainnet-beta
    REACT_APP_SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+   REACT_APP_HELIUS_API_KEY=your_helius_api_key_here
    ```
 
 4. **Start the development server**
@@ -129,6 +131,7 @@ The app uses a custom design system built on Tailwind CSS:
 | `REACT_APP_API_KEY` | API key for authentication | Required |
 | `REACT_APP_SOLANA_NETWORK` | Solana network | `mainnet-beta` |
 | `REACT_APP_SOLANA_RPC_URL` | Solana RPC endpoint | `https://api.mainnet-beta.solana.com` |
+| `REACT_APP_HELIUS_API_KEY` | Helius API key for NFT validation | Required for NFT features |
 
 ### Wallet Configuration
 
@@ -141,9 +144,22 @@ The app automatically detects and connects to available Solana wallets:
 ## 📖 Usage
 
 1. **Connect Wallet**: Click "Connect Wallet" and select your preferred Solana wallet
-2. **Create Offers**: Navigate to "My Offers" → "Create Offer" to set up lending terms
-3. **Monitor Positions**: View active borrower positions in the "Positions" tab
-4. **Track Performance**: Use the Dashboard for portfolio overview and analytics
+2. **NFT Verification**: Ensure your wallet contains a Lavarock NFT for access to lender features
+3. **Create Offers**: Navigate to "My Offers" → "Create Offer" to set up lending terms
+4. **Monitor Positions**: View active borrower positions in the "Positions" tab
+5. **Track Performance**: Use the Dashboard for portfolio overview and analytics
+
+### 🔐 NFT Access Control
+
+The application implements NFT-gated access for lender operations:
+
+- **Read Access**: All users can view balances, offers, positions, and analytics
+- **Write Access**: Lavarock NFT required for creating offers, deposits, withdrawals, and other lender operations
+- **Collection Validation**: Validates against the official Lavarock collection (`3HeEvzCyUK3M7Q2xkvMeZojAnVYmn3yHGHHJHmRktUVw`)
+- **Real-time Checking**: NFT ownership is verified when wallet connects and can be refreshed
+- **Graceful UX**: Users without NFTs see disabled buttons with helpful messages
+- **Frontend & Backend**: Validation occurs on both frontend (UX) and backend (security) levels
+- **Real-time Status**: NFT ownership status is displayed in the header for transparency
 
 ## 🚨 Risk Considerations
 
