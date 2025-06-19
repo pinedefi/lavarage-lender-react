@@ -189,9 +189,11 @@ const Positions: React.FC = () => {
           bValue = b.interestAccrued;
           break;
         case 'riskLevel':
-          const riskOrder = { low: 1, medium: 2, high: 3 };
-          aValue = riskOrder[calculateRiskLevel(a)];
-          bValue = riskOrder[calculateRiskLevel(b)];
+          {
+            const riskOrder = { low: 1, medium: 2, high: 3 };
+            aValue = riskOrder[calculateRiskLevel(a)];
+            bValue = riskOrder[calculateRiskLevel(b)];
+          }
           break;
         case 'ltv':
           aValue = parseFloat(a.currentLtv);
