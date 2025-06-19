@@ -155,11 +155,13 @@ export function isValidSolanaAddress(address: string): boolean {
  * Gets risk level based on LTV ratio
  */
 export function getRiskLevel(ltv: number): {
-  level: 'low' | 'medium' | 'high' | 'critical';
+  level: 'none' | 'low' | 'medium' | 'high' | 'critical';
   color: string;
   label: string;
 } {
-  if (ltv < 0.6) {
+  if (ltv === 0) {
+    return { level: 'none', color: 'text-gray-600', label: 'No Risk' };
+  } else if (ltv < 0.6) {
     return { level: 'low', color: 'text-success-600', label: 'Low Risk' };
   } else if (ltv < 0.75) {
     return { level: 'medium', color: 'text-warning-600', label: 'Medium Risk' };
@@ -229,4 +231,38 @@ export function formatDate(
         day: 'numeric',
       });
   }
+}
+
+/**
+ * Formats a number for input fields, handling floating-point precision issues
+ */
+export function formatNumberForInput(value: number, decimals: number = 2): string {
+  if (isNaN(value) || !Number.isFinite(value) || value === null || value === undefined) return '';
+
+  // Handle zero case
+  if (value === 0) return '0';
+
+  // Define minimum threshold to prevent scientific notation
+  const minThreshold = Math.pow(10, -(decimals + 2));
+  if (Math.abs(value) < minThreshold) {
+    return '0';
+  }
+
+  // Round to specified decimal places to avoid floating-point precision issues
+  const multiplier = Math.pow(10, decimals);
+  const rounded = Math.round(value * multiplier) / multiplier;
+
+  // Use Number.prototype.toFixed() and ensure no scientific notation
+  let result = rounded.toFixed(decimals);
+
+  // Remove trailing zeros after decimal point, but keep at least one decimal place for percentages
+  if (result.includes('.')) {
+    result = result.replace(/\.?0+$/, '');
+    // If we removed all decimal places, ensure we don't end with a decimal point
+    if (result.endsWith('.')) {
+      result = result.slice(0, -1);
+    }
+  }
+
+  return result;
 }
