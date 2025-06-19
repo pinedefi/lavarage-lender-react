@@ -230,3 +230,31 @@ export function formatDate(
       });
   }
 }
+
+/**
+ * Formats a number for input fields, handling floating-point precision issues
+ */
+export function formatNumberForInput(value: number, decimals: number = 2): string {
+  if (isNaN(value) || !isFinite(value) || value === null || value === undefined) return '';
+
+  // Handle zero case
+  if (value === 0) return '0';
+
+  // Round to specified decimal places to avoid floating-point precision issues
+  const multiplier = Math.pow(10, decimals);
+  const rounded = Math.round(value * multiplier) / multiplier;
+
+  // Convert to string and remove unnecessary trailing zeros
+  let result = rounded.toFixed(decimals);
+
+  // Remove trailing zeros after decimal point, but keep at least one decimal place for percentages
+  if (result.includes('.')) {
+    result = result.replace(/\.?0+$/, '');
+    // If we removed all decimal places, ensure we don't end with a decimal point
+    if (result.endsWith('.')) {
+      result = result.slice(0, -1);
+    }
+  }
+
+  return result;
+}

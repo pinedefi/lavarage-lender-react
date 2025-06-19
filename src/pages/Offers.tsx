@@ -27,7 +27,14 @@ import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import { useOffers } from '@/hooks/useOffers';
 import { useWallet } from '@/contexts/WalletContext';
-import { formatNumber, formatPercentage, formatDate, truncateAddress, getRiskLevel } from '@/utils';
+import {
+  formatNumber,
+  formatPercentage,
+  formatDate,
+  truncateAddress,
+  getRiskLevel,
+  formatNumberForInput,
+} from '@/utils';
 import { OfferV2Model } from '@/types';
 import { copyToClipboard } from '@/utils';
 
@@ -146,9 +153,9 @@ const Offers: React.FC = () => {
       if (offer) {
         const quoteToken = typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
         const decimals = quoteToken?.decimals ?? 9;
-        setApr(offer.apr.toString());
-        setExposure(parseFloat(offer.maxExposure).toString());
-        setLtv(((offer.targetLtv || 0.75) * 100).toString());
+        setApr(formatNumberForInput(offer.apr, 2));
+        setExposure(formatNumberForInput(parseFloat(offer.maxExposure), 2));
+        setLtv(formatNumberForInput((offer.targetLtv || 0.75) * 100, 2));
       }
     }, [offer]);
 
