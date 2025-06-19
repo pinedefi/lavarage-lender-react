@@ -10,7 +10,13 @@ import {
   HeliusTokenModel,
 } from '@/types';
 import { nftValidationService } from './nftValidation';
+import { LENDER_ENDPOINTS_REQUIRING_NFT } from '@/config';
 
+/**
+ * ApiService handles all API communications with the Lavarage backend.
+ * Implements frontend-level security validations for UX improvement.
+ * Backend provides authoritative security via blockchain-based validation.
+ */
 class ApiService {
   private api: AxiosInstance;
   private apiKey: string;
@@ -61,17 +67,15 @@ class ApiService {
     );
   }
 
+  /**
+   * Validates NFT ownership for lender endpoints.
+   * Frontend validation for UX - backend provides authoritative security.
+   */
   private async validateNFTForLenderEndpoints(config: any): Promise<void> {
     // Check if this is a lender endpoint that requires NFT validation
-    const lenderEndpoints = [
-      '/api/sdk/v1.0/lender/offers/create',
-      '/api/sdk/v1.0/lender/offers/update',
-      '/api/sdk/v1.0/lender/offers/changeLTV',
-      '/api/sdk/v1.0/lender/pools/deposit',
-      '/api/sdk/v1.0/lender/pools/withdraw',
-    ];
-
-    const isLenderEndpoint = lenderEndpoints.some((endpoint) => config.url?.includes(endpoint));
+    const isLenderEndpoint = LENDER_ENDPOINTS_REQUIRING_NFT.some((endpoint) =>
+      config.url?.includes(endpoint)
+    );
 
     if (!isLenderEndpoint) {
       return;
@@ -83,8 +87,8 @@ class ApiService {
       return;
     }
 
-    // Extract wallet address from request data
-    const walletAddress = this.extractWalletAddress(config);
+    // Extract wallet address with ownership validation for changeLTV
+    const walletAddress = await this.extractWalletAddress(config);
     if (!walletAddress) {
       throw new Error('Wallet address is required for lender operations');
     }
@@ -101,7 +105,44 @@ class ApiService {
     }
   }
 
-  private extractWalletAddress(config: any): string | null {
+  /**
+   * Validates offer ownership for UX. Backend performs blockchain-based validation.
+   */
+  private async validateOfferOwnership(offerAddress: string): Promise<boolean> {
+    try {
+      // Fetch all offers and find the specific one
+      const offers = await this.getOffers({ includeRawData: true });
+      const targetOffer = offers.find(
+        (offer) =>
+          offer.publicKey.toString() === offerAddress || offer.publicKey.toBase58() === offerAddress
+      );
+
+      if (!targetOffer) {
+        console.warn(`Offer not found: ${offerAddress}`);
+        return false;
+      }
+
+      // Check if current wallet matches the offer's nodeWallet
+      const offerOwner = targetOffer.nodeWallet.toString();
+      const isOwner = this.walletAddress === offerOwner;
+
+      if (!isOwner) {
+        console.warn(
+          `Wallet ${this.walletAddress} does not own offer ${offerAddress} (nodeWallet: ${offerOwner})`
+        );
+      }
+
+      return isOwner;
+    } catch (error) {
+      console.error('Failed to validate offer ownership:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Extracts wallet address for NFT validation with offer ownership check for changeLTV.
+   */
+  private async extractWalletAddress(config: any): Promise<string | null> {
     // Try to extract wallet address from various sources
     if (config.data?.userWallet) {
       return config.data.userWallet;
@@ -111,11 +152,17 @@ class ApiService {
       return config.params.userWallet;
     }
 
-    // For changeLTV endpoint, we'll need to handle this differently
-    // as it requires looking up the offer owner
+    // Special handling for changeLTV endpoint with ownership validation
     if (config.url?.includes('/changeLTV') && config.data?.offerAddress) {
-      // Return a placeholder - the backend will handle the validation
-      // since we can't easily look up offer ownership from the frontend
+      if (!this.walletAddress) {
+        throw new Error('Wallet not connected. Please connect your wallet to modify offers.');
+      }
+
+      const ownsOffer = await this.validateOfferOwnership(config.data.offerAddress);
+      if (!ownsOffer) {
+        throw new Error('Access denied: You can only modify offers that you own.');
+      }
+
       return this.walletAddress;
     }
 
