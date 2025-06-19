@@ -21,7 +21,7 @@ module.exports = {
       config.module = {
         ...config.module,
         rules: config.module.rules.map((rule) => {
-          if (rule.oneOf instanceof Array) {
+          if (Array.isArray(rule.oneOf)) {
             // eslint-disable-next-line no-param-reassign
             rule.oneOf[rule.oneOf.length - 1].exclude = [
               /\.(js|mjs|jsx|cjs|ts|tsx)$/,
