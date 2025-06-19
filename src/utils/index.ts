@@ -155,11 +155,13 @@ export function isValidSolanaAddress(address: string): boolean {
  * Gets risk level based on LTV ratio
  */
 export function getRiskLevel(ltv: number): {
-  level: 'low' | 'medium' | 'high' | 'critical';
+  level: 'none' | 'low' | 'medium' | 'high' | 'critical';
   color: string;
   label: string;
 } {
-  if (ltv < 0.6) {
+  if (ltv === 0) {
+    return { level: 'none', color: 'text-gray-600', label: 'No Risk' };
+  } else if (ltv < 0.6) {
     return { level: 'low', color: 'text-success-600', label: 'Low Risk' };
   } else if (ltv < 0.75) {
     return { level: 'medium', color: 'text-warning-600', label: 'Medium Risk' };
