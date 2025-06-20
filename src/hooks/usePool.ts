@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
-import { apiService } from "@/services/api";
-import { useWallet } from "@/contexts/WalletContext";
-import toast from "react-hot-toast";
-import bs58 from "bs58";
-import { VersionedTransaction } from "@solana/web3.js";
+import { useState, useEffect, useCallback } from 'react';
+import { apiService } from '@/services/api';
+import { useWallet } from '@/contexts/WalletContext';
+import toast from 'react-hot-toast';
+import bs58 from 'bs58';
+import { VersionedTransaction } from '@solana/web3.js';
 
 interface UsePoolOptions {
   quoteToken?: string;
@@ -61,21 +61,22 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
       try {
         setError(null);
         const tx = await apiService.depositFunds({
-          amount: amount * 10 ** (quoteToken === "So11111111111111111111111111111111111111112" ? 9 : 6),
+          amount:
+            amount * 10 ** (quoteToken === 'So11111111111111111111111111111111111111112' ? 9 : 6),
           quoteToken,
           userWallet: publicKey.toBase58(),
         });
-        console.log("Deposit submitted", tx);
-        
+        console.log('Deposit submitted', tx);
+
         // Decode the transaction from base58
         const transactionBuffer = bs58.decode(tx.transaction);
         const transaction = VersionedTransaction.deserialize(transactionBuffer);
-        
+
         // Send the transaction directly
         const signature = await sendTransaction(transaction);
-        
-        console.log("Transaction sent with signature:", signature);
-        toast.success("Deposit submitted successfully");
+
+        console.log('Transaction sent with signature:', signature);
+        toast.success('Deposit submitted successfully');
         await fetchBalance();
       } catch (err: any) {
         const message = err.message || 'Deposit failed';
@@ -84,7 +85,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         throw err;
       }
     },
-    [publicKey, quoteToken, fetchBalance, sendTransaction],
+    [publicKey, quoteToken, fetchBalance, sendTransaction]
   );
 
   const withdraw = useCallback(
@@ -95,21 +96,22 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
       try {
         setError(null);
         const tx = await apiService.withdrawFunds({
-          amount,
+          amount:
+            amount * 10 ** (quoteToken === 'So11111111111111111111111111111111111111112' ? 9 : 6),
           quoteToken,
           userWallet: publicKey.toBase58(),
         });
-        console.log("Withdraw submitted", tx);
-        
+        console.log('Withdraw submitted', tx);
+
         // Decode the transaction from base58
         const transactionBuffer = bs58.decode(tx.transaction);
         const transaction = VersionedTransaction.deserialize(transactionBuffer);
-        
+
         // Send the transaction directly
         const signature = await sendTransaction(transaction);
-        
-        console.log("Transaction sent with signature:", signature);
-        toast.success("Withdrawal submitted successfully");
+
+        console.log('Transaction sent with signature:', signature);
+        toast.success('Withdrawal submitted successfully');
         await fetchBalance();
       } catch (err: any) {
         const message = err.message || 'Withdrawal failed';
@@ -118,7 +120,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         throw err;
       }
     },
-    [publicKey, quoteToken, fetchBalance, sendTransaction],
+    [publicKey, quoteToken, fetchBalance, sendTransaction]
   );
 
   useEffect(() => {
