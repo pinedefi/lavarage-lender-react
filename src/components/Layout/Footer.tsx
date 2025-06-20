@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Github, Twitter, MessageCircle, ExternalLink } from 'lucide-react';
+import { Github, Twitter, MessageCircle, ExternalLink, Send } from 'lucide-react';
 import { LavarageLogo } from '@/components/brand';
 
 const Footer: React.FC = () => {
@@ -14,15 +14,15 @@ const Footer: React.FC = () => {
       { name: 'Analytics', href: '/analytics' },
     ],
     resources: [
-      { name: 'Documentation', href: 'https://docs.lavarage.com', external: true },
-      { name: 'API Reference', href: 'https://api.lavarage.com/docs', external: true },
-      { name: 'Support', href: 'https://support.lavarage.com', external: true },
-      { name: 'Status', href: 'https://status.lavarage.com', external: true },
+      { name: 'Documentation', href: 'https://lavarage.gitbook.io/lavarage', external: true },
+      { name: 'API Reference', href: 'https://lavarage-api.readme.io', external: true },
     ],
     legal: [
-      { name: 'Privacy Policy', href: '/privacy' },
-      { name: 'Terms of Service', href: '/terms' },
-      { name: 'Risk Disclosure', href: '/risk-disclosure' },
+      { name: 'Privacy Policy', href: 'https://lavarage.gitbook.io/lavarage/legal/privacy-policy' },
+      {
+        name: 'Terms of Service',
+        href: 'https://lavarage.gitbook.io/lavarage/legal/terms-and-conditions',
+      },
     ],
     social: [
       {
@@ -31,14 +31,9 @@ const Footer: React.FC = () => {
         icon: Twitter,
       },
       {
-        name: 'Discord',
-        href: 'https://discord.gg/lavarage',
-        icon: MessageCircle,
-      },
-      {
-        name: 'GitHub',
-        href: 'https://github.com/lavarage',
-        icon: Github,
+        name: 'Telegram',
+        href: 'https://t.me/lavarage_xyz',
+        icon: Send,
       },
     ],
   };
@@ -50,14 +45,14 @@ const Footer: React.FC = () => {
           {/* Brand and Description */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center">
-              <LavarageLogo 
-                variant="horizontal" 
-                size="md" 
+              <LavarageLogo
+                variant="horizontal"
+                size="md"
                 className="transition-all duration-300 hover:scale-105"
               />
             </div>
             <p className="mt-4 text-gray-600 max-w-md leading-relaxed">
-              Earn competitive returns on your crypto holdings through decentralized lending. 
+              Earn competitive returns on your crypto holdings through decentralized lending.
               Professional-grade tools for liquidity providers and DeFi lenders powered by LAVARAGE.
             </p>
             <div className="mt-6 glass-lavarage rounded-lg p-3 inline-block">
@@ -124,17 +119,20 @@ const Footer: React.FC = () => {
             {/* Copyright */}
             <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
               <p className="text-gray-600 text-sm">
-                © {currentYear} <span className="lavarage-text font-bold">LAVARAGE</span>. All rights reserved.
+                © {currentYear} <span className="lavarage-text font-bold">LAVARAGE</span>. All
+                rights reserved.
               </p>
               <div className="flex space-x-6">
                 {footerLinks.legal.map((item) => (
-                  <Link
+                  <a
                     key={item.name}
-                    to={item.href}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-gray-500 hover:text-lavarage-coral text-sm transition-colors duration-300"
                   >
                     {item.name}
-                  </Link>
+                  </a>
                 ))}
               </div>
             </div>
@@ -166,12 +164,9 @@ const Footer: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="glass-lavarage rounded-lg p-4">
             <p className="text-xs text-gray-600 text-center leading-relaxed">
-              <strong className="text-lavarage-red">⚠️ Risk Warning:</strong> DeFi lending involves significant risks including potential loss of funds. 
-              Past performance does not guarantee future results. Please read our{' '}
-              <Link to="/risk-disclosure" className="text-lavarage-coral hover:text-lavarage-red font-medium transition-colors duration-300">
-                risk disclosure
-              </Link>{' '}
-              before participating.
+              <strong className="text-lavarage-red">⚠️ Risk Warning:</strong> DeFi lending involves
+              significant risks including potential loss of funds. Past performance does not
+              guarantee future results.
             </p>
           </div>
         </div>
