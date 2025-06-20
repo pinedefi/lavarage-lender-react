@@ -175,7 +175,6 @@ export interface PositionV3Model {
   closePositionQuote?: string;
   currentPrice: number;
   currentPositionBase: string;
-  currentLtv: string;
   entryPrice: number;
   interestAccrued: number;
   liquidationPrice: number;

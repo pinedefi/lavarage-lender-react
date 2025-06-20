@@ -32,9 +32,9 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, mobileMenuOpen = false })
   const navigation = [
     { name: 'Dashboard', href: '/', icon: BarChart3 },
     { name: 'My Offers', href: '/offers', icon: Coins },
-    { name: 'Positions', href: '/positions', icon: TrendingUp },
-    { name: 'Liquidations', href: '/liquidations', icon: Wallet },
     { name: 'Balances', href: '/balances', icon: DollarSign },
+    { name: 'Positions', href: '/positions', icon: TrendingUp },
+    { name: 'Liquidations', href: '/liquidations', icon: Wallet }, 
   ];
 
   const isActive = (path: string) => {

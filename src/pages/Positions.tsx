@@ -112,9 +112,9 @@ const Positions: React.FC = () => {
   // Calculate risk level for a position
   const calculateRiskLevel = (position: PositionV3Model): 'low' | 'medium' | 'high' => {
     const currentLtv =
-      typeof position.currentLtv === 'string'
-        ? parseFloat(position.currentLtv)
-        : position.currentLtv;
+      typeof position.positionLtv === 'string'
+        ? parseFloat(position.positionLtv)
+        : position.positionLtv;
     const currentPrice =
       typeof position.currentPrice === 'number'
         ? position.currentPrice
@@ -207,8 +207,8 @@ const Positions: React.FC = () => {
           }
           break;
         case 'ltv':
-          aValue = parseFloat(a.currentLtv);
-          bValue = parseFloat(b.currentLtv);
+          aValue = a.positionLtv;
+          bValue = b.positionLtv;
           break;
         case 'apr':
           aValue = a.apr;
@@ -592,9 +592,9 @@ const Positions: React.FC = () => {
                           <td className="py-4 px-4">
                             <div className="font-semibold text-gray-900">
                               {formatPercentage(
-                                typeof position.currentLtv === 'string'
-                                  ? parseFloat(position.currentLtv) * 100
-                                  : position.currentLtv * 100
+                                typeof position.positionLtv === 'string'
+                                  ? parseFloat(position.positionLtv) * 100
+                                  : position.positionLtv * 100
                               )}
                             </div>
                             <div className="text-sm text-gray-600">
@@ -684,9 +684,9 @@ const Positions: React.FC = () => {
                           <div className="text-gray-600">LTV</div>
                           <div className="font-semibold">
                             {formatPercentage(
-                              typeof position.currentLtv === 'string'
-                                ? parseFloat(position.currentLtv) * 100
-                                : position.currentLtv * 100
+                              typeof position.positionLtv === 'string'
+                                ? parseFloat(position.positionLtv) * 100
+                                : position.positionLtv * 100
                             )}
                           </div>
                         </div>
