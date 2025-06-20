@@ -279,15 +279,47 @@ const Offers: React.FC = () => {
 
     return (
       <Modal open={!!offer} onClose={onClose}>
-        <div className="p-6 space-y-4">
-          <h2 className="text-xl font-semibold">{actionText} Offer</h2>
-          <p className="text-gray-600">{actionDescription}</p>
-          <div className="flex justify-end space-x-2 pt-2">
-            <Button variant="ghost" onClick={onClose}>
+        <div className="card-lavarage p-8 space-y-6">
+          <div className="flex items-center space-x-3">
+            <div className={`p-3 rounded-full ${isActive ? 'bg-warning-100' : 'bg-success-100'}`}>
+              {isActive ? (
+                <Pause className="h-6 w-6 text-warning-600" />
+              ) : (
+                <Play className="h-6 w-6 text-success-600" />
+              )}
+            </div>
+            <div>
+              <GradientText variant="primary" size="xl" weight="bold" as="h2">
+                {actionText} Offer
+              </GradientText>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-lavarage-coral">
+            <p className="text-gray-900 font-medium">{actionDescription}</p>
+            <p className="text-sm text-gray-600 mt-2">
+              {isActive
+                ? 'This will temporarily stop new loans from being created against this offer.'
+                : 'This will reactivate the offer and allow new loans to be created.'}
+            </p>
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-4">
+            <Button variant="ghost" onClick={onClose} className="px-6">
               Cancel
             </Button>
-            <Button variant="primary" onClick={handleAction}>
-              {actionText}
+            <Button variant="primary" onClick={handleAction} className={`px-6`}>
+              {isActive ? (
+                <>
+                  <Pause className="h-4 w-4 mr-2" />
+                  Pause Offer
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4 mr-2" />
+                  Reactivate Offer
+                </>
+              )}
             </Button>
           </div>
         </div>
