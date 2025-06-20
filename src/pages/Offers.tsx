@@ -261,14 +261,18 @@ const Offers: React.FC = () => {
       : 'Are you sure you want to reactivate this offer?';
 
     const handleAction = async () => {
-      if (isActive) {
-        // Pause the offer by setting LTV to 0
-        await changeLTV(offer.publicKey.toString(), 0);
-      } else {
-        // Reactivate the offer by setting LTV to a default value (75%)
-        // You might want to store the previous LTV value or let user choose
-        const defaultLTV = 0.75; // 75%
-        await changeLTV(offer.publicKey.toString(), defaultLTV);
+      try {
+        if (isActive) {
+          // Pause the offer by setting LTV to 0
+          await changeLTV(offer.publicKey.toString(), 0);
+        } else {
+          // Reactivate the offer by setting LTV to a default value (75%)
+          const defaultLTV = 0.75; // 75%
+          await changeLTV(offer.publicKey.toString(), defaultLTV);
+        }
+      } catch (error) {
+        console.error('Failed to toggle offer:', error);
+        return;
       }
       onClose();
     };
