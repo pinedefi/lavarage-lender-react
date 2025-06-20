@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { WalletMultiButton } from '@/contexts/WalletContext';
 import { useWallet } from '@/contexts/WalletContext';
+import { useWalletInfo } from '@/contexts/WalletInfoContext';
 import { truncateAddress } from '@/utils';
 import {
   Menu,
@@ -15,6 +16,8 @@ import {
   Coins,
   Wallet,
   DollarSign,
+  Shield,
+  ShieldCheck,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -27,6 +30,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onMenuToggle, mobileMenuOpen = false }) => {
   const { publicKey, connected, disconnect } = useWallet();
+  const { hasLavaRockNFT, isCheckingNFT } = useWalletInfo();
   const location = useLocation();
 
   const navigation = [
@@ -110,7 +114,42 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, mobileMenuOpen = false })
 
             {/* Wallet Connection */}
             {connected && publicKey ? (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-4">
+                {/* NFT Status Indicator */}
+                <div className="hidden sm:flex items-center">
+                  {isCheckingNFT ? (
+                    <div className="relative group">
+                      <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center cursor-default">
+                        <Shield className="h-4 w-4 text-gray-400 animate-pulse" />
+                      </div>
+                      <div className="absolute top-10 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-3 py-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-50 shadow-lg">
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-900"></div>
+                        Checking NFT...
+                      </div>
+                    </div>
+                  ) : hasLavaRockNFT ? (
+                    <div className="relative group">
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-lavarage-coral to-lavarage-red flex items-center justify-center shadow-md cursor-default">
+                        <ShieldCheck className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="absolute top-10 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-3 py-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none shadow-lg">
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-900"></div>
+                        Lavarock NFT Verified
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative group">
+                      <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center cursor-default">
+                        <Shield className="h-4 w-4 text-gray-500" />
+                      </div>
+                      <div className="absolute top-10 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-3 py-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none shadow-lg">
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-900"></div>
+                        No NFT Detected
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* Wallet Address Display */}
                 <div className="hidden sm:flex items-center space-x-2 glass-lavarage rounded-lg px-3 py-2 transition-all duration-300 hover:shadow-lg">
                   <div className="status-connected h-2 w-2 rounded-full shadow-sm"></div>

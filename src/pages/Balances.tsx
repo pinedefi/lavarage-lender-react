@@ -1,39 +1,50 @@
-import React, { useState } from "react";
-import Card, { CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
-import Button from "@/components/ui/Button";
-import Input from "@/components/ui/Input";
-import { WalletMultiButton } from "@/contexts/WalletContext";
-import { useWallet } from "@/contexts/WalletContext";
-import { usePool } from "@/hooks/usePool";
-import { formatNumber } from "@/utils";
-import { DollarSign } from "lucide-react";
-import { QUOTE_TOKENS } from "@/utils/tokens";
+import React, { useState } from 'react';
+import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import { WalletMultiButton } from '@/contexts/WalletContext';
+import { useWallet } from '@/contexts/WalletContext';
+import { usePool } from '@/hooks/usePool';
+import { formatNumber } from '@/utils';
+import { DollarSign } from 'lucide-react';
+import { QUOTE_TOKENS } from '@/utils/tokens';
+import { RequireNFT } from '@/components/auth/RequireNFT';
 
 const Balances: React.FC = () => {
   const { connected } = useWallet();
-  const [selectedToken, setSelectedToken] = useState<"SOL" | "USDC">("SOL");
-  const { balance: solBalance, loading: solLoading, deposit: depositSol, withdraw: withdrawSol } = usePool({ quoteToken: "So11111111111111111111111111111111111111112" });
-  const { balance: usdcBalance, loading: usdcLoading, deposit: depositUsdc, withdraw: withdrawUsdc } = usePool({ quoteToken: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" });
-  const [amount, setAmount] = useState("");
+  const [selectedToken, setSelectedToken] = useState<'SOL' | 'USDC'>('SOL');
+  const {
+    balance: solBalance,
+    loading: solLoading,
+    deposit: depositSol,
+    withdraw: withdrawSol,
+  } = usePool({ quoteToken: 'So11111111111111111111111111111111111111112' });
+  const {
+    balance: usdcBalance,
+    loading: usdcLoading,
+    deposit: depositUsdc,
+    withdraw: withdrawUsdc,
+  } = usePool({ quoteToken: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' });
+  const [amount, setAmount] = useState('');
 
   const handleDeposit = async () => {
     if (!amount) return;
-    if (selectedToken === "SOL") {
+    if (selectedToken === 'SOL') {
       await depositSol(parseFloat(amount));
     } else {
       await depositUsdc(parseFloat(amount));
     }
-    setAmount("");
+    setAmount('');
   };
 
   const handleWithdraw = async () => {
     if (!amount) return;
-    if (selectedToken === "SOL") {
+    if (selectedToken === 'SOL') {
       await withdrawSol(parseFloat(amount));
     } else {
       await withdrawUsdc(parseFloat(amount));
     }
-    setAmount("");
+    setAmount('');
   };
 
   if (!connected) {
@@ -61,79 +72,121 @@ const Balances: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* SOL Balance Card */}
-        <Card className={selectedToken === "SOL" ? "ring-2 ring-primary-500" : ""}>
+        <Card className={selectedToken === 'SOL' ? 'ring-2 ring-primary-500' : ''}>
           <CardHeader>
             <CardTitle>SOL Balance</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-semibold mb-4">
-              {solLoading ? "Loading..." : `${formatNumber(solBalance, 3)} SOL`}
+              {solLoading ? 'Loading...' : `${formatNumber(solBalance, 3)} SOL`}
             </p>
-            <div className="flex items-center space-x-2">
-              <Input
-                type="number"
-                placeholder="Amount"
-                min="0"
-                value={selectedToken === "SOL" ? amount : ""}
-                onChange={(e) => {
-                  if (selectedToken === "SOL") {
-                    setAmount(e.target.value);
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Input
+                  type="number"
+                  placeholder="Amount"
+                  min="0"
+                  value={selectedToken === 'SOL' ? amount : ''}
+                  onChange={(e) => {
+                    if (selectedToken === 'SOL') {
+                      setAmount(e.target.value);
+                    }
+                  }}
+                  disabled={selectedToken !== 'SOL'}
+                />
+                <RequireNFT
+                  fallback={
+                    <div className="flex space-x-2">
+                      <Button disabled title="Lavarock NFT required">
+                        Deposit
+                      </Button>
+                      <Button variant="secondary" disabled title="Lavarock NFT required">
+                        Withdraw
+                      </Button>
+                    </div>
                   }
-                }}
-                disabled={selectedToken !== "SOL"}
-              />
-              <Button 
-                onClick={handleDeposit}
-                disabled={selectedToken !== "SOL"}
+                >
+                  <Button onClick={handleDeposit} disabled={selectedToken !== 'SOL'}>
+                    Deposit
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={handleWithdraw}
+                    disabled={selectedToken !== 'SOL'}
+                  >
+                    Withdraw
+                  </Button>
+                </RequireNFT>
+              </div>
+              <RequireNFT
+                fallback={
+                  <p className="text-xs text-amber-600">
+                    ⚠️ Lavarock NFT required for deposits/withdrawals
+                  </p>
+                }
               >
-                Deposit
-              </Button>
-              <Button 
-                variant="secondary" 
-                onClick={handleWithdraw}
-                disabled={selectedToken !== "SOL"}
-              >
-                Withdraw
-              </Button>
+                <div></div>
+              </RequireNFT>
             </div>
           </CardContent>
         </Card>
 
         {/* USDC Balance Card */}
-        <Card className={selectedToken === "USDC" ? "ring-2 ring-primary-500" : ""}>
+        <Card className={selectedToken === 'USDC' ? 'ring-2 ring-primary-500' : ''}>
           <CardHeader>
             <CardTitle>USDC Balance</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-semibold mb-4">
-              {usdcLoading ? "Loading..." : `${formatNumber(usdcBalance, 3)} USDC`}
+              {usdcLoading ? 'Loading...' : `${formatNumber(usdcBalance, 3)} USDC`}
             </p>
-            <div className="flex items-center space-x-2">
-              <Input
-                type="number"
-                placeholder="Amount"
-                min="0"
-                value={selectedToken === "USDC" ? amount : ""}
-                onChange={(e) => {
-                  if (selectedToken === "USDC") {
-                    setAmount(e.target.value);
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Input
+                  type="number"
+                  placeholder="Amount"
+                  min="0"
+                  value={selectedToken === 'USDC' ? amount : ''}
+                  onChange={(e) => {
+                    if (selectedToken === 'USDC') {
+                      setAmount(e.target.value);
+                    }
+                  }}
+                  disabled={selectedToken !== 'USDC'}
+                />
+                <RequireNFT
+                  fallback={
+                    <div className="flex space-x-2">
+                      <Button disabled title="Lavarock NFT required">
+                        Deposit
+                      </Button>
+                      <Button variant="secondary" disabled title="Lavarock NFT required">
+                        Withdraw
+                      </Button>
+                    </div>
                   }
-                }}
-                disabled={selectedToken !== "USDC"}
-              />
-              <Button 
-                onClick={handleDeposit}
-                disabled={selectedToken !== "USDC"}
+                >
+                  <Button onClick={handleDeposit} disabled={selectedToken !== 'USDC'}>
+                    Deposit
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={handleWithdraw}
+                    disabled={selectedToken !== 'USDC'}
+                  >
+                    Withdraw
+                  </Button>
+                </RequireNFT>
+              </div>
+              <RequireNFT
+                fallback={
+                  <p className="text-xs text-amber-600">
+                    ⚠️ Lavarock NFT required for deposits/withdrawals
+                  </p>
+                }
               >
-                Deposit
-              </Button>
-              <Button 
-                variant="secondary" 
-                onClick={handleWithdraw}
-                disabled={selectedToken !== "USDC"}
-              >
-                Withdraw
-              </Button>
+                <div></div>
+              </RequireNFT>
             </div>
           </CardContent>
         </Card>
@@ -142,19 +195,19 @@ const Balances: React.FC = () => {
       {/* Token Selection */}
       <div className="flex justify-center space-x-4 mt-6">
         <Button
-          variant={selectedToken === "SOL" ? "default" : "secondary"}
+          variant={selectedToken === 'SOL' ? 'default' : 'secondary'}
           onClick={() => {
-            setSelectedToken("SOL");
-            setAmount("");
+            setSelectedToken('SOL');
+            setAmount('');
           }}
         >
           SOL
         </Button>
         <Button
-          variant={selectedToken === "USDC" ? "default" : "secondary"}
+          variant={selectedToken === 'USDC' ? 'default' : 'secondary'}
           onClick={() => {
-            setSelectedToken("USDC");
-            setAmount("");
+            setSelectedToken('USDC');
+            setAmount('');
           }}
         >
           USDC
