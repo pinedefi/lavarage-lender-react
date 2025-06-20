@@ -48,7 +48,7 @@ const CreateOffer: React.FC = () => {
     await createOffer({
       collateralToken: baseToken,
       maxExposure: parseFloat(amount) * 10 ** (quoteToken === "SOL" ? 9 : 6),
-      interestRate: parseFloat(interestRate).toFixed(0),
+      interestRate:  Number(parseFloat(interestRate).toFixed(0)),
       quoteToken: getQuoteTokenAddress(quoteToken as keyof typeof QUOTE_TOKENS),
       tokenData: tokenData || undefined,
     });
@@ -69,7 +69,7 @@ const CreateOffer: React.FC = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Amount (Quote Token)
+                  Max Exposure (Quote Token)
                 </label>
                 <Input
                   variant="message"
