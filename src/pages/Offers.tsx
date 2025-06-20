@@ -173,8 +173,8 @@ const Offers: React.FC = () => {
         collateralToken: offer.collateralToken?.address || '',
         quoteToken:
           typeof offer.quoteToken === 'string' ? offer.quoteToken : offer.quoteToken.address,
-        maxExposure: parseFloat(exposure),
-        interestRate: parseFloat(apr),
+        maxExposure: parseFloat(exposure) * 10 ** (quoteToken?.decimals ?? 9),
+        interestRate: parseFloat(apr).toFixed(0),
       });
       onClose();
     };

@@ -47,8 +47,8 @@ const CreateOffer: React.FC = () => {
     e.preventDefault();
     await createOffer({
       collateralToken: baseToken,
-      maxExposure: parseFloat(amount),
-      interestRate: parseFloat(interestRate),
+      maxExposure: parseFloat(amount) * 10 ** (quoteToken === "SOL" ? 9 : 6),
+      interestRate: parseFloat(interestRate).toFixed(0),
       quoteToken: getQuoteTokenAddress(quoteToken as keyof typeof QUOTE_TOKENS),
       tokenData: tokenData || undefined,
     });
