@@ -560,7 +560,7 @@ const Offers: React.FC = () => {
                               <span
                                 className={`text-xs font-medium px-1.5 py-0.5 rounded ${getRiskLevel(offer.targetLtv).color}`}
                               >
-                                {getRiskLevel(offer.targetLtv).label}
+                                {/* {getRiskLevel(offer.targetLtv).label} */}
                               </span>
                             )}
                           </div>
