@@ -43,6 +43,7 @@ const Offers: React.FC = () => {
   const { connected } = useWallet();
   const { offers, loading, error, refetch, changeLTV, updateOffer } = useOffers({
     autoRefresh: true,
+    inactiveOffers: true, // Include inactive offers so users can reactivate them
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
@@ -51,7 +52,7 @@ const Offers: React.FC = () => {
   >('created');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedOffer, setSelectedOffer] = useState<OfferV2Model | null>(null);
-  const [pauseOffer, setPauseOffer] = useState<OfferV2Model | null>(null);
+  const [toggleOffer, setToggleOffer] = useState<OfferV2Model | null>(null);
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
 
   const handleCopyToClipboard = async (address: string) => {
@@ -253,22 +254,36 @@ const Offers: React.FC = () => {
   }> = ({ offer, onClose }) => {
     if (!offer) return null;
 
-    const handlePause = async () => {
-      await changeLTV(offer.publicKey.toString(), 0);
+    const isActive = offer.active;
+    const actionText = isActive ? 'Pause' : 'Reactivate';
+    const actionDescription = isActive
+      ? 'Are you sure you want to pause this offer?'
+      : 'Are you sure you want to reactivate this offer?';
+
+    const handleAction = async () => {
+      if (isActive) {
+        // Pause the offer by setting LTV to 0
+        await changeLTV(offer.publicKey.toString(), 0);
+      } else {
+        // Reactivate the offer by setting LTV to a default value (75%)
+        // You might want to store the previous LTV value or let user choose
+        const defaultLTV = 0.75; // 75%
+        await changeLTV(offer.publicKey.toString(), defaultLTV);
+      }
       onClose();
     };
 
     return (
       <Modal open={!!offer} onClose={onClose}>
         <div className="p-6 space-y-4">
-          <h2 className="text-xl font-semibold">Pause Offer</h2>
-          <p>Are you sure you want to pause this offer?</p>
+          <h2 className="text-xl font-semibold">{actionText} Offer</h2>
+          <p className="text-gray-600">{actionDescription}</p>
           <div className="flex justify-end space-x-2 pt-2">
             <Button variant="ghost" onClick={onClose}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={handlePause}>
-              Pause
+            <Button variant="primary" onClick={handleAction}>
+              {actionText}
             </Button>
           </div>
         </div>
@@ -569,7 +584,7 @@ const Offers: React.FC = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => setPauseOffer(offer)}
+                              onClick={() => setToggleOffer(offer)}
                               className="p-1 h-8 w-8"
                             >
                               {offer.active ? (
@@ -608,7 +623,7 @@ const Offers: React.FC = () => {
         </CardContent>
       </Card>
       <OfferModal offer={selectedOffer} onClose={() => setSelectedOffer(null)} />
-      <PauseModal offer={pauseOffer} onClose={() => setPauseOffer(null)} />
+      <PauseModal offer={toggleOffer} onClose={() => setToggleOffer(null)} />
     </div>
   );
 };
