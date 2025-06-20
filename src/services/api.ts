@@ -8,6 +8,9 @@ import {
   TransactionModel,
   TokenModel,
   HeliusTokenModel,
+  LiquidationSearchParams,
+  LiquidationSearchResponse,
+  LiquidationData,
 } from '@/types';
 
 class ApiService {
@@ -226,6 +229,54 @@ class ApiService {
       baseURL: this.api.defaults.baseURL || '',
       apiKey: this.apiKey,
     };
+  }
+
+  // Liquidation Management
+  async searchLiquidations(params: LiquidationSearchParams): Promise<LiquidationData[]> {
+    const requestBody = {
+      method: "search",
+      params: {
+        gte: params.gte,
+        lte: params.lte,
+      }
+    };
+
+    try {
+      // Use the same base URL as the main API, but with a different endpoint
+      const response = await axios.post(
+        `${this.api.defaults.baseURL}/api/sdk/v1.0/liquidations/search`,
+        requestBody,
+        { 
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-api-key': this.apiKey,
+          },
+          timeout: 30000
+        }
+      );
+
+      const data: LiquidationSearchResponse = response.data;
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Parse the JSON strings in the result object
+      const liquidations: LiquidationData[] = [];
+      for (const [timestamp, jsonString] of Object.entries(data.result)) {
+        try {
+          const liquidationData: LiquidationData = JSON.parse(jsonString);
+          liquidations.push(liquidationData);
+        } catch (parseError) {
+          console.error('Failed to parse liquidation data:', parseError);
+        }
+      }
+
+      return liquidations;
+    } catch (error) {
+      console.error('Search liquidations error:', error);
+      throw new Error('Failed to fetch liquidation data');
+    }
   }
 }
 

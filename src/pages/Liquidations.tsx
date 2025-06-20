@@ -1,11 +1,38 @@
 import React from 'react';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { GradientText, LoadingSpinner } from '@/components/brand';
+import { DateRangePicker } from '@/components/ui/DateRangePicker';
 import { useWallet, WalletMultiButton } from '@/contexts/WalletContext';
-import { AlertTriangle, Activity, Shield } from 'lucide-react';
+import { useLiquidations } from '@/hooks/useLiquidations';
+import { AlertTriangle, Activity, Shield, RefreshCw, ExternalLink } from 'lucide-react';
+import Button from '@/components/ui/Button';
 
 const Liquidations: React.FC = () => {
   const { connected } = useWallet();
+  const { liquidations, loading, error, dateRange, setDateRange, refresh } = useLiquidations();
+
+  const formatAmount = (amount: string, decimals: number = 6) => {
+    const num = parseFloat(amount) / Math.pow(10, decimals);
+    return num.toLocaleString('en-US', { maximumFractionDigits: 4 });
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const shortenAddress = (address: string) => {
+    return `${address.slice(0, 4)}...${address.slice(-4)}`;
+  };
+
+  const openExplorer = (txid: string) => {
+    window.open(`https://solscan.io/tx/${txid}`, '_blank');
+  };
 
   if (!connected) {
     return (
@@ -17,7 +44,7 @@ const Liquidations: React.FC = () => {
             </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Connect Your Wallet</h2>
             <p className="text-gray-600 mb-6">
-              Connect your wallet to monitor positions at risk of liquidation.
+              Connect your wallet to view liquidation data.
             </p>
             <WalletMultiButton className="w-full !bg-lavarage-primary !rounded-md hover:!bg-lavarage-primary/90" />
           </CardContent>
@@ -34,27 +61,126 @@ const Liquidations: React.FC = () => {
             Liquidations
           </GradientText>
           <p className="text-gray-600 mt-2">
-            Monitor positions at risk of{' '}
-            <span className="font-semibold text-lavarage-red">liquidation</span>
+            Monitor liquidation events and their details
           </p>
         </div>
+        <div className="flex items-center space-x-3">
+          <DateRangePicker
+            gte={dateRange.gte}
+            lte={dateRange.lte}
+            onDateRangeChange={setDateRange}
+          />
+          <Button
+            variant="outline"
+            onClick={refresh}
+            disabled={loading}
+            className="flex items-center space-x-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </Button>
+        </div>
       </div>
+
+      {error && (
+        <Card className="border-lavarage-red/20 bg-lavarage-red/5">
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2 text-lavarage-red">
+              <AlertTriangle className="h-5 w-5" />
+              <span className="font-medium">Error: {error}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Shield className="h-5 w-5 text-lavarage-red" />
-            <span>At Risk Positions</span>
+            <span>Liquidation Events</span>
+            {loading && <LoadingSpinner size="sm" />}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center justify-center py-12">
-            <AlertTriangle className="h-12 w-12 text-gray-400" />
-            <h3 className="mt-4 text-lg font-medium">No Positions at Risk</h3>
-            <p className="mt-2 text-center text-gray-600">
-              There are currently no positions at risk of liquidation.
-            </p>
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <LoadingSpinner size="lg" />
+              <span className="ml-3 text-gray-600">Loading liquidation data...</span>
+            </div>
+          ) : liquidations.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <AlertTriangle className="h-12 w-12 text-gray-400" />
+              <h3 className="mt-4 text-lg font-medium">No Liquidations Found</h3>
+              <p className="mt-2 text-center text-gray-600">
+                No liquidation events found for the selected date range.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">Liquidated At</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">Position</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">Amount</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">Sold For</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">Sold At</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">Transactions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {liquidations.map((liquidation, index) => (
+                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-3 px-4 text-sm text-gray-900">
+                        {formatDate(liquidation.liquidatedAt)}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-900">
+                        <div className="flex flex-col">
+                          <span className="font-mono text-xs">
+                            {shortenAddress(liquidation.position)}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            Offer: {shortenAddress(liquidation.offer)}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-900">
+                        {formatAmount(liquidation.amount)}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-900">
+                        {formatAmount(liquidation.soldFor.toString())}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-900">
+                        {formatDate(liquidation.soldAt)}
+                      </td>
+                      <td className="py-3 px-4 text-sm">
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openExplorer(liquidation.liquidationTxid)}
+                            className="flex items-center space-x-1 text-xs"
+                          >
+                            <span>Liquidation</span>
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openExplorer(liquidation.sellTxid)}
+                            className="flex items-center space-x-1 text-xs"
+                          >
+                            <span>Sell</span>
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

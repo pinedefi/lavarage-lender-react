@@ -187,6 +187,10 @@ export interface PositionV3Model {
   onChainStatus?: any;
   isActionable: boolean;
   positionLtv: number;
+  positionValue: {
+    valueInQuoteToken: number;
+    pnlInQuoteToken: number;
+  };
 }
 
 // Dashboard Types
@@ -200,6 +204,30 @@ export interface DashboardStats {
 }
 
 // Liquidation Types
+export interface LiquidationData {
+  offer: string;
+  position: string;
+  amount: string;
+  soldFor: number;
+  toSellToken: string;
+  toSellAmount: string;
+  toReceiveToken: string;
+  liquidatedAt: string;
+  soldAt: string;
+  liquidationTxid: string;
+  sellTxid: string;
+}
+
+export interface LiquidationSearchParams {
+  gte?: string;
+  lte?: string;
+}
+
+export interface LiquidationSearchResponse {
+  result: Record<string, string>;
+  error: string | null;
+}
+
 export interface LiquidationEvent {
   id: string;
   positionId: string;

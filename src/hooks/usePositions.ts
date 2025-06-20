@@ -104,7 +104,7 @@ export function usePositions(options: UsePositionsOptions = {}): UsePositionsRet
     const averageLTV =
       positions.length > 0
         ? positions.reduce((sum, position) => {
-            const ltv = parseFloat(position.currentLtv) || 0;
+            const ltv = position.positionLtv || 0;
             return sum + ltv;
           }, 0) / positions.length
         : 0;

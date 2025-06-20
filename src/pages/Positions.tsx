@@ -22,6 +22,7 @@ import {
   Copy,
   Check,
   Activity,
+  ExternalLink,
 } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
@@ -42,7 +43,7 @@ const Positions: React.FC = () => {
   });
 
   // State for filtering and sorting
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('active');
   const [sortField, setSortField] = useState<SortField>('riskLevel');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [searchTerm, setSearchTerm] = useState('');
@@ -56,6 +57,10 @@ const Positions: React.FC = () => {
       setCopiedAddress(address);
       setTimeout(() => setCopiedAddress(null), 2000); // Reset after 2 seconds
     }
+  };
+
+  const openSolscan = (address: string) => {
+    window.open(`https://solscan.io/account/${address}`, '_blank');
   };
 
   const formatCurrency = (amount: string | number, symbol: string = 'USDC') => {
@@ -82,12 +87,24 @@ const Positions: React.FC = () => {
     return `${formatted} ${symbol}`;
   };
 
-  const formatPrice = (price: string | number) => {
-    const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-    // Use more decimal places for very small prices (like SOL in USD terms)
-    const decimals = numPrice < 1 ? 6 : numPrice < 10 ? 4 : 2;
-    return `$${formatNumber(numPrice, decimals)}`;
-  };
+  const formatPrice = (price: number): string => {
+  if (price >= 1000) {
+    return `${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  } else if (price >= 1) {
+    return `${price.toFixed(4)}`;
+  } else if (price >= 0.000001) {
+    return `${price.toFixed(6)}`;
+  } else if (isNaN(price)) {
+    return '--';
+  } else {
+    // Count leading zeros after decimal point
+    const leadingZeros = Math.abs(Math.floor(Math.log10(price))) - 1;
+    const significantDigits = price * Math.pow(10, leadingZeros + 1);
+    // Convert number to subscript
+    const subscript = leadingZeros.toString().split('').map(d => '₀₁₂₃₄₅₆₇₈₉'[parseInt(d)]).join('');
+    return `0.0${subscript}${(Number(significantDigits.toFixed(4)) * 10000).toFixed(0)}`;
+  }
+}
 
   const formatAddress = (address: any) => {
     return typeof address === 'string' ? address : address.toString();
@@ -532,14 +549,13 @@ const Positions: React.FC = () => {
                         </div>
                       </th>
                       <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredAndSortedPositions.map((position) => {
                       const currentPrice =
-                        typeof position.currentPrice === 'number'
-                          ? position.currentPrice
-                          : parseFloat(position.currentPrice);
+                        position.positionValue.valueInQuoteToken / Number(position.initialPositionBase);
                       const liquidationPrice =
                         typeof position.liquidationPrice === 'number'
                           ? position.liquidationPrice
@@ -617,6 +633,20 @@ const Positions: React.FC = () => {
                           </td>
                           <td className="py-4 px-4">{getRiskBadge(position)}</td>
                           <td className="py-4 px-4">{getStatusBadge(position.status)}</td>
+                          <td className="py-4 px-4">
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openSolscan(formatAddress(position.positionAddress));
+                                }}
+                                className="text-lavarage-coral hover:text-lavarage-coral/80 transition-colors"
+                                title="View on Solscan"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
                         </tr>
                       );
                     })}
@@ -710,6 +740,16 @@ const Positions: React.FC = () => {
 
                       <div className="flex items-center justify-between pt-2 border-t">
                         {getRiskBadge(position)}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openSolscan(formatAddress(position.positionAddress));
+                          }}
+                          className="flex items-center space-x-1 text-lavarage-coral hover:text-lavarage-coral/80 text-sm"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          <span>View on Solscan</span>
+                        </button>
                       </div>
                     </div>
                   );

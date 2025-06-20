@@ -61,7 +61,7 @@ const Dashboard: React.FC = () => {
   const atRiskPositions = useMemo(
     () =>
       positions.filter(
-        (p) => p.status === 'active' && (parseFloat(p.currentLtv ?? '0') || 0) >= 0.75
+        (p) => p.status === 'active' && (p.positionLtv || 0) >= 0.75
       ).length,
     [positions]
   );
@@ -253,7 +253,7 @@ const Dashboard: React.FC = () => {
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-gray-900">
-                          {formatNumber(parseInt(offer.availableForOpen) / 1e9, 2)} SOL
+                          {offer.maxLeverage} X
                         </p>
                         <Badge variant={offer.active ? 'lavarage' : 'gray'} size="sm">
                           {offer.active ? 'Active' : 'Inactive'}
