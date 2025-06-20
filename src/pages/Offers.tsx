@@ -233,7 +233,7 @@ const Offers: React.FC = () => {
                 onChange={(e) => setLtv(e.target.value)}
                 step="0.1"
                 min="0"
-                max="100"
+                max="80"
                 placeholder="e.g., 75 for 75%"
               />
             </div>
