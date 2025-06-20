@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { GradientText, LoadingSpinner } from '@/components/brand';
 import { usePositions } from '@/hooks/usePositions';
-import { useWallet } from '@/contexts/WalletContext';
+import { useWallet, WalletMultiButton } from '@/contexts/WalletContext';
 import {
   Users,
   TrendingUp,
@@ -21,6 +21,7 @@ import {
   ChevronDown,
   Copy,
   Check,
+  Activity,
 } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
@@ -272,22 +273,17 @@ const Positions: React.FC = () => {
 
   if (!connected) {
     return (
-      <div className="card-glass p-8 space-y-6">
-        <div className="flex items-center justify-between">
-          <GradientText variant="primary" size="3xl" weight="bold" as="h1">
-            Position Monitoring
-          </GradientText>
-        </div>
-
-        <Card>
-          <CardContent>
-            <div className="flex flex-col items-center justify-center py-12">
-              <Users className="h-12 w-12 text-gray-400" />
-              <h3 className="mt-4 text-lg font-medium">Connect Your Wallet</h3>
-              <p className="mt-2 text-center text-gray-600">
-                Please connect your wallet to monitor your lending positions.
-              </p>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Card className="max-w-md mx-auto text-center">
+          <CardContent className="p-8">
+            <div className="h-16 w-16 bg-lavarage-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Activity className="h-8 w-8 text-lavarage-primary" />
             </div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Connect Your Wallet</h2>
+            <p className="text-gray-600 mb-6">
+              Connect your wallet to view and monitor your lending positions.
+            </p>
+            <WalletMultiButton className="w-full !bg-lavarage-primary !rounded-md hover:!bg-lavarage-primary/90" />
           </CardContent>
         </Card>
       </div>
