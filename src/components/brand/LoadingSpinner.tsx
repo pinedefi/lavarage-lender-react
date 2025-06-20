@@ -28,14 +28,26 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     xl: 'h-20 w-20',
   };
 
+  const logoSizeMap = {
+    sm: 'sm' as const,
+    md: 'md' as const,
+    lg: 'lg' as const,
+    xl: 'xl' as const,
+  };
+
   return (
     <div
       role="status"
       aria-live="polite"
-      className={`flex flex-col items-center justify-center space-y-4 ${className}`}
+      className={`flex flex-col items-center justify-center space-y-6 ${className}`}
     >
       <span className="sr-only">Loading…</span>
-      {showLogo && <LavarageLogo variant="mark" size={size} className="animate-pulse" />}
+
+      {showLogo && (
+        <div className="mb-2">
+          <LavarageLogo variant="mark" size={logoSizeMap[size]} className="animate-pulse" />
+        </div>
+      )}
 
       <div className={`relative ${containerSizeClasses[size]}`}>
         {/* Outer ring */}

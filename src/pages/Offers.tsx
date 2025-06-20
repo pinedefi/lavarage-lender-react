@@ -25,6 +25,7 @@ import { WalletMultiButton } from '@/contexts/WalletContext';
 import Badge from '@/components/ui/Badge';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
+import { GradientText, LoadingSpinner } from '@/components/brand';
 import { useOffers } from '@/hooks/useOffers';
 import { useWallet } from '@/contexts/WalletContext';
 import {
@@ -297,7 +298,15 @@ const Offers: React.FC = () => {
   return (
     <div className="card-glass p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Offers</h1>
+        <div>
+          <GradientText variant="primary" size="3xl" weight="bold" as="h1">
+            Lending Offers
+          </GradientText>
+          <p className="text-gray-600 mt-2">
+            Manage your <span className="font-semibold text-lavarage-coral">LAVARAGE</span> lending
+            offers and track performance
+          </p>
+        </div>
         <Link to="/create-offer">
           <Button variant="glass" size="sm">
             <Plus className="h-4 w-4 mr-2" />
@@ -347,7 +356,9 @@ const Offers: React.FC = () => {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8">Loading...</div>
+            <div className="flex items-center justify-center py-12">
+              <LoadingSpinner size="lg" showLogo={true} message="Loading offers data..." />
+            </div>
           ) : filteredOffers.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full">

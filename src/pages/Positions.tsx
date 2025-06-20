@@ -131,7 +131,17 @@ const Positions: React.FC = () => {
     return 'low';
   };
 
-  const getRiskBadge = (riskLevel: 'low' | 'medium' | 'high') => {
+  const getRiskBadge = (position: PositionV3Model) => {
+    // Only show risk badges for active positions
+    if (position.status !== 'active') {
+      return (
+        <div className="flex items-center space-x-1">
+          <span className="text-sm text-gray-500">—</span>
+        </div>
+      );
+    }
+
+    const riskLevel = calculateRiskLevel(position);
     const riskMap = {
       low: { variant: 'success' as const, text: 'Low Risk', icon: CheckCircle },
       medium: { variant: 'warning' as const, text: 'Medium Risk', icon: AlertCircle },
@@ -530,7 +540,6 @@ const Positions: React.FC = () => {
                   </thead>
                   <tbody>
                     {filteredAndSortedPositions.map((position) => {
-                      const riskLevel = calculateRiskLevel(position);
                       const currentPrice =
                         typeof position.currentPrice === 'number'
                           ? position.currentPrice
@@ -610,7 +619,7 @@ const Positions: React.FC = () => {
                               {formatCurrency(position.interestAccrued, position.quoteToken.symbol)}
                             </div>
                           </td>
-                          <td className="py-4 px-4">{getRiskBadge(riskLevel)}</td>
+                          <td className="py-4 px-4">{getRiskBadge(position)}</td>
                           <td className="py-4 px-4">{getStatusBadge(position.status)}</td>
                         </tr>
                       );
@@ -622,7 +631,6 @@ const Positions: React.FC = () => {
               {/* Mobile Card View */}
               <div className="md:hidden space-y-4">
                 {filteredAndSortedPositions.map((position) => {
-                  const riskLevel = calculateRiskLevel(position);
                   const currentPrice =
                     typeof position.currentPrice === 'number'
                       ? position.currentPrice
@@ -705,7 +713,7 @@ const Positions: React.FC = () => {
                       </div>
 
                       <div className="flex items-center justify-between pt-2 border-t">
-                        {getRiskBadge(riskLevel)}
+                        {getRiskBadge(position)}
                       </div>
                     </div>
                   );
