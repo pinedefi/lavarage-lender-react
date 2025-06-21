@@ -39,10 +39,19 @@ const Dashboard: React.FC = () => {
 
   // Calculate dashboard metrics
   const dashboardStats = {
-    totalLiquidityDeployed: offers.reduce((sum, offer) => {
-      const currentExposure = parseInt(offer.currentExposure, 16) || 0;
-      return sum + currentExposure / 1e9; // Convert lamports to SOL
-    }, 0),
+    totalLiquidityDeployed: offers.reduce((acc: Record<string, number>, offer) => {
+      const currentExposure = parseFloat(offer.currentExposure) || 0;
+      const quoteToken = typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
+      const symbol = quoteToken?.symbol ?? 'SOL';
+      const decimals = quoteToken?.decimals ?? 9;
+      
+      if (!acc[symbol]) {
+        acc[symbol] = 0;
+      }
+      acc[symbol] += currentExposure;
+      
+      return acc;
+    }, { SOL: 0, USDC: 0 }),
     activeOffersCount: offers.filter((offer) => offer.active).length,
     portfolioUtilization:
       offers.length > 0
@@ -69,7 +78,10 @@ const Dashboard: React.FC = () => {
   const statCards = [
     {
       title: 'Total Liquidity Deployed',
-      value: `${formatNumber(dashboardStats.totalLiquidityDeployed, 2)} SOL`,
+      value:
+        Object.entries(dashboardStats.totalLiquidityDeployed)
+          .map(([currency, amount]) => `${formatNumber(amount, 2)} ${currency}`)
+          .join(' + ') || '0 SOL',
       icon: TrendingUp,
       trend: '+12.5%',
       trendType: 'positive' as const,
@@ -117,7 +129,7 @@ const Dashboard: React.FC = () => {
             <GradientText variant="primary" size="2xl" weight="bold" className="block">
               {value}
             </GradientText>
-            {trend && (
+            {/* {trend && (
               <div
                 className={`flex items-center text-sm ${
                   trendType === 'positive'
@@ -134,7 +146,7 @@ const Dashboard: React.FC = () => {
                 ) : null}
                 {trend}
               </div>
-            )}
+            )} */}
           </div>
         </div>
         <div className="p-4 rounded-full bg-gradient-to-br from-lavarage-subtle to-lavarage-orange/20 group-hover:scale-110 transition-transform duration-300">
