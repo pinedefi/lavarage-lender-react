@@ -244,7 +244,7 @@ class ApiService {
     try {
       // Use the same base URL as the main API, but with a different endpoint
       const response = await axios.post(
-        `${this.api.defaults.baseURL}/api/sdk/v1.0/liquidations/search`,
+        `https://outside-lenders-liquidations-production.up.railway.app/rpc`,
         requestBody,
         { 
           headers: { 
