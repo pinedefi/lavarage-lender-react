@@ -90,8 +90,8 @@ const CreateOffer: React.FC = () => {
                   type="number"
                   placeholder="Enter annual interest rate"
                   min="0"
-                  max="100"
-                  step="0.1"
+                  max="255"
+                  step="1"
                   value={interestRate}
                   onChange={(e) => setInterestRate(e.target.value)}
                 />

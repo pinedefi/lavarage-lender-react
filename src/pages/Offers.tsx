@@ -258,7 +258,7 @@ const Offers: React.FC = () => {
     const actionText = isActive ? 'Pause' : 'Reactivate';
     const actionDescription = isActive
       ? 'Are you sure you want to pause this offer?'
-      : 'Are you sure you want to reactivate this offer?';
+      : 'Are you sure you want to reactivate this offer? (Default LTV is 75%)';
 
     const handleAction = async () => {
       try {

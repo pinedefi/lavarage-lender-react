@@ -27,7 +27,7 @@ const Footer: React.FC = () => {
     social: [
       {
         name: 'Twitter',
-        href: 'https://twitter.com/lavarage',
+        href: 'https://twitter.com/lavaragexyz',
         icon: Twitter,
       },
       {
