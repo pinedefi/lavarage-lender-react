@@ -12,10 +12,18 @@ import {
   LiquidationSearchResponse,
   LiquidationData,
 } from '@/types';
+import { nftValidationService } from './nftValidation';
+import { LENDER_ENDPOINTS_REQUIRING_NFT } from '@/config';
 
+/**
+ * ApiService handles all API communications with the Lavarage backend.
+ * Implements frontend-level security validations for UX improvement.
+ * Backend provides authoritative security via blockchain-based validation.
+ */
 class ApiService {
   private api: AxiosInstance;
   private apiKey: string;
+  private walletAddress: string | null = null;
 
   constructor(baseURL: string = process.env.REACT_APP_API_URL || 'https://api.lavarage.com') {
     this.apiKey = process.env.REACT_APP_API_KEY || '';
@@ -35,13 +43,16 @@ class ApiService {
   private setupInterceptors(): void {
     // Request interceptor
     this.api.interceptors.request.use(
-      (config) => {
+      async (config) => {
         // Add timestamp to prevent caching
         if (config.method === 'get') {
           config.params = {
             ...config.params,
             _t: Date.now(),
           };
+        } else {
+          // For non-GET requests, validate NFT ownership
+          await this.validateNFTForLenderEndpoints(config);
         }
         return config;
       },
@@ -57,6 +68,108 @@ class ApiService {
         return Promise.reject(new Error(message));
       }
     );
+  }
+
+  /**
+   * Validates NFT ownership for lender endpoints.
+   * Frontend validation for UX - backend provides authoritative security.
+   */
+  private async validateNFTForLenderEndpoints(config: any): Promise<void> {
+    // Check if this is a lender endpoint that requires NFT validation
+    const isLenderEndpoint = LENDER_ENDPOINTS_REQUIRING_NFT.some((endpoint) =>
+      config.url?.includes(endpoint)
+    );
+
+    if (!isLenderEndpoint) {
+      return;
+    }
+
+    // Skip validation in development/staging environments
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Skipping NFT validation in development environment');
+      return;
+    }
+
+    // Extract wallet address with ownership validation for changeLTV
+    const walletAddress = await this.extractWalletAddress(config);
+    if (!walletAddress) {
+      throw new Error('Wallet address is required for lender operations');
+    }
+
+    // Validate NFT ownership
+    try {
+      const hasNFT = await nftValidationService.hasLavaRockNFT(walletAddress);
+      if (!hasNFT) {
+        throw new Error('Access denied: Lavarock NFT required for lender operations');
+      }
+    } catch (error) {
+      console.error('NFT validation failed:', error);
+      throw new Error('Unable to verify NFT ownership. Please ensure you own a Lavarock NFT.');
+    }
+  }
+
+  /**
+   * Validates offer ownership for UX. Backend performs blockchain-based validation.
+   */
+  private async validateOfferOwnership(offerAddress: string): Promise<boolean> {
+    try {
+      // Fetch all offers and find the specific one
+      const offers = await this.getOffers({ includeRawData: true });
+      const targetOffer = offers.find(
+        (offer) =>
+          offer.publicKey.toString() === offerAddress || offer.publicKey.toBase58() === offerAddress
+      );
+
+      if (!targetOffer) {
+        console.warn(`Offer not found: ${offerAddress}`);
+        return false;
+      }
+
+      // Check if current wallet matches the offer's nodeWallet
+      const offerOwner = targetOffer.nodeWallet.toString();
+      const isOwner = this.walletAddress === offerOwner;
+
+      if (!isOwner) {
+        console.warn(
+          `Wallet ${this.walletAddress} does not own offer ${offerAddress} (nodeWallet: ${offerOwner})`
+        );
+      }
+
+      return isOwner;
+    } catch (error) {
+      console.error('Failed to validate offer ownership:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Extracts wallet address for NFT validation with offer ownership check for changeLTV.
+   */
+  private async extractWalletAddress(config: any): Promise<string | null> {
+    // Try to extract wallet address from various sources
+    if (config.data?.userWallet) {
+      return config.data.userWallet;
+    }
+
+    if (config.params?.userWallet) {
+      return config.params.userWallet;
+    }
+
+    // Special handling for changeLTV endpoint with ownership validation
+    if (config.url?.includes('/changeLTV') && config.data?.offerAddress) {
+      if (!this.walletAddress) {
+        throw new Error('Wallet not connected. Please connect your wallet to modify offers.');
+      }
+
+      const ownsOffer = await this.validateOfferOwnership(config.data.offerAddress);
+      if (!ownsOffer) {
+        throw new Error('Access denied: You can only modify offers that you own.');
+      }
+
+      return this.walletAddress;
+    }
+
+    return this.walletAddress;
   }
 
   // Offer Management
@@ -221,6 +334,11 @@ class ApiService {
   setApiKey(apiKey: string): void {
     this.apiKey = apiKey;
     this.api.defaults.headers['x-api-key'] = apiKey;
+  }
+
+  // Set wallet address for NFT validation
+  setWalletAddress(walletAddress: string | null): void {
+    this.walletAddress = walletAddress;
   }
 
   // Get current API configuration

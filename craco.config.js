@@ -10,10 +10,10 @@ module.exports = {
     configure: {
       resolve: {
         fallback: {
-          "crypto": require.resolve("crypto-browserify"),
-          "stream": require.resolve("stream-browserify"),
-          "buffer": require.resolve("buffer/"),
-          "process": require.resolve("process/browser.js"),
+          crypto: require.resolve('crypto-browserify'),
+          stream: require.resolve('stream-browserify'),
+          buffer: require.resolve('buffer/'),
+          process: require.resolve('process/browser.js'),
         },
       },
       plugins: [
@@ -24,4 +24,4 @@ module.exports = {
       ],
     },
   },
-}; 
+};
