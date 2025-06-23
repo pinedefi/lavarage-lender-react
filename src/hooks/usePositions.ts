@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { PositionV3Model } from '@/types';
 import { apiService } from '@/services/api';
 import { useWallet } from '@/contexts/WalletContext';
+import { useError } from '@/contexts/ErrorContext';
 import toast from 'react-hot-toast';
 
 interface UsePositionsOptions {
@@ -30,6 +31,7 @@ export function usePositions(options: UsePositionsOptions = {}): UsePositionsRet
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { publicKey, connected } = useWallet();
+  const { handleError } = useError();
 
   const {
     status = 'all',
@@ -65,15 +67,17 @@ export function usePositions(options: UsePositionsOptions = {}): UsePositionsRet
         const errorMessage = err.message || 'Failed to fetch positions';
         setError(errorMessage);
         console.error('Error fetching positions:', err);
-        // Only show toast error on initial load or if it's a new error
-        if (isInitialLoad) {
-          toast.error(errorMessage);
-        }
+        
+        // Handle LavaRock NFT errors globally first
+        handleError(errorMessage);
+        
+        // Then show toast for all errors
+        toast.error(errorMessage);
       } finally {
         setLoading(false);
       }
     },
-    [publicKey, connected, status, includeInactionable]
+    [publicKey, connected, status, includeInactionable, handleError]
   );
 
   // Calculate statistics

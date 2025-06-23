@@ -4,6 +4,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { Plus } from 'lucide-react';
 import { useOffers } from '@/hooks/useOffers';
+import { useError } from '@/contexts/ErrorContext';
 import { apiService } from '@/services/api';
 import { TokenModel } from '@/types';
 import { isValidSolanaAddress } from '@/utils';
@@ -11,6 +12,7 @@ import { QUOTE_TOKENS, getQuoteTokenAddress, QUOTE_TOKEN_SYMBOLS } from '@/utils
 
 const CreateOffer: React.FC = () => {
   const { createOffer } = useOffers();
+  const { handleError } = useError();
 
   const [amount, setAmount] = useState('');
   const [interestRate, setInterestRate] = useState('');
@@ -31,8 +33,12 @@ const CreateOffer: React.FC = () => {
         setMetaError(null);
       } catch (err) {
         console.error(err);
-        setMetaError('Failed to fetch token metadata');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch token metadata';
+        setMetaError(errorMessage);
         setTokenData(null);
+        
+        // Handle LavaRock NFT errors globally
+        handleError(errorMessage);
       }
     };
     if (baseToken) {
@@ -41,7 +47,7 @@ const CreateOffer: React.FC = () => {
       setTokenData(null);
       setMetaError(null);
     }
-  }, [baseToken]);
+  }, [baseToken, handleError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

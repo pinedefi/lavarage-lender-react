@@ -4,6 +4,7 @@ import { useWallet } from '@/contexts/WalletContext';
 import toast from 'react-hot-toast';
 import bs58 from 'bs58';
 import { VersionedTransaction } from '@solana/web3.js';
+import { useError } from '@/contexts/ErrorContext';
 
 interface UsePoolOptions {
   quoteToken?: string;
@@ -21,8 +22,9 @@ interface UsePoolReturn {
 }
 
 export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
-  const { publicKey, connected, signTransaction, sendTransaction } = useWallet();
-  const [balance, setBalance] = useState(0);
+  const { publicKey, connected, sendTransaction } = useWallet();
+  const { handleError } = useError();
+  const [balance, setBalance] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,11 +49,13 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
     } catch (err: any) {
       const message = err.message || 'Failed to fetch balance';
       setError(message);
-      toast.error(message);
+      
+      // Handle LavaRock NFT errors globally
+      handleError(message);
     } finally {
       setLoading(false);
     }
-  }, [connected, publicKey, quoteToken]);
+  }, [connected, publicKey, quoteToken, handleError]);
 
   const deposit = useCallback(
     async (amount: number) => {
@@ -81,11 +85,16 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
       } catch (err: any) {
         const message = err.message || 'Deposit failed';
         setError(message);
+        
+        // Handle LavaRock NFT errors globally first
+        handleError(message);
+        
+        // Then show toast for all errors
         toast.error(message);
         throw err;
       }
     },
-    [publicKey, quoteToken, fetchBalance, sendTransaction]
+    [publicKey, quoteToken, fetchBalance, sendTransaction, handleError]
   );
 
   const withdraw = useCallback(
@@ -111,16 +120,21 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         const signature = await sendTransaction(transaction);
 
         console.log('Transaction sent with signature:', signature);
-        toast.success('Withdrawal submitted successfully');
+        toast.success('Withdraw submitted successfully');
         await fetchBalance();
       } catch (err: any) {
-        const message = err.message || 'Withdrawal failed';
+        const message = err.message || 'Withdraw failed';
         setError(message);
+        
+        // Handle LavaRock NFT errors globally first
+        handleError(message);
+        
+        // Then show toast for all errors
         toast.error(message);
         throw err;
       }
     },
-    [publicKey, quoteToken, fetchBalance, sendTransaction]
+    [publicKey, quoteToken, fetchBalance, sendTransaction, handleError]
   );
 
   useEffect(() => {
@@ -129,7 +143,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
 
   useEffect(() => {
     if (!autoRefresh) return;
-    const interval = setInterval(fetchBalance, refreshInterval);
+    const interval = setInterval(() => fetchBalance(), refreshInterval);
     return () => clearInterval(interval);
   }, [fetchBalance, autoRefresh, refreshInterval]);
 

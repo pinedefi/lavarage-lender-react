@@ -6,6 +6,7 @@ import { useWallet as useSolanaWallet } from '@solana/wallet-adapter-react';
 import toast from 'react-hot-toast';
 import bs58 from 'bs58';
 import { VersionedTransaction } from '@solana/web3.js';
+import { useError } from '@/contexts/ErrorContext';
 
 interface UseOffersOptions {
   includeTokens?: boolean;
@@ -28,10 +29,11 @@ interface UseOffersReturn {
 }
 
 export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
+  const { publicKey, connected, sendTransaction } = useWallet();
+  const { handleError } = useError();
   const [offers, setOffers] = useState<OfferV2Model[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { publicKey, connected, sendTransaction } = useWallet();
 
   const {
     includeTokens = true,
@@ -44,15 +46,19 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
   } = options;
 
   const fetchOffers = useCallback(
-    async (isInitialLoad = false) => {
+    async (showLoading = true) => {
       if (!connected || !publicKey) {
         setOffers([]);
         setLoading(false);
         return;
       }
 
+      if (showLoading) {
+        setLoading(true);
+      }
+      setError(null);
+
       try {
-        setError(null);
         const data = await apiService.getLenderOffers({
           lenderWallet: publicKey.toBase58(),
           inactiveOffers,
@@ -63,7 +69,7 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
 
         // Only update state if data has actually changed or it's the initial load
         setOffers((prevOffers) => {
-          if (isInitialLoad || JSON.stringify(prevOffers) !== JSON.stringify(data)) {
+          if (JSON.stringify(prevOffers) !== JSON.stringify(data)) {
             return data;
           }
           return prevOffers;
@@ -71,16 +77,17 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
       } catch (err: any) {
         const errorMessage = err.message || 'Failed to fetch offers';
         setError(errorMessage);
-        console.error('Error fetching offers:', err);
-        // Only show toast error on initial load or if it's a new error
-        if (isInitialLoad) {
-          toast.error(errorMessage);
-        }
+        setOffers([]);
+        
+        // Handle LavaRock NFT errors globally
+        handleError(errorMessage);
       } finally {
-        setLoading(false);
+        if (showLoading) {
+          setLoading(false);
+        }
       }
     },
-    [publicKey, connected, inactiveOffers, includeRawData, chain, tags]
+    [publicKey, connected, inactiveOffers, includeRawData, chain, tags, handleError]
   );
 
   const createOffer = useCallback(
@@ -114,11 +121,16 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
       } catch (err: any) {
         const errorMessage = err.message || 'Failed to create offer';
         setError(errorMessage);
+        
+        // Handle LavaRock NFT errors globally first
+        handleError(errorMessage);
+        
+        // Then show toast for all errors
         toast.error(errorMessage);
         throw err;
       }
     },
-    [publicKey, fetchOffers, sendTransaction]
+    [publicKey, fetchOffers, sendTransaction, handleError]
   );
 
   const updateOffer = useCallback(
@@ -152,11 +164,16 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
       } catch (err: any) {
         const errorMessage = err.message || 'Failed to update offer';
         setError(errorMessage);
+        
+        // Handle LavaRock NFT errors globally first
+        handleError(errorMessage);
+        
+        // Then show toast for all errors
         toast.error(errorMessage);
         throw err;
       }
     },
-    [publicKey, fetchOffers, sendTransaction]
+    [publicKey, fetchOffers, sendTransaction, handleError]
   );
 
   const { signMessage } = useSolanaWallet();
@@ -191,11 +208,16 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
       } catch (err: any) {
         const errorMessage = err.message || 'Failed to update LTV';
         setError(errorMessage);
+        
+        // Handle LavaRock NFT errors globally first
+        handleError(errorMessage);
+        
+        // Then show toast for all errors
         toast.error(errorMessage);
         throw err;
       }
     },
-    [publicKey, signMessage, fetchOffers]
+    [publicKey, signMessage, fetchOffers, handleError]
   );
 
   // Initial fetch
@@ -227,6 +249,7 @@ export function useAllOffers(options: UseOffersOptions = {}) {
   const [offers, setOffers] = useState<OfferV2Model[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { handleError } = useError();
 
   const {
     includeTokens = true,
@@ -261,11 +284,16 @@ export function useAllOffers(options: UseOffersOptions = {}) {
         const errorMessage = err.message || 'Failed to fetch offers';
         setError(errorMessage);
         console.error('Error fetching all offers:', err);
+        
+        // Handle LavaRock NFT errors globally first
+        handleError(errorMessage);
+        
+        // Note: This hook doesn't show toasts by default, but the error will be displayed in the UI
       } finally {
         setLoading(false);
       }
     },
-    [includeTokens, inactiveOffers, includeRawData, chain, tags]
+    [includeTokens, inactiveOffers, includeRawData, chain, tags, handleError]
   );
 
   useEffect(() => {

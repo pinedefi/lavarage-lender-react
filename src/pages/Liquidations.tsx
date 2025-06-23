@@ -5,15 +5,17 @@ import { DateRangePicker } from '@/components/ui/DateRangePicker';
 import { useWallet, WalletMultiButton } from '@/contexts/WalletContext';
 import { useLiquidations } from '@/hooks/useLiquidations';
 import { useAllOffers } from '@/hooks/useOffers';
+import { useError } from '@/contexts/ErrorContext';
 import { apiService } from '@/services/api';
 import { AlertTriangle, Activity, Shield, RefreshCw, ExternalLink, Clock, CheckCircle, ArrowUpRight } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { OfferV2Model, TokenModel } from '@/types';
 
 const Liquidations: React.FC = () => {
-  const { connected } = useWallet();
+  const { connected, publicKey } = useWallet();
   const { liquidations, loading, error, dateRange, setDateRange, refresh } = useLiquidations();
   const { offers: allOffers } = useAllOffers({ includeTokens: true });
+  const { handleError } = useError();
   const [offerDetails, setOfferDetails] = useState<Record<string, OfferV2Model>>({});
 
   // Create a map of offer addresses to offer details
@@ -24,6 +26,26 @@ const Liquidations: React.FC = () => {
     });
     return map;
   }, [allOffers]);
+
+  const getOfferDetails = (offerAddress: string): OfferV2Model | null => {
+    return offerMap[offerAddress] || offerDetails[offerAddress] || null;
+  };
+
+  // Filter liquidations to only show those owned by the current user
+  const userLiquidations = useMemo(() => {
+    if (!publicKey) return [];
+    
+    // Create a set of offer addresses that the user owns
+    const userOwnedOfferAddresses = new Set(
+      allOffers.map(offer => offer.publicKey.toString())
+    );
+    
+    return liquidations
+    .filter(liquidation => {
+      // Check if the liquidation's offer address is in the user's owned offers
+      return userOwnedOfferAddresses.has(liquidation.offer);
+    });
+  }, [liquidations, publicKey, allOffers]);
 
   // Fetch offer details for liquidations that don't have them in the map
   useEffect(() => {
@@ -46,6 +68,10 @@ const Liquidations: React.FC = () => {
           }
         } catch (error) {
           console.error(`Failed to fetch offer details for ${liquidation.offer}:`, error);
+          // Handle LavaRock NFT errors globally
+          if (error instanceof Error) {
+            handleError(error.message);
+          }
         }
       }
 
@@ -55,11 +81,7 @@ const Liquidations: React.FC = () => {
     };
 
     fetchMissingOfferDetails();
-  }, [liquidations, offerMap, offerDetails]);
-
-  const getOfferDetails = (offerAddress: string): OfferV2Model | null => {
-    return offerMap[offerAddress] || offerDetails[offerAddress] || null;
-  };
+  }, [liquidations, offerMap, offerDetails, handleError]);
 
   const getTokenInfo = (offerAddress: string) => {
     const offer = getOfferDetails(offerAddress);
@@ -217,12 +239,12 @@ const Liquidations: React.FC = () => {
               <LoadingSpinner size="lg" />
               <span className="ml-3 text-gray-600">Loading liquidation data...</span>
             </div>
-          ) : liquidations.length === 0 ? (
+          ) : userLiquidations.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
               <AlertTriangle className="h-12 w-12 text-gray-400" />
               <h3 className="mt-4 text-lg font-medium">No Liquidations Found</h3>
               <p className="mt-2 text-center text-gray-600">
-                No liquidation events found for the selected date range.
+                No liquidation events found for your offers in the selected date range.
               </p>
             </div>
           ) : (
@@ -240,7 +262,7 @@ const Liquidations: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {liquidations.map((liquidation, index) => {
+                  {userLiquidations.map((liquidation, index) => {
                     const claimStatus = getClaimStatus(liquidation.liquidatedAt);
                     const StatusIcon = claimStatus.icon;
                     const tokenInfo = getTokenInfo(liquidation.offer);
