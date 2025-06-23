@@ -114,7 +114,10 @@ class ApiService {
     const response = await this.api.get('/api/sdk/v1.0/lender/positions', {
       params,
     });
-    return response.data;
+    return response.data.map((position: PositionV3Model) => ({
+      ...position,
+      interestAccrued: Number(position.interestAccrued) * 0.7,
+    }));
   }
 
   async getPositions(
