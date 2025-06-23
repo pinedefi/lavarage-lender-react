@@ -1,15 +1,82 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { GradientText, LoadingSpinner } from '@/components/brand';
 import { DateRangePicker } from '@/components/ui/DateRangePicker';
 import { useWallet, WalletMultiButton } from '@/contexts/WalletContext';
 import { useLiquidations } from '@/hooks/useLiquidations';
+import { useAllOffers } from '@/hooks/useOffers';
+import { apiService } from '@/services/api';
 import { AlertTriangle, Activity, Shield, RefreshCw, ExternalLink, Clock, CheckCircle, ArrowUpRight } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import { OfferV2Model, TokenModel } from '@/types';
 
 const Liquidations: React.FC = () => {
   const { connected } = useWallet();
   const { liquidations, loading, error, dateRange, setDateRange, refresh } = useLiquidations();
+  const { offers: allOffers } = useAllOffers({ includeTokens: true });
+  const [offerDetails, setOfferDetails] = useState<Record<string, OfferV2Model>>({});
+
+  // Create a map of offer addresses to offer details
+  const offerMap = useMemo(() => {
+    const map: Record<string, OfferV2Model> = {};
+    allOffers.forEach(offer => {
+      map[offer.publicKey.toString()] = offer;
+    });
+    return map;
+  }, [allOffers]);
+
+  // Fetch offer details for liquidations that don't have them in the map
+  useEffect(() => {
+    const fetchMissingOfferDetails = async () => {
+      const missingOffers = liquidations.filter(
+        liquidation => !offerMap[liquidation.offer] && !offerDetails[liquidation.offer]
+      );
+
+      if (missingOffers.length === 0) return;
+
+      const newOfferDetails: Record<string, OfferV2Model> = {};
+      
+      for (const liquidation of missingOffers) {
+        try {
+          // Try to get the offer from the API
+          const offers = await apiService.getOffers({ includeTokens: true });
+          const offer = offers.find(o => o.publicKey.toString() === liquidation.offer);
+          if (offer) {
+            newOfferDetails[liquidation.offer] = offer;
+          }
+        } catch (error) {
+          console.error(`Failed to fetch offer details for ${liquidation.offer}:`, error);
+        }
+      }
+
+      if (Object.keys(newOfferDetails).length > 0) {
+        setOfferDetails(prev => ({ ...prev, ...newOfferDetails }));
+      }
+    };
+
+    fetchMissingOfferDetails();
+  }, [liquidations, offerMap, offerDetails]);
+
+  const getOfferDetails = (offerAddress: string): OfferV2Model | null => {
+    return offerMap[offerAddress] || offerDetails[offerAddress] || null;
+  };
+
+  const getTokenInfo = (offerAddress: string) => {
+    const offer = getOfferDetails(offerAddress);
+    if (!offer) {
+      return { decimals: 6, symbol: 'Unknown', quoteDecimals: 9, quoteSymbol: 'SOL' };
+    }
+
+    const quoteToken = typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
+    const collateralToken = offer.collateralToken;
+
+    return {
+      decimals: collateralToken?.decimals ?? 6,
+      symbol: collateralToken?.symbol ?? 'Unknown',
+      quoteDecimals: quoteToken?.decimals ?? 9,
+      quoteSymbol: quoteToken?.symbol ?? 'SOL'
+    };
+  };
 
   const formatAmount = (amount: string, decimals: number = 6) => {
     const num = parseFloat(amount) / Math.pow(10, decimals);
@@ -165,7 +232,7 @@ const Liquidations: React.FC = () => {
                   <tr className="border-b border-gray-200">
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Liquidated At</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Position</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Amount</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">Borrowed Amount</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Sold For</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Sold At</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Claim Status</th>
@@ -176,6 +243,7 @@ const Liquidations: React.FC = () => {
                   {liquidations.map((liquidation, index) => {
                     const claimStatus = getClaimStatus(liquidation.liquidatedAt);
                     const StatusIcon = claimStatus.icon;
+                    const tokenInfo = getTokenInfo(liquidation.offer);
                     
                     return (
                       <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
@@ -193,10 +261,14 @@ const Liquidations: React.FC = () => {
                           </div>
                         </td>
                         <td className="py-3 px-4 text-sm text-gray-900">
-                          {formatAmount(liquidation.amount)}
+                          <div className="flex flex-col">
+                            <span>{formatAmount(liquidation.amount, tokenInfo.quoteDecimals)} {tokenInfo.quoteSymbol}</span>
+                          </div>
                         </td>
                         <td className="py-3 px-4 text-sm text-gray-900">
-                          {formatAmount(liquidation.soldFor.toString())}
+                          <div className="flex flex-col">
+                            <span>{formatAmount(liquidation.soldFor.toString(), tokenInfo.quoteDecimals)} {tokenInfo.quoteSymbol}</span>
+                          </div>
                         </td>
                         <td className="py-3 px-4 text-sm text-gray-900">
                           {formatDate(liquidation.soldAt)}
