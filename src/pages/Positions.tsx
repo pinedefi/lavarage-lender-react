@@ -76,7 +76,7 @@ const Positions: React.FC = () => {
     } else {
       // For USDC and other tokens, use standard currency formatting
       minimumFractionDigits = 2;
-      maximumFractionDigits = 2;
+      maximumFractionDigits = 4;
     }
 
     const formatted = new Intl.NumberFormat('en-US', {
