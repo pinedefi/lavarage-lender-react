@@ -4,7 +4,7 @@ import { GradientText, LoadingSpinner } from '@/components/brand';
 import { DateRangePicker } from '@/components/ui/DateRangePicker';
 import { useWallet, WalletMultiButton } from '@/contexts/WalletContext';
 import { useLiquidations } from '@/hooks/useLiquidations';
-import { useAllOffers } from '@/hooks/useOffers';
+import { useOffers } from '@/hooks/useOffers';
 import { useError } from '@/contexts/ErrorContext';
 import { apiService } from '@/services/api';
 import { AlertTriangle, Activity, Shield, RefreshCw, ExternalLink, Clock, CheckCircle, ArrowUpRight } from 'lucide-react';
@@ -14,18 +14,18 @@ import { OfferV2Model, TokenModel } from '@/types';
 const Liquidations: React.FC = () => {
   const { connected, publicKey } = useWallet();
   const { liquidations, loading, error, dateRange, setDateRange, refresh } = useLiquidations();
-  const { offers: allOffers } = useAllOffers({ includeTokens: true });
+  const { offers: lenderOffers } = useOffers({ includeTokens: true, inactiveOffers: true });
   const { handleError } = useError();
   const [offerDetails, setOfferDetails] = useState<Record<string, OfferV2Model>>({});
 
   // Create a map of offer addresses to offer details
   const offerMap = useMemo(() => {
     const map: Record<string, OfferV2Model> = {};
-    allOffers.forEach(offer => {
+    lenderOffers.forEach(offer => {
       map[offer.publicKey.toString()] = offer;
     });
     return map;
-  }, [allOffers]);
+  }, [lenderOffers]);
 
   const getOfferDetails = (offerAddress: string): OfferV2Model | null => {
     return offerMap[offerAddress] || offerDetails[offerAddress] || null;
@@ -37,7 +37,7 @@ const Liquidations: React.FC = () => {
     
     // Create a set of offer addresses that the user owns
     const userOwnedOfferAddresses = new Set(
-      allOffers.map(offer => offer.publicKey.toString())
+      lenderOffers.map(offer => offer.publicKey.toString())
     );
     
     return liquidations
@@ -45,7 +45,7 @@ const Liquidations: React.FC = () => {
       // Check if the liquidation's offer address is in the user's owned offers
       return userOwnedOfferAddresses.has(liquidation.offer);
     });
-  }, [liquidations, publicKey, allOffers]);
+  }, [liquidations, publicKey, lenderOffers]);
 
   // Fetch offer details for liquidations that don't have them in the map
   useEffect(() => {
