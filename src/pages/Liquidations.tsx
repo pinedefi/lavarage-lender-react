@@ -233,7 +233,7 @@ const Liquidations: React.FC = () => {
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Liquidated At</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Position</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Borrowed Amount</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">Sold For</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-900">Sold For (After Fees)</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Sold At</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Claim Status</th>
                     <th className="text-left py-3 px-4 font-medium text-gray-900">Transactions</th>
