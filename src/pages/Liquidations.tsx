@@ -9,7 +9,7 @@ import { useError } from '@/contexts/ErrorContext';
 import { apiService } from '@/services/api';
 import { AlertTriangle, Activity, Shield, RefreshCw, ExternalLink, Clock, CheckCircle, ArrowUpRight } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import { OfferV2Model, TokenModel } from '@/types';
+import { LiquidationData, OfferV2Model, TokenModel } from '@/types';
 
 const Liquidations: React.FC = () => {
   const { connected, publicKey } = useWallet();
@@ -123,12 +123,32 @@ const Liquidations: React.FC = () => {
     window.open(`https://solscan.io/tx/${txid}`, '_blank');
   };
 
-  const getClaimStatus = (liquidatedAt: string) => {
+  const getClaimStatus = (liquidatedAt: string, liquidation: LiquidationData) => {
     const liquidationDate = new Date(liquidatedAt);
     const now = new Date();
     const diffInDays = (now.getTime() - liquidationDate.getTime()) / (1000 * 60 * 60 * 24);
     
-    if (diffInDays < 3) {
+    if (liquidation.sendTx) {
+      return {
+        status: 'returned' as const,
+        label: 'Returned to Wallet',
+        timeRemaining: null,
+        icon: CheckCircle,
+        color: 'text-green-600',
+        bgColor: 'bg-green-50',
+        borderColor: 'border-green-200'
+      };
+    } else if (diffInDays > 3) {
+      return {
+        status: 'processing' as const,
+        label: 'Processing',
+        timeRemaining: null,
+        icon: Activity,
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-50',
+        borderColor: 'border-blue-200'
+      };
+    } else {
       const cooldownEndsAt = new Date(liquidationDate.getTime() + (3 * 24 * 60 * 60 * 1000));
       const timeRemaining = cooldownEndsAt.getTime() - now.getTime();
       const hoursRemaining = Math.floor(timeRemaining / (1000 * 60 * 60));
@@ -143,27 +163,7 @@ const Liquidations: React.FC = () => {
         bgColor: 'bg-orange-50',
         borderColor: 'border-orange-200'
       };
-    } else if (diffInDays < 5) {
-      return {
-        status: 'processing' as const,
-        label: 'Processing',
-        timeRemaining: null,
-        icon: Activity,
-        color: 'text-blue-600',
-        bgColor: 'bg-blue-50',
-        borderColor: 'border-blue-200'
-      };
-    } else {
-      return {
-        status: 'returned' as const,
-        label: 'Returned to Pool',
-        timeRemaining: null,
-        icon: CheckCircle,
-        color: 'text-green-600',
-        bgColor: 'bg-green-50',
-        borderColor: 'border-green-200'
-      };
-    }
+    } 
   };
 
   if (!connected) {
@@ -263,7 +263,7 @@ const Liquidations: React.FC = () => {
                 </thead>
                 <tbody>
                   {userLiquidations.map((liquidation, index) => {
-                    const claimStatus = getClaimStatus(liquidation.liquidatedAt);
+                    const claimStatus = getClaimStatus(liquidation.liquidatedAt, liquidation);
                     const StatusIcon = claimStatus.icon;
                     const tokenInfo = getTokenInfo(liquidation.offer);
                     
@@ -284,7 +284,7 @@ const Liquidations: React.FC = () => {
                         </td>
                         <td className="py-3 px-4 text-sm text-gray-900">
                           <div className="flex flex-col">
-                            <span>{formatAmount(liquidation.amount, tokenInfo.quoteDecimals)} {tokenInfo.quoteSymbol}</span>
+                            <span>{formatAmount(liquidation.amount.toString(), tokenInfo.quoteDecimals)} {tokenInfo.quoteSymbol}</span>
                           </div>
                         </td>
                         <td className="py-3 px-4 text-sm text-gray-900">
@@ -328,6 +328,17 @@ const Liquidations: React.FC = () => {
                               <span>Sell</span>
                               <ExternalLink className="h-3 w-3" />
                             </Button>
+                            {liquidation.sendTx && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => openExplorer(liquidation.sendTx!)}
+                                className="flex items-center space-x-1 text-xs"
+                              >
+                                <span>Send</span>
+                                <ExternalLink className="h-3 w-3" />
+                              </Button>
+                            )}
                           </div>
                         </td>
                       </tr>

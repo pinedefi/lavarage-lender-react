@@ -205,17 +205,19 @@ export interface DashboardStats {
 
 // Liquidation Types
 export interface LiquidationData {
-  offer: string;
-  position: string;
-  amount: string;
-  soldFor: number;
-  toSellToken: string;
-  toSellAmount: string;
-  toReceiveToken: string;
-  liquidatedAt: string;
-  soldAt: string;
-  liquidationTxid: string;
-  sellTxid: string;
+  offer: string,
+  position: string,
+  amount: number,
+  soldFor: number,
+  toSellToken: string,
+  toSellAmount: number,
+  toReceiveToken: string,
+  liquidatedAt: string,
+  soldAt: string,
+  liquidationTxid: string,
+  sellTxid: string,
+  sendTx?: string,
+  sendAt?: string
 }
 
 export interface LiquidationSearchParams {
