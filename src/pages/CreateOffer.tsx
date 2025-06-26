@@ -36,7 +36,7 @@ const CreateOffer: React.FC = () => {
         const errorMessage = err instanceof Error ? err.message : 'Failed to fetch token metadata';
         setMetaError(errorMessage);
         setTokenData(null);
-        
+
         // Handle LavaRock NFT errors globally
         handleError(errorMessage);
       }
@@ -51,10 +51,19 @@ const CreateOffer: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const parsedAmount = parseFloat(amount);
+    const parsedInterest = parseFloat(interestRate);
+
+    if (isNaN(parsedAmount) || isNaN(parsedInterest)) {
+      handleError('Amount and interest rate are required and must be numeric');
+      return;
+    }
+
     await createOffer({
       collateralToken: baseToken,
-      maxExposure: parseFloat(amount) * 10 ** (quoteToken === "SOL" ? 9 : 6),
-      interestRate:  Number(parseFloat(interestRate).toFixed(0)),
+      maxExposure: parsedAmount * 10 ** (quoteToken === 'SOL' ? 9 : 6),
+      interestRate: Math.round(parsedInterest),
       quoteToken: getQuoteTokenAddress(quoteToken as keyof typeof QUOTE_TOKENS),
       tokenData: tokenData || undefined,
     });
@@ -73,35 +82,6 @@ const CreateOffer: React.FC = () => {
         <CardContent>
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Max Exposure (Quote Token)
-                </label>
-                <Input
-                  variant="message"
-                  type="number"
-                  placeholder="Enter amount to lend"
-                  min="0"
-                  step="0.1"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Interest Rate (APR %)
-                </label>
-                <Input
-                  variant="message"
-                  type="number"
-                  placeholder="Enter annual interest rate"
-                  min="0"
-                  max="255"
-                  step="1"
-                  value={interestRate}
-                  onChange={(e) => setInterestRate(e.target.value)}
-                />
-              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Quote Token</label>
                 <select
@@ -132,6 +112,35 @@ const CreateOffer: React.FC = () => {
                   </p>
                 )}
                 {metaError && <p className="mt-1 text-sm text-error-600">{metaError}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Max Exposure (Quote Token)
+                </label>
+                <Input
+                  variant="message"
+                  type="number"
+                  placeholder="Enter amount to lend"
+                  min="0"
+                  step="0.1"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Interest Rate (APR %)
+                </label>
+                <Input
+                  variant="message"
+                  type="number"
+                  placeholder="Enter annual interest rate"
+                  min="0"
+                  max="255"
+                  step="1"
+                  value={interestRate}
+                  onChange={(e) => setInterestRate(e.target.value)}
+                />
               </div>
             </div>
             <Button className="w-full" type="submit">
