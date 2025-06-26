@@ -51,10 +51,19 @@ const CreateOffer: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const parsedAmount = parseFloat(amount);
+    const parsedInterest = parseFloat(interestRate);
+
+    if (isNaN(parsedAmount) || isNaN(parsedInterest)) {
+      handleError('Amount and interest rate are required and must be numeric');
+      return;
+    }
+
     await createOffer({
       collateralToken: baseToken,
-      maxExposure: parseFloat(amount) * 10 ** (quoteToken === 'SOL' ? 9 : 6),
-      interestRate: Number(parseFloat(interestRate).toFixed(0)),
+      maxExposure: parsedAmount * 10 ** (quoteToken === 'SOL' ? 9 : 6),
+      interestRate: Math.round(parsedInterest),
       quoteToken: getQuoteTokenAddress(quoteToken as keyof typeof QUOTE_TOKENS),
       tokenData: tokenData || undefined,
     });
