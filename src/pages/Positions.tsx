@@ -554,14 +554,11 @@ const Positions: React.FC = () => {
                   </thead>
                   <tbody>
                     {filteredAndSortedPositions.map((position) => {
-                      const currentPrice =
-                        position.positionValue.valueInQuoteToken / Number(position.initialPositionBase);
                       const liquidationPrice =
                         typeof position.liquidationPrice === 'number'
                           ? position.liquidationPrice
                           : parseFloat(position.liquidationPrice);
-                      const priceBuffer =
-                        ((currentPrice - liquidationPrice) / liquidationPrice) * 100;
+
 
                       return (
                         <tr
@@ -600,9 +597,6 @@ const Positions: React.FC = () => {
                                 position.initialBorrowQuote,
                                 position.quoteToken.symbol
                               )}
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              {formatPrice(currentPrice)} current
                             </div>
                           </td>
                           <td className="py-4 px-4">
@@ -657,15 +651,6 @@ const Positions: React.FC = () => {
               {/* Mobile Card View */}
               <div className="md:hidden space-y-4">
                 {filteredAndSortedPositions.map((position) => {
-                  const currentPrice =
-                    typeof position.currentPrice === 'number'
-                      ? position.currentPrice
-                      : parseFloat(position.currentPrice);
-                  const liquidationPrice =
-                    typeof position.liquidationPrice === 'number'
-                      ? position.liquidationPrice
-                      : parseFloat(position.liquidationPrice);
-                  const priceBuffer = ((currentPrice - liquidationPrice) / liquidationPrice) * 100;
 
                   return (
                     <div
