@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Calendar, ChevronDown, AlertTriangle } from 'lucide-react';
 import Button from './Button';
 
@@ -17,47 +17,121 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dropdownPosition, setDropdownPosition] = useState<'bottom' | 'top'>('bottom');
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
+
+  // Calculate dropdown position when opening
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const spaceBelow = viewportHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      const dropdownHeight = 500; // Approximate height of dropdown
+      
+      if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+        setDropdownPosition('top');
+      } else {
+        setDropdownPosition('bottom');
+      }
+    }
+  }, [isOpen]);
 
   const formatTimestamp = (timestamp: string) => {
-    const date = new Date(parseInt(timestamp) * 1000);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  const validateDateRange = (gteTimestamp: string, lteTimestamp: string): boolean => {
-    const gteDate = new Date(parseInt(gteTimestamp) * 1000);
-    const lteDate = new Date(parseInt(lteTimestamp) * 1000);
-    const diffInDays = (lteDate.getTime() - gteDate.getTime()) / (1000 * 60 * 60 * 24);
-    
-    if (diffInDays > 7) {
-      setError('Date range cannot exceed 7 days');
-      return false;
-    }
-    
-    if (diffInDays < 0) {
-      setError('End date must be after start date');
-      return false;
-    }
-    
-    setError(null);
-    return true;
-  };
-
-  const handleDateChange = (type: 'gte' | 'lte', value: string) => {
-    const timestamp = Math.floor(new Date(value).getTime() / 1000).toString();
-    const newGte = type === 'gte' ? timestamp : gte;
-    const newLte = type === 'lte' ? timestamp : lte;
-    
-    if (validateDateRange(newGte, newLte)) {
-      onDateRangeChange({
-        gte: newGte,
-        lte: newLte,
+    try {
+      const date = new Date(parseInt(timestamp) * 1000);
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
       });
+    } catch (error) {
+      return 'Invalid Date';
     }
   };
+
+  const timestampToDatetimeLocal = (timestamp: string): string => {
+    try {
+      const date = new Date(parseInt(timestamp) * 1000);
+      if (isNaN(date.getTime())) return '';
+      
+      // Convert to local timezone for datetime-local input
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    } catch {
+      return '';
+    }
+  };
+
+  const handleDateChange = useCallback((type: 'gte' | 'lte', value: string) => {
+    // Clear existing debounce timer
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    
+    // Debounce the validation to prevent excessive calls while typing
+    debounceRef.current = setTimeout(() => {
+      if (!value) return; // Handle empty input
+      
+      try {
+        const date = new Date(value);
+        if (isNaN(date.getTime())) {
+          setError('Invalid date format');
+          return;
+        }
+        
+        const timestamp = Math.floor(date.getTime() / 1000).toString();
+        let newGte = type === 'gte' ? timestamp : gte;
+        let newLte = type === 'lte' ? timestamp : lte;
+        
+        // Auto-adjust the other date if the range exceeds 7 days
+        const gteDate = new Date(parseInt(newGte) * 1000);
+        const lteDate = new Date(parseInt(newLte) * 1000);
+        const diffInDays = (lteDate.getTime() - gteDate.getTime()) / (1000 * 60 * 60 * 24);
+        
+        if (diffInDays > 7) {
+          if (type === 'gte') {
+            // User changed start date, adjust end date to be 7 days later
+            const adjustedEndDate = new Date(gteDate.getTime() + (7 * 24 * 60 * 60 * 1000));
+            newLte = Math.floor(adjustedEndDate.getTime() / 1000).toString();
+          } else {
+            // User changed end date, adjust start date to be 7 days earlier
+            const adjustedStartDate = new Date(lteDate.getTime() - (7 * 24 * 60 * 60 * 1000));
+            newGte = Math.floor(adjustedStartDate.getTime() / 1000).toString();
+          }
+        } else if (diffInDays < 0) {
+          setError('End date must be after start date');
+          return;
+        }
+        
+        setError(null);
+        onDateRangeChange({
+          gte: newGte,
+          lte: newLte,
+        });
+      } catch (error) {
+        setError('Invalid date format');
+      }
+    }, 300); // 300ms debounce
+  }, [gte, lte, onDateRangeChange]);
 
   const setPresetRange = (days: number) => {
     if (days > 7) {
@@ -76,39 +150,42 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   };
 
   return (
-    <div className={`relative ${className}`}>
+    <div ref={containerRef} className={`relative ${className}`}>
       <Button
         variant="outline"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center space-x-2 ${error ? 'border-lavarage-red' : ''}`}
+        className={`flex items-center space-x-2 w-full sm:w-auto ${error ? 'border-lavarage-red' : ''}`}
       >
-        <Calendar className="h-4 w-4" />
-        <span>
+        <Calendar className="h-4 w-4 flex-shrink-0" />
+        <span className="truncate">
           {formatTimestamp(gte)} - {formatTimestamp(lte)}
         </span>
-        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`h-4 w-4 transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
       </Button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[300px]">
-          <div className="p-4">
+        <div className={`absolute bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-y-auto
+          ${dropdownPosition === 'bottom' ? 'top-full mt-2' : 'bottom-full mb-2'}
+          w-full sm:min-w-[300px] sm:left-0 sm:right-auto
+          left-0 right-0 max-h-[80vh] sm:max-h-[500px]`}>
+          <div className="p-3 sm:p-4">
             {error && (
-              <div className="mb-4 p-3 bg-lavarage-red/5 border border-lavarage-red/20 rounded-md">
+              <div className="mb-3 p-2 bg-lavarage-red/5 border border-lavarage-red/20 rounded-md">
                 <div className="flex items-center space-x-2 text-lavarage-red">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span className="text-sm font-medium">{error}</span>
+                  <AlertTriangle className="h-3 w-3 flex-shrink-0" />
+                  <span className="text-xs font-medium">{error}</span>
                 </div>
               </div>
             )}
 
             <div className="mb-4">
               <h3 className="text-sm font-medium text-gray-900 mb-2">Quick Presets</h3>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setPresetRange(1)}
-                  className="text-xs"
+                  className="text-xs px-2 py-1"
                 >
                   Last 24h
                 </Button>
@@ -116,7 +193,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => setPresetRange(3)}
-                  className="text-xs"
+                  className="text-xs px-2 py-1"
                 >
                   Last 3 days
                 </Button>
@@ -124,18 +201,9 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => setPresetRange(7)}
-                  className="text-xs"
+                  className="text-xs px-2 py-1"
                 >
                   Last 7 days
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setPresetRange(7)}
-                  className="text-xs opacity-50 cursor-not-allowed"
-                  disabled
-                >
-                  Last 30 days
                 </Button>
               </div>
             </div>
@@ -147,9 +215,12 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 </label>
                 <input
                   type="datetime-local"
-                  value={new Date(parseInt(gte) * 1000).toISOString().slice(0, 16)}
-                  onChange={(e) => handleDateChange('gte', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lavarage-primary focus:border-transparent"
+                  value={timestampToDatetimeLocal(gte)}
+                  onChange={(e) => {
+                    setError(null); // Clear error when user starts typing
+                    handleDateChange('gte', e.target.value);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lavarage-primary focus:border-transparent text-sm"
                 />
               </div>
 
@@ -159,9 +230,12 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 </label>
                 <input
                   type="datetime-local"
-                  value={new Date(parseInt(lte) * 1000).toISOString().slice(0, 16)}
-                  onChange={(e) => handleDateChange('lte', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lavarage-primary focus:border-transparent"
+                  value={timestampToDatetimeLocal(lte)}
+                  onChange={(e) => {
+                    setError(null); // Clear error when user starts typing
+                    handleDateChange('lte', e.target.value);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lavarage-primary focus:border-transparent text-sm"
                 />
               </div>
             </div>
@@ -174,6 +248,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   setIsOpen(false);
                   setError(null);
                 }}
+                className="px-4 py-2"
               >
                 Cancel
               </Button>
@@ -185,6 +260,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   }
                 }}
                 disabled={!!error}
+                className="px-4 py-2"
               >
                 Apply
               </Button>
