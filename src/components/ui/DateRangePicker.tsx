@@ -154,22 +154,21 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
       <Button
         variant="outline"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center space-x-2 ${error ? 'border-lavarage-red' : ''}`}
+        className={`flex items-center space-x-2 w-full sm:w-auto ${error ? 'border-lavarage-red' : ''}`}
       >
-        <Calendar className="h-4 w-4" />
-        <span>
+        <Calendar className="h-4 w-4 flex-shrink-0" />
+        <span className="truncate">
           {formatTimestamp(gte)} - {formatTimestamp(lte)}
         </span>
-        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`h-4 w-4 transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
       </Button>
 
       {isOpen && (
-        <div className={`absolute left-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[300px] max-h-[500px] overflow-y-auto ${
-          dropdownPosition === 'bottom' 
-            ? 'top-full mt-2' 
-            : 'bottom-full mb-2'
-        }`}>
-          <div className="p-3">
+        <div className={`absolute bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-y-auto
+          ${dropdownPosition === 'bottom' ? 'top-full mt-2' : 'bottom-full mb-2'}
+          w-full sm:min-w-[300px] sm:left-0 sm:right-auto
+          left-0 right-0 max-h-[80vh] sm:max-h-[500px]`}>
+          <div className="p-3 sm:p-4">
             {error && (
               <div className="mb-3 p-2 bg-lavarage-red/5 border border-lavarage-red/20 rounded-md">
                 <div className="flex items-center space-x-2 text-lavarage-red">
@@ -181,12 +180,12 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
             <div className="mb-4">
               <h3 className="text-sm font-medium text-gray-900 mb-2">Quick Presets</h3>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setPresetRange(1)}
-                  className="text-xs flex-1 min-w-0"
+                  className="text-xs px-2 py-1"
                 >
                   Last 24h
                 </Button>
@@ -194,7 +193,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => setPresetRange(3)}
-                  className="text-xs flex-1 min-w-0"
+                  className="text-xs px-2 py-1"
                 >
                   Last 3 days
                 </Button>
@@ -202,7 +201,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => setPresetRange(7)}
-                  className="text-xs flex-1 min-w-0"
+                  className="text-xs px-2 py-1"
                 >
                   Last 7 days
                 </Button>
@@ -221,7 +220,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                     setError(null); // Clear error when user starts typing
                     handleDateChange('gte', e.target.value);
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lavarage-primary focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lavarage-primary focus:border-transparent text-sm"
                 />
               </div>
 
@@ -236,7 +235,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                     setError(null); // Clear error when user starts typing
                     handleDateChange('lte', e.target.value);
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lavarage-primary focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lavarage-primary focus:border-transparent text-sm"
                 />
               </div>
             </div>
@@ -249,6 +248,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   setIsOpen(false);
                   setError(null);
                 }}
+                className="px-4 py-2"
               >
                 Cancel
               </Button>
@@ -260,6 +260,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   }
                 }}
                 disabled={!!error}
+                className="px-4 py-2"
               >
                 Apply
               </Button>
