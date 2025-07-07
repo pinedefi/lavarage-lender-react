@@ -127,62 +127,58 @@ const TokenDisplay: React.FC<{
   showAddress?: boolean;
   onCopyAddress?: (address: string) => void;
   copiedAddress?: string | null;
-}> = ({ token, showAddress = true, onCopyAddress, copiedAddress }) => (
-  <div className="flex items-center space-x-3">
-    <div className="h-8 w-8 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-      {token?.logoURI ? (
-        <img
-          src={token.logoURI}
-          alt={token.symbol || 'Token'}
-          className="h-8 w-8 rounded-lg object-cover"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-            const parent = target.parentElement;
-            if (parent) {
-              parent.className = 'h-8 w-8 bg-primary-100 rounded-lg flex items-center justify-center';
-              parent.innerHTML = `<span class="text-primary-600 font-semibold text-sm">${token?.symbol?.charAt(0) || 'T'}</span>`;
-            }
-          }}
-        />
-      ) : (
-        <div className="h-8 w-8 bg-primary-100 rounded-lg flex items-center justify-center">
-          <span className="text-primary-600 font-semibold text-sm">
-            {token?.symbol?.charAt(0) || 'T'}
-          </span>
-        </div>
-      )}
-    </div>
-    <div className="min-w-0 flex-1">
-      <div className="font-medium text-gray-900 text-sm whitespace-nowrap overflow-hidden">
-        {token?.symbol || 'Unknown'}
+}> = ({ token, showAddress = true, onCopyAddress, copiedAddress }) => {
+  const [imageError, setImageError] = useState(false);
+
+  return (
+    <div className="flex items-center space-x-3">
+      <div className="h-8 w-8 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+        {token?.logoURI && !imageError ? (
+          <img
+            src={token.logoURI}
+            alt={token.symbol || 'Token'}
+            className="h-8 w-8 rounded-lg object-cover"
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="h-8 w-8 bg-primary-100 rounded-lg flex items-center justify-center">
+            <span className="text-primary-600 font-semibold text-sm">
+              {token?.symbol?.charAt(0) || 'T'}
+            </span>
+          </div>
+        )}
       </div>
-      {showAddress && (
-        <div className="flex items-center space-x-1 min-w-0">
-          <span className="text-xs text-gray-500 truncate flex-1">
-            {token?.address ? truncateAddress(token.address) : 'Unknown Address'}
-          </span>
-          {token?.address && onCopyAddress && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onCopyAddress(token.address || '');
-              }}
-              className="p-0.5 rounded hover:bg-gray-100 transition-colors flex-shrink-0"
-              title="Copy address"
-            >
-              {copiedAddress === token.address ? (
-                <Check className="h-3 w-3 text-green-500" />
-              ) : (
-                <Copy className="h-3 w-3 text-gray-400 hover:text-gray-600" />
-              )}
-            </button>
-          )}
+      <div className="min-w-0 flex-1">
+        <div className="font-medium text-gray-900 text-sm whitespace-nowrap overflow-hidden">
+          {token?.symbol || 'Unknown'}
         </div>
-      )}
+        {showAddress && (
+          <div className="flex items-center space-x-1 min-w-0">
+            <span className="text-xs text-gray-500 truncate flex-1">
+              {token?.address ? truncateAddress(token.address) : 'Unknown Address'}
+            </span>
+            {token?.address && onCopyAddress && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCopyAddress(token.address || '');
+                }}
+                className="p-0.5 rounded hover:bg-gray-100 transition-colors flex-shrink-0"
+                title="Copy address"
+              >
+                {copiedAddress === token.address ? (
+                  <Check className="h-3 w-3 text-green-500" />
+                ) : (
+                  <Copy className="h-3 w-3 text-gray-400 hover:text-gray-600" />
+                )}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const UtilizationBar: React.FC<{ utilization: number; showPercentage?: boolean }> = ({
   utilization,
@@ -675,7 +671,7 @@ const Offers: React.FC = () => {
           ) : filteredOffers.length > 0 ? (
             <>
               {/* Desktop Table View */}
-              <div className="hidden lg:block overflow-x-auto">
+              <div className="hidden lg:block overflow-x-auto min-h-[400px]">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200">
