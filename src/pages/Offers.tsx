@@ -611,9 +611,9 @@ const Offers: React.FC = () => {
   }
 
   return (
-    <div className="card-glass p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+    <div className="card-glass p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:h-auto h-screen flex flex-col">
       {/* Responsive Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0 lg:flex-shrink lg:flex-grow-0 flex-shrink-0">
         <div className="min-w-0 flex-1">
           <GradientText variant="primary" size="3xl" weight="bold" as="h1" className="text-2xl sm:text-3xl">
             Lending Offers
@@ -631,8 +631,8 @@ const Offers: React.FC = () => {
         </Link>
       </div>
 
-      <Card>
-        <CardHeader>
+      <Card className="lg:block flex flex-col flex-1 min-h-0">
+        <CardHeader className="lg:block flex-shrink-0">
           <div className="flex flex-col space-y-4">
             <CardTitle>Your Offers</CardTitle>
             
@@ -663,7 +663,7 @@ const Offers: React.FC = () => {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="lg:block flex-1 overflow-y-auto min-h-0">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <LoadingSpinner size="lg" showLogo={true} message="Loading offers data..." />
@@ -671,7 +671,7 @@ const Offers: React.FC = () => {
           ) : filteredOffers.length > 0 ? (
             <>
               {/* Desktop Table View */}
-              <div className="hidden lg:block overflow-x-auto min-h-[400px]">
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200">
