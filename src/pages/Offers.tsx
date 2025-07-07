@@ -154,7 +154,7 @@ const TokenDisplay: React.FC<{
         </div>
         {showAddress && (
           <div className="flex items-center space-x-1 min-w-0">
-            <span className="text-xs text-gray-500 truncate flex-1">
+            <span className="text-xs text-gray-500 truncate">
               {token?.address ? truncateAddress(token.address) : 'Unknown Address'}
             </span>
             {token?.address && onCopyAddress && (
@@ -163,8 +163,8 @@ const TokenDisplay: React.FC<{
                   e.stopPropagation();
                   onCopyAddress(token.address || '');
                 }}
-                className="p-0.5 rounded hover:bg-gray-100 transition-colors flex-shrink-0"
-                title="Copy address"
+                className="p-0.5 rounded hover:bg-gray-100 transition-colors flex-shrink-0 ml-1"
+                title="Copy token address"
               >
                 {copiedAddress === token.address ? (
                   <Check className="h-3 w-3 text-green-500" />
