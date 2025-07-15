@@ -77,7 +77,7 @@ const CreateOffer: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>New Lending Offer</CardTitle>
+          <CardTitle>New Loan Offer</CardTitle>
         </CardHeader>
         <CardContent>
           <form className="space-y-6" onSubmit={handleSubmit}>
@@ -102,7 +102,7 @@ const CreateOffer: React.FC = () => {
                 </label>
                 <Input
                   variant="message"
-                  placeholder="Enter base token address"
+                  placeholder="Enter address"
                   value={baseToken}
                   onChange={(e) => setBaseToken(e.target.value.trim())}
                 />
@@ -120,7 +120,7 @@ const CreateOffer: React.FC = () => {
                 <Input
                   variant="message"
                   type="number"
-                  placeholder="Enter amount to lend"
+                  placeholder="Enter amount"
                   min="0"
                   step="0.1"
                   value={amount}
@@ -134,7 +134,7 @@ const CreateOffer: React.FC = () => {
                 <Input
                   variant="message"
                   type="number"
-                  placeholder="Enter annual interest rate"
+                  placeholder="Enter interest rate"
                   min="0"
                   max="255"
                   step="1"

@@ -149,7 +149,35 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, mobileMenuOpen = false })
               </div>
             ) : (
               <div className="flex items-center space-x-4">
-                <WalletMultiButton className="btn-lavarage !text-white !font-bold !shadow-lg hover:!shadow-xl !transition-all !duration-300" />
+                {/* Mobile: Icon-only wallet button */}
+                <div className="md:hidden">
+                  <button
+                    onClick={() => {
+                      // Find and click the hidden wallet button
+                      const walletBtn = document.querySelector('.wallet-adapter-button-trigger') as HTMLButtonElement;
+                      if (walletBtn) {
+                        walletBtn.click();
+                      } else {
+                        // Fallback: look for any wallet button
+                        const anyWalletBtn = document.querySelector('[data-testid="wallet-adapter-button"]') as HTMLButtonElement;
+                        if (anyWalletBtn) anyWalletBtn.click();
+                      }
+                    }}
+                    className="p-2 rounded-lg bg-gradient-to-r from-lavarage-orange to-lavarage-red hover:from-lavarage-red hover:to-lavarage-coral transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+                    aria-label="Connect wallet"
+                  >
+                    <Wallet className="h-5 w-5 text-white" />
+                  </button>
+                  {/* Hidden wallet button for functionality */}
+                  <div className="hidden">
+                    <WalletMultiButton />
+                  </div>
+                </div>
+                
+                {/* Desktop/Tablet: Full wallet button */}
+                <div className="hidden md:block">
+                  <WalletMultiButton className="btn-lavarage !text-white !font-bold !shadow-lg hover:!shadow-xl !transition-all !duration-300" />
+                </div>
               </div>
             )}
           </div>

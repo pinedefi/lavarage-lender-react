@@ -131,7 +131,7 @@ const TokenDisplay: React.FC<{
   const [imageError, setImageError] = useState(false);
 
   return (
-    <div className="flex items-center space-x-3">
+    <div className="flex items-center space-x-2 min-w-0">
       <div className="h-8 w-8 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
         {token?.logoURI && !imageError ? (
           <img
@@ -149,7 +149,7 @@ const TokenDisplay: React.FC<{
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="font-medium text-gray-900 text-sm whitespace-nowrap overflow-hidden">
+        <div className="font-medium text-gray-900 text-xs truncate">
           {token?.symbol || 'Unknown'}
         </div>
         {showAddress && (
@@ -252,7 +252,7 @@ const OfferCard: React.FC<{
   return (
     <Card className="mb-4">
       <CardContent className="p-4">
-        <div className="flex items-start justify-between mb-4 gap-2">
+        <div className="flex flex-col space-y-3 mb-4 sm:flex-row sm:items-start sm:justify-between sm:space-y-0 sm:gap-2">
           <div className="flex-1 min-w-0">
             <TokenDisplay
               token={offer.collateralToken}
@@ -260,28 +260,30 @@ const OfferCard: React.FC<{
               copiedAddress={copiedAddress}
             />
           </div>
-          <div className="flex items-center space-x-1 flex-shrink-0">
+          <div className="flex items-center justify-between sm:justify-start sm:space-x-1 sm:flex-shrink-0">
             <Badge variant={offer.active ? 'success' : 'gray'} size="sm" className="whitespace-nowrap">
               {offer.active ? 'Active' : 'Inactive'}
             </Badge>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onEdit(offer)}
-              className="p-1 h-8 w-8 flex-shrink-0"
-              title="Edit offer"
-            >
-              <Edit3 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onToggle(offer)}
-              className="p-1 h-8 w-8 flex-shrink-0"
-              title={offer.active ? 'Pause offer' : 'Activate offer'}
-            >
-              {offer.active ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-            </Button>
+            <div className="flex items-center space-x-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEdit(offer)}
+                className="p-1 h-8 w-8 flex-shrink-0"
+                title="Edit offer"
+              >
+                <Edit3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onToggle(offer)}
+                className="p-1 h-8 w-8 flex-shrink-0"
+                title={offer.active ? 'Pause offer' : 'Activate offer'}
+              >
+                {offer.active ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -454,7 +456,7 @@ const Offers: React.FC = () => {
 
     return (
       <Modal open={!!offer} onClose={onClose}>
-        <div className="p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="p-4 sm:p-6 space-y-4">
           <h2 className="text-lg sm:text-xl font-semibold">Edit Offer</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -544,7 +546,7 @@ const Offers: React.FC = () => {
     return (
       <Modal open={!!offer} onClose={onClose}>
         <div className="card-lavarage p-4 sm:p-8 space-y-4 sm:space-y-6">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-1.5">
             <div className={`p-3 rounded-full ${isActive ? 'bg-warning-100' : 'bg-success-100'}`}>
               {isActive ? (
                 <Pause className="h-6 w-6 text-warning-600" />
@@ -553,7 +555,7 @@ const Offers: React.FC = () => {
               )}
             </div>
             <div>
-              <GradientText variant="primary" size="xl" weight="bold" as="h2">
+              <GradientText variant="primary" size="lg" weight="bold" as="h3">
                 {actionText} Offer
               </GradientText>
             </div>
