@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { WalletMultiButton } from '@/contexts/WalletContext';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useWallet } from '@/contexts/WalletContext';
 import { truncateAddress } from '@/utils';
 import {
@@ -26,12 +26,12 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onMenuToggle, mobileMenuOpen = false }) => {
-  const { publicKey, connected, disconnect } = useWallet();
+  const { publicKey, connected, disconnect, connect } = useWallet();
   const location = useLocation();
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: BarChart3 },
-    { name: 'My Offers', href: '/offers', icon: Coins },
+    { name: 'Offers', href: '/offers', icon: Coins },
     { name: 'Balances', href: '/balances', icon: DollarSign },
     { name: 'Positions', href: '/positions', icon: TrendingUp },
     { name: 'Liquidations', href: '/liquidations', icon: Wallet }, 
@@ -44,37 +44,57 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, mobileMenuOpen = false })
     return location.pathname.startsWith(path);
   };
 
+  const handleMobileWalletClick = async () => {
+    try {
+      if (connected) {
+        await disconnect();
+      } else {
+        // For mobile, we'll trigger the same wallet connection as the desktop button
+        // We use a more reliable approach by finding the actual WalletMultiButton
+        const walletButton = document.querySelector('.wallet-adapter-button') as HTMLButtonElement;
+        if (walletButton) {
+          walletButton.click();
+        } else {
+          // Fallback to connect method
+          await connect();
+        }
+      }
+    } catch (error) {
+      console.error('Wallet connection error:', error);
+    }
+  };
+
   return (
     <header className="lavarage-header sticky top-0 z-40">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Left side - Logo and Navigation */}
-          <div className="flex items-center">
+          <div className="flex items-center flex-1 min-w-0">
             {/* Mobile menu button */}
             <button
               onClick={onMenuToggle}
-              className="md:hidden p-2 rounded-md text-gray-400 hover:text-lavarage-coral hover:bg-lavarage-subtle focus:outline-none focus:ring-2 focus:ring-lavarage-coral transition-all duration-300"
+              className="lg:hidden p-2 rounded-md text-gray-400 hover:text-lavarage-coral hover:bg-lavarage-subtle focus:outline-none focus:ring-2 focus:ring-lavarage-coral transition-all duration-300"
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
 
             {/* LAVARAGE Logo */}
-            <Link to="/" className="flex items-center group">
-              <div className="flex-shrink-0 flex items-center transition-transform duration-300 group-hover:scale-105">
+            <Link to="/" className="flex items-center group flex-shrink-0">
+              <div className="flex items-center transition-transform duration-300 group-hover:scale-105">
                 <LavarageLogo
                   variant="horizontal"
                   size="lg"
                   priority={true}
                   className="transition-all duration-300"
                 />
-                <Badge variant="primary" size="sm" className="ml-3 badge-lavarage shadow-md">
+                <Badge variant="primary" size="sm" className="ml-2 lg:ml-3 badge-lavarage shadow-md">
                   Lender
                 </Badge>
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex ml-10 space-x-8">
+            {/* Desktop/Tablet Navigation */}
+            <nav className="hidden lg:flex ml-6 xl:ml-10 space-x-4 xl:space-x-8 flex-1 justify-center max-w-2xl">
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
@@ -82,18 +102,19 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, mobileMenuOpen = false })
                   <Link
                     key={item.name}
                     to={item.href}
-                    className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-all duration-300 ${
+                    className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-all duration-300 whitespace-nowrap ${
                       active
                         ? 'nav-link-active'
                         : 'border-transparent text-gray-500 hover:text-lavarage-coral hover:border-lavarage-orange/50'
                     }`}
                   >
                     <Icon
-                      className={`h-4 w-4 mr-2 transition-colors duration-300 ${
+                      className={`h-4 w-4 mr-1 xl:mr-2 transition-colors duration-300 ${
                         active ? 'text-lavarage-red' : ''
                       }`}
                     />
-                    {item.name}
+                    <span className="hidden xl:inline">{item.name}</span>
+                    <span className="xl:hidden text-xs">{item.name}</span>
                   </Link>
                 );
               })}
@@ -101,40 +122,17 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, mobileMenuOpen = false })
           </div>
 
           {/* Right side - Wallet and User Actions */}
-          <div className="flex items-center space-x-4">
-            {/* Notifications */}
-            {/* <button className="p-2 text-gray-400 hover:text-lavarage-coral relative transition-colors duration-300 group" aria-label="Notifications">
-              <Bell className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
-              <span className="notification-dot absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white"></span>
-            </button> */}
-
+          <div className="flex items-center space-x-2 lg:space-x-4 flex-shrink-0">
             {/* Wallet Connection */}
             {connected && publicKey ? (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2 lg:space-x-3">
                 {/* Wallet Address Display */}
-                <div className="hidden sm:flex items-center space-x-2 glass-lavarage rounded-lg px-3 py-2 transition-all duration-300 hover:shadow-lg">
+                <div className="hidden sm:flex items-center space-x-2 glass-lavarage rounded-lg px-2 lg:px-3 py-2 transition-all duration-300 hover:shadow-lg">
                   <div className="status-connected h-2 w-2 rounded-full shadow-sm"></div>
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-xs lg:text-sm font-medium text-gray-700">
                     {truncateAddress(publicKey.toBase58())}
                   </span>
                 </div>
-
-                {/* User Menu */}
-                {/* <div className="relative">
-                  <button className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lavarage-coral transition-all duration-300 group">
-                    <div className="h-8 w-8 bg-lavarage-primary rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
-                      <User className="h-5 w-5 text-white" />
-                    </div>
-                  </button>
-                </div> */}
-
-                {/* Settings */}
-                {/* <button
-                  className="p-2 text-gray-400 hover:text-lavarage-coral transition-colors duration-300 group"
-                  aria-label="Settings"
-                >
-                  <Settings className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
-                </button> */}
 
                 {/* Disconnect */}
                 <Button
@@ -148,34 +146,20 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, mobileMenuOpen = false })
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center space-x-4">
-                {/* Mobile: Icon-only wallet button */}
-                <div className="md:hidden">
+              <div className="flex items-center space-x-2 lg:space-x-4">
+                {/* Mobile/Tablet: Icon-only wallet button */}
+                <div className="lg:hidden">
                   <button
-                    onClick={() => {
-                      // Find and click the hidden wallet button
-                      const walletBtn = document.querySelector('.wallet-adapter-button-trigger') as HTMLButtonElement;
-                      if (walletBtn) {
-                        walletBtn.click();
-                      } else {
-                        // Fallback: look for any wallet button
-                        const anyWalletBtn = document.querySelector('[data-testid="wallet-adapter-button"]') as HTMLButtonElement;
-                        if (anyWalletBtn) anyWalletBtn.click();
-                      }
-                    }}
+                    onClick={handleMobileWalletClick}
                     className="p-2 rounded-lg bg-gradient-to-r from-lavarage-orange to-lavarage-red hover:from-lavarage-red hover:to-lavarage-coral transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
                     aria-label="Connect wallet"
                   >
                     <Wallet className="h-5 w-5 text-white" />
                   </button>
-                  {/* Hidden wallet button for functionality */}
-                  <div className="hidden">
-                    <WalletMultiButton />
-                  </div>
                 </div>
                 
-                {/* Desktop/Tablet: Full wallet button */}
-                <div className="hidden md:block">
+                {/* Desktop: Full wallet button */}
+                <div className="hidden lg:block">
                   <WalletMultiButton className="btn-lavarage !text-white !font-bold !shadow-lg hover:!shadow-xl !transition-all !duration-300" />
                 </div>
               </div>
@@ -184,9 +168,9 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, mobileMenuOpen = false })
         </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile/Tablet Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-lavarage-orange/10 bg-gradient-to-r from-lavarage-subtle to-transparent animate-in slide-in-from-top-2 duration-200">
+        <div className="lg:hidden border-t border-lavarage-orange/10 bg-gradient-to-r from-lavarage-subtle to-transparent animate-in slide-in-from-top-2 duration-200">
           <div className="px-2 py-3 space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon;
