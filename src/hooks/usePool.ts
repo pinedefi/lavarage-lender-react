@@ -30,6 +30,51 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
 
   const { quoteToken = 'SOL', autoRefresh = true, refreshInterval = 30000 } = options;
 
+  const getUserFriendlyErrorMessage = (error: any): string => {
+    const errorMessage = typeof error === 'string' ? error : error?.message || 'Unknown error';
+
+    // User rejected the transaction
+    if (errorMessage.includes('User rejected') || errorMessage.includes('user rejected')) {
+      return 'Transaction was cancelled by user';
+    }
+
+    // Insufficient funds
+    if (
+      errorMessage.includes('Insufficient funds') ||
+      errorMessage.includes('insufficient funds')
+    ) {
+      return 'Insufficient funds in wallet';
+    }
+
+    // Network errors
+    if (errorMessage.includes('Network request failed') || errorMessage.includes('fetch')) {
+      return 'Network error. Please check your connection and try again';
+    }
+
+    // Wallet not connected
+    if (errorMessage.includes('Wallet not connected')) {
+      return 'Please connect your wallet first';
+    }
+
+    // Transaction failed
+    if (errorMessage.includes('Transaction failed')) {
+      return 'Transaction failed. Please try again';
+    }
+
+    // Timeout errors
+    if (errorMessage.includes('timeout') || errorMessage.includes('Timeout')) {
+      return 'Transaction timed out. Please try again';
+    }
+
+    // Slippage errors
+    if (errorMessage.includes('slippage') || errorMessage.includes('Slippage')) {
+      return 'Transaction failed due to slippage. Please try again';
+    }
+
+    // Generic fallback
+    return errorMessage;
+  };
+
   const fetchBalance = useCallback(async () => {
     if (!connected || !publicKey) {
       setBalance(0);
@@ -49,7 +94,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
     } catch (err: any) {
       const message = err.message || 'Failed to fetch balance';
       setError(message);
-      
+
       // Handle LavaRock NFT errors globally
       handleError(message);
     } finally {
@@ -85,12 +130,13 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
       } catch (err: any) {
         const message = err.message || 'Deposit failed';
         setError(message);
-        
+
         // Handle LavaRock NFT errors globally first
         handleError(message);
-        
-        // Then show toast for all errors
-        toast.error(message);
+
+        // Show user-friendly toast message
+        const userFriendlyMessage = getUserFriendlyErrorMessage(err);
+        toast.error(userFriendlyMessage);
         throw err;
       }
     },
@@ -120,17 +166,18 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         const signature = await sendTransaction(transaction);
 
         console.log('Transaction sent with signature:', signature);
-        toast.success('Withdraw submitted successfully');
+        toast.success('Withdrawal submitted successfully');
         await fetchBalance();
       } catch (err: any) {
         const message = err.message || 'Withdraw failed';
         setError(message);
-        
+
         // Handle LavaRock NFT errors globally first
         handleError(message);
-        
-        // Then show toast for all errors
-        toast.error(message);
+
+        // Show user-friendly toast message
+        const userFriendlyMessage = getUserFriendlyErrorMessage(err);
+        toast.error(userFriendlyMessage);
         throw err;
       }
     },
