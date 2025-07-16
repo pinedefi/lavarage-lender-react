@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Plus,
@@ -39,11 +39,298 @@ import {
 import { OfferV2Model } from '@/types';
 import { copyToClipboard } from '@/utils';
 
+// Custom dropdown component to fix positioning issues
+const StatusDropdown: React.FC<{
+  value: 'all' | 'active' | 'inactive';
+  onChange: (value: 'all' | 'active' | 'inactive') => void;
+}> = ({ value, onChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  const options = [
+    { value: 'all', label: 'All Status' },
+    { value: 'active', label: 'Active' },
+    { value: 'inactive', label: 'Inactive' },
+  ];
+  
+  const selectedOption = options.find(opt => opt.value === value);
+  
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isOpen]);
+  
+  // Close dropdown on escape key
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+    
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [isOpen]);
+  
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent min-w-[120px] cursor-pointer"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+      >
+        <span>{selectedOption?.label}</span>
+        <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+      
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-60 overflow-auto">
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => {
+                onChange(option.value as 'all' | 'active' | 'inactive');
+                setIsOpen(false);
+              }}
+              className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 transition-colors first:rounded-t-md last:rounded-b-md ${
+                value === option.value ? 'bg-primary-50 text-primary-600 font-medium' : 'text-gray-700'
+              }`}
+              role="option"
+              aria-selected={value === option.value}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Reusable components to eliminate duplication
+const TokenDisplay: React.FC<{
+  token: OfferV2Model['collateralToken'];
+  showAddress?: boolean;
+  onCopyAddress?: (address: string) => void;
+  copiedAddress?: string | null;
+}> = ({ token, showAddress = true, onCopyAddress, copiedAddress }) => {
+  const [imageError, setImageError] = useState(false);
+
+  return (
+    <div className="flex items-center space-x-2 min-w-0">
+      <div className="h-8 w-8 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+        {token?.logoURI && !imageError ? (
+          <img
+            src={token.logoURI}
+            alt={token.symbol || 'Token'}
+            className="h-8 w-8 rounded-lg object-cover"
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="h-8 w-8 bg-primary-100 rounded-lg flex items-center justify-center">
+            <span className="text-primary-600 font-semibold text-sm">
+              {token?.symbol?.charAt(0) || 'T'}
+            </span>
+          </div>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="font-medium text-gray-900 text-xs truncate">
+          {token?.symbol || 'Unknown'}
+        </div>
+        {showAddress && (
+          <div className="flex items-center space-x-1 min-w-0">
+            <span className="text-xs text-gray-500 truncate">
+              {token?.address ? truncateAddress(token.address) : 'Unknown Address'}
+            </span>
+            {token?.address && onCopyAddress && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCopyAddress(token.address || '');
+                }}
+                className="p-0.5 rounded hover:bg-gray-100 transition-colors flex-shrink-0 ml-1"
+                title="Copy token address"
+              >
+                {copiedAddress === token.address ? (
+                  <Check className="h-3 w-3 text-green-500" />
+                ) : (
+                  <Copy className="h-3 w-3 text-gray-400 hover:text-gray-600" />
+                )}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const UtilizationBar: React.FC<{ utilization: number; showPercentage?: boolean }> = ({
+  utilization,
+  showPercentage = true,
+}) => (
+  <div className="flex items-center space-x-2">
+    {showPercentage && (
+      <span className="font-semibold text-gray-900 text-sm">
+        {formatPercentage(utilization, 1)}
+      </span>
+    )}
+    <div className="w-16 bg-gray-200 rounded-full h-1.5 flex-shrink-0">
+      <div
+        className={`h-1.5 rounded-full transition-all duration-300 ${
+          utilization > 80
+            ? 'bg-success-500'
+            : utilization > 50
+              ? 'bg-warning-500'
+              : 'bg-primary-500'
+        }`}
+        style={{ width: `${Math.min(utilization, 100)}%` }}
+      ></div>
+    </div>
+  </div>
+);
+
+const SortableHeader: React.FC<{
+  children: React.ReactNode;
+  sortKey: 'created' | 'apr' | 'utilization' | 'exposure' | 'token' | 'available';
+  currentSort: string;
+  sortOrder: 'asc' | 'desc';
+  onSort: (key: 'created' | 'apr' | 'utilization' | 'exposure' | 'token' | 'available') => void;
+  className?: string;
+}> = ({ children, sortKey, currentSort, sortOrder, onSort, className = '' }) => (
+  <th
+    className={`text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-50 ${className}`}
+    onClick={() => onSort(sortKey)}
+  >
+    <div className="flex items-center space-x-1">
+      <span>{children}</span>
+      {currentSort !== sortKey ? (
+        <ArrowUpDown className="h-4 w-4 text-gray-400" />
+      ) : sortOrder === 'asc' ? (
+        <ChevronUp className="h-4 w-4 text-primary-600" />
+      ) : (
+        <ChevronDown className="h-4 w-4 text-primary-600" />
+      )}
+    </div>
+  </th>
+);
+
+// Mobile-friendly offer card component
+const OfferCard: React.FC<{
+  offer: OfferV2Model;
+  onEdit: (offer: OfferV2Model) => void;
+  onToggle: (offer: OfferV2Model) => void;
+  onCopyAddress: (address: string) => void;
+  copiedAddress: string | null;
+}> = ({ offer, onEdit, onToggle, onCopyAddress, copiedAddress }) => {
+  const utilization = (() => {
+    const maxExposure = parseFloat(offer.maxExposure) || 0;
+    const currentExposure = parseFloat(offer.currentExposure) || 0;
+    return maxExposure > 0 ? (currentExposure / maxExposure) * 100 : 0;
+  })();
+
+  const quoteToken = typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
+  const symbol = quoteToken?.symbol ?? 'SOL';
+  const availableAmount = parseFloat(offer.availableForOpen) || 0;
+  const totalExposure = parseFloat(offer.maxExposure) || 0;
+
+  return (
+    <Card className="mb-4">
+      <CardContent className="p-4">
+        <div className="flex flex-col space-y-3 mb-4 sm:flex-row sm:items-start sm:justify-between sm:space-y-0 sm:gap-2">
+          <div className="flex-1 min-w-0">
+            <TokenDisplay
+              token={offer.collateralToken}
+              onCopyAddress={onCopyAddress}
+              copiedAddress={copiedAddress}
+            />
+          </div>
+          <div className="flex items-center justify-between sm:justify-start sm:space-x-1 sm:flex-shrink-0">
+            <Badge variant={offer.active ? 'success' : 'gray'} size="sm" className="whitespace-nowrap">
+              {offer.active ? 'Active' : 'Inactive'}
+            </Badge>
+            <div className="flex items-center space-x-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEdit(offer)}
+                className="p-1 h-8 w-8 flex-shrink-0"
+                title="Edit offer"
+              >
+                <Edit3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onToggle(offer)}
+                className="p-1 h-8 w-8 flex-shrink-0"
+                title={offer.active ? 'Pause offer' : 'Activate offer'}
+              >
+                {offer.active ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-gray-500">APR</span>
+            <div className="font-semibold text-gray-900">{formatPercentage(offer.apr)}</div>
+          </div>
+          <div>
+            <span className="text-gray-500">LTV</span>
+            <div className="font-semibold text-gray-900">
+              {offer.targetLtv !== null && offer.targetLtv !== undefined
+                ? formatPercentage(offer.targetLtv * 100)
+                : 'N/A'}
+            </div>
+          </div>
+          <div>
+            <span className="text-gray-500">Max Exposure</span>
+            <div className="font-semibold text-gray-900">
+              {formatNumber(totalExposure, 2)} {symbol}
+            </div>
+          </div>
+          <div>
+            <span className="text-gray-500">Available</span>
+            <div className="font-semibold text-gray-900">
+              {formatNumber(availableAmount, 2)} {symbol}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-gray-500 text-sm">Utilization</span>
+            <span className="text-sm text-gray-500">{formatDate(offer.createdAt, 'relative')}</span>
+          </div>
+          <UtilizationBar utilization={utilization} />
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 const Offers: React.FC = () => {
   const { connected } = useWallet();
   const { offers, loading, error, refetch, changeLTV, updateOffer } = useOffers({
     autoRefresh: true,
-    inactiveOffers: true, // Include inactive offers so users can reactivate them
+    inactiveOffers: true,
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
@@ -59,7 +346,7 @@ const Offers: React.FC = () => {
     const success = await copyToClipboard(address);
     if (success) {
       setCopiedAddress(address);
-      setTimeout(() => setCopiedAddress(null), 2000); // Reset after 2 seconds
+      setTimeout(() => setCopiedAddress(null), 2000);
     }
   };
 
@@ -126,23 +413,6 @@ const Offers: React.FC = () => {
     }
   };
 
-  const getUtilization = (offer: OfferV2Model) => {
-    const maxExposure = parseFloat(offer.maxExposure) || 0;
-    const currentExposure = parseFloat(offer.currentExposure) || 0;
-    return maxExposure > 0 ? (currentExposure / maxExposure) * 100 : 0;
-  };
-
-  const getSortIcon = (column: string) => {
-    if (sortBy !== column) {
-      return <ArrowUpDown className="h-4 w-4 text-gray-400" />;
-    }
-    return sortOrder === 'asc' ? (
-      <ChevronUp className="h-4 w-4 text-primary-600" />
-    ) : (
-      <ChevronDown className="h-4 w-4 text-primary-600" />
-    );
-  };
-
   const OfferModal: React.FC<{
     offer: OfferV2Model | null;
     onClose: () => void;
@@ -154,7 +424,6 @@ const Offers: React.FC = () => {
     useEffect(() => {
       if (offer) {
         const quoteToken = typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
-        const decimals = quoteToken?.decimals ?? 9;
         setApr(formatNumberForInput(offer.apr, 2));
         setExposure(formatNumberForInput(parseFloat(offer.maxExposure), 2));
         setLtv(formatNumberForInput((offer.targetLtv || 0.75) * 100, 2));
@@ -181,15 +450,14 @@ const Offers: React.FC = () => {
 
     const handleLtvSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      // Convert percentage to decimal for API (75 -> 0.75)
       await changeLTV(offer.publicKey.toString(), parseFloat(ltv) / 100);
       onClose();
     };
 
     return (
       <Modal open={!!offer} onClose={onClose}>
-        <div className="p-6 space-y-4">
-          <h2 className="text-xl font-semibold">Edit Offer</h2>
+        <div className="p-4 sm:p-6 space-y-4">
+          <h2 className="text-lg sm:text-xl font-semibold">Edit Offer</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">APR (%)</label>
@@ -213,17 +481,17 @@ const Offers: React.FC = () => {
                 min="0"
               />
             </div>
-            <div className="flex justify-end space-x-2 pt-2">
-              <Button type="button" variant="ghost" onClick={onClose}>
+            <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-2">
+              <Button type="button" variant="ghost" onClick={onClose} className="w-full sm:w-auto">
                 Cancel
               </Button>
-              <Button type="submit" variant="primary">
+              <Button type="submit" variant="primary" className="w-full sm:w-auto">
                 Save
               </Button>
             </div>
           </form>
           <hr />
-          <h2 className="text-xl font-semibold">Change LTV</h2>
+          <h2 className="text-lg sm:text-xl font-semibold">Change LTV</h2>
           <form onSubmit={handleLtvSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">New LTV (%)</label>
@@ -238,7 +506,7 @@ const Offers: React.FC = () => {
               />
             </div>
             <div className="flex justify-end pt-2">
-              <Button type="submit" variant="primary">
+              <Button type="submit" variant="primary" className="w-full sm:w-auto">
                 Update LTV
               </Button>
             </div>
@@ -263,11 +531,9 @@ const Offers: React.FC = () => {
     const handleAction = async () => {
       try {
         if (isActive) {
-          // Pause the offer by setting LTV to 0
           await changeLTV(offer.publicKey.toString(), 0);
         } else {
-          // Reactivate the offer by setting LTV to a default value (75%)
-          const defaultLTV = 0.75; // 75%
+          const defaultLTV = 0.75;
           await changeLTV(offer.publicKey.toString(), defaultLTV);
         }
       } catch (error) {
@@ -279,8 +545,8 @@ const Offers: React.FC = () => {
 
     return (
       <Modal open={!!offer} onClose={onClose}>
-        <div className="card-lavarage p-8 space-y-6">
-          <div className="flex items-center space-x-3">
+        <div className="card-lavarage p-4 sm:p-8 space-y-4 sm:space-y-6">
+          <div className="flex items-center space-x-1.5">
             <div className={`p-3 rounded-full ${isActive ? 'bg-warning-100' : 'bg-success-100'}`}>
               {isActive ? (
                 <Pause className="h-6 w-6 text-warning-600" />
@@ -289,7 +555,7 @@ const Offers: React.FC = () => {
               )}
             </div>
             <div>
-              <GradientText variant="primary" size="xl" weight="bold" as="h2">
+              <GradientText variant="primary" size="lg" weight="bold" as="h3">
                 {actionText} Offer
               </GradientText>
             </div>
@@ -304,11 +570,11 @@ const Offers: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-4">
-            <Button variant="ghost" onClick={onClose} className="px-6">
+          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
+            <Button variant="ghost" onClick={onClose} className="px-6 w-full sm:w-auto">
               Cancel
             </Button>
-            <Button variant="primary" onClick={handleAction} className={`px-6`}>
+            <Button variant="primary" onClick={handleAction} className="px-6 w-full sm:w-auto">
               {isActive ? (
                 <>
                   <Pause className="h-4 w-4 mr-2" />
@@ -329,9 +595,9 @@ const Offers: React.FC = () => {
 
   if (!connected) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex items-center justify-center min-h-[60vh] p-4">
         <Card className="max-w-md mx-auto text-center">
-          <CardContent className="p-8">
+          <CardContent className="p-6 sm:p-8">
             <div className="h-16 w-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Activity className="h-8 w-8 text-primary-600" />
             </div>
@@ -347,308 +613,247 @@ const Offers: React.FC = () => {
   }
 
   return (
-    <div className="card-glass p-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <GradientText variant="primary" size="3xl" weight="bold" as="h1">
+    <div className="card-glass p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:h-auto h-screen flex flex-col">
+      {/* Responsive Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0 lg:flex-shrink lg:flex-grow-0 flex-shrink-0">
+        <div className="min-w-0 flex-1">
+          <GradientText variant="primary" size="3xl" weight="bold" as="h1" className="text-2xl sm:text-3xl">
             Lending Offers
           </GradientText>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-600 mt-2 text-sm sm:text-base">
             Manage your <span className="font-semibold text-lavarage-coral">LAVARAGE</span> lending
             offers and track performance
           </p>
         </div>
-        <Link to="/create-offer">
-          <Button variant="glass" size="sm">
+        <Link to="/create-offer" className="w-full sm:w-auto">
+          <Button variant="glass" size="sm" className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
             Create Offer
           </Button>
         </Link>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+      <Card className="lg:block flex flex-col flex-1 min-h-0">
+        <CardHeader className="lg:block flex-shrink-0">
+          <div className="flex flex-col space-y-4">
             <CardTitle>Your Offers</CardTitle>
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+            
+            {/* Responsive Filters */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               {/* Search Bar */}
-              <div className="relative">
+              <div className="relative flex-1 sm:max-w-xs">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none z-10" />
                 <Input
                   type="text"
                   placeholder="Search offers..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-full sm:w-64"
+                  className="pl-10 pr-4 py-2 w-full"
                 />
               </div>
 
               {/* Status Filter */}
-              <div className="flex items-center space-x-2">
-                <Filter className="h-4 w-4 text-gray-400" />
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
-                  className="px-3 py-2 pr-8 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white appearance-none cursor-pointer"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                    backgroundPosition: 'right 0.5rem center',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundSize: '1.5em 1.5em',
-                  }}
-                >
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
+              <div className="flex items-center gap-2 sm:flex-shrink-0">
+                <Filter className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                <div className="flex-1 sm:flex-initial">
+                  <StatusDropdown
+                    value={statusFilter}
+                    onChange={setStatusFilter}
+                  />
+                </div>
               </div>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="lg:block flex-1 overflow-y-auto min-h-0">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <LoadingSpinner size="lg" showLogo={true} message="Loading offers data..." />
             </div>
           ) : filteredOffers.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th
-                      className="text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleSort('token')}
-                    >
-                      <div className="flex items-center space-x-1">
-                        <span>Token</span>
-                        {getSortIcon('token')}
-                      </div>
-                    </th>
-                    <th
-                      className="text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleSort('apr')}
-                    >
-                      <div className="flex items-center space-x-1">
-                        <span>APR</span>
-                        {getSortIcon('apr')}
-                      </div>
-                    </th>
-                    <th
-                      className="text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleSort('utilization')}
-                    >
-                      <div className="flex items-center space-x-1">
-                        <span>Utilization</span>
-                        {getSortIcon('utilization')}
-                      </div>
-                    </th>
-                    <th
-                      className="text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleSort('exposure')}
-                    >
-                      <div className="flex items-center space-x-1">
-                        <span>Max Exposure</span>
-                        {getSortIcon('exposure')}
-                      </div>
-                    </th>
-                    <th
-                      className="text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleSort('available')}
-                    >
-                      <div className="flex items-center space-x-1">
-                        <span>Available</span>
-                        {getSortIcon('available')}
-                      </div>
-                    </th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">LTV</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
-                    <th
-                      className="text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleSort('created')}
-                    >
-                      <div className="flex items-center space-x-1">
-                        <span>Created</span>
-                        {getSortIcon('created')}
-                      </div>
-                    </th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredOffers.map((offer) => {
-                    const utilization = getUtilization(offer);
-                    const quoteToken =
-                      typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
-                    const decimals = quoteToken?.decimals ?? 9;
-                    const symbol = quoteToken?.symbol ?? 'SOL';
-                    const availableAmount = parseFloat(offer.availableForOpen) || 0;
-                    const totalExposure = parseFloat(offer.maxExposure) || 0;
-
-                    return (
-                      <tr
-                        key={offer.publicKey.toString()}
-                        className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <SortableHeader
+                        sortKey="token"
+                        currentSort={sortBy}
+                        sortOrder={sortOrder}
+                        onSort={handleSort}
                       >
-                        <td className="py-4 px-4">
-                          <div className="flex items-center space-x-3">
-                            <div className="h-8 w-8 rounded-lg flex items-center justify-center overflow-hidden">
-                              {offer.collateralToken?.logoURI ? (
-                                <img
-                                  src={offer.collateralToken.logoURI}
-                                  alt={offer.collateralToken.symbol || 'Token'}
-                                  className="h-8 w-8 rounded-lg object-cover"
-                                  onError={(e) => {
-                                    // Fallback to text avatar if image fails to load
-                                    const target = e.target as HTMLImageElement;
-                                    target.style.display = 'none';
-                                    const parent = target.parentElement;
-                                    if (parent) {
-                                      parent.className =
-                                        'h-8 w-8 bg-primary-100 rounded-lg flex items-center justify-center';
-                                      parent.innerHTML = `<span class="text-primary-600 font-semibold text-sm">${offer.collateralToken?.symbol?.charAt(0) || 'T'}</span>`;
-                                    }
-                                  }}
-                                />
-                              ) : (
-                                <div className="h-8 w-8 bg-primary-100 rounded-lg flex items-center justify-center">
-                                  <span className="text-primary-600 font-semibold text-sm">
-                                    {offer.collateralToken?.symbol?.charAt(0) || 'T'}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                            <div>
-                              <div className="font-medium text-gray-900 text-sm">
-                                {offer.collateralToken?.symbol || 'Unknown'}
-                              </div>
-                              <div className="flex items-center space-x-1">
-                                <span className="text-xs text-gray-500">
-                                  {offer.collateralToken?.address
-                                    ? truncateAddress(offer.collateralToken.address)
-                                    : 'Unknown Address'}
-                                </span>
-                                {offer.collateralToken?.address && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleCopyToClipboard(offer.collateralToken?.address || '');
-                                    }}
-                                    className="p-0.5 rounded hover:bg-gray-100 transition-colors"
-                                    title="Copy address"
-                                  >
-                                    {copiedAddress === offer.collateralToken.address ? (
-                                      <Check className="h-3 w-3 text-green-500" />
-                                    ) : (
-                                      <Copy className="h-3 w-3 text-gray-400 hover:text-gray-600" />
-                                    )}
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span className="font-semibold text-gray-900">
-                            {formatPercentage(offer.apr)}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div className="flex items-center space-x-2">
+                        Token
+                      </SortableHeader>
+                      <SortableHeader
+                        sortKey="apr"
+                        currentSort={sortBy}
+                        sortOrder={sortOrder}
+                        onSort={handleSort}
+                      >
+                        APR
+                      </SortableHeader>
+                      <SortableHeader
+                        sortKey="utilization"
+                        currentSort={sortBy}
+                        sortOrder={sortOrder}
+                        onSort={handleSort}
+                      >
+                        Utilization
+                      </SortableHeader>
+                      <SortableHeader
+                        sortKey="exposure"
+                        currentSort={sortBy}
+                        sortOrder={sortOrder}
+                        onSort={handleSort}
+                      >
+                        Max Exposure
+                      </SortableHeader>
+                      <SortableHeader
+                        sortKey="available"
+                        currentSort={sortBy}
+                        sortOrder={sortOrder}
+                        onSort={handleSort}
+                      >
+                        Available
+                      </SortableHeader>
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">LTV</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                      <SortableHeader
+                        sortKey="created"
+                        currentSort={sortBy}
+                        sortOrder={sortOrder}
+                        onSort={handleSort}
+                      >
+                        Created
+                      </SortableHeader>
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredOffers.map((offer) => {
+                      const utilization = (() => {
+                        const maxExposure = parseFloat(offer.maxExposure) || 0;
+                        const currentExposure = parseFloat(offer.currentExposure) || 0;
+                        return maxExposure > 0 ? (currentExposure / maxExposure) * 100 : 0;
+                      })();
+                      const quoteToken = typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
+                      const symbol = quoteToken?.symbol ?? 'SOL';
+                      const availableAmount = parseFloat(offer.availableForOpen) || 0;
+                      const totalExposure = parseFloat(offer.maxExposure) || 0;
+
+                      return (
+                        <tr
+                          key={offer.publicKey.toString()}
+                          className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                        >
+                          <td className="py-4 px-4">
+                            <TokenDisplay
+                              token={offer.collateralToken}
+                              onCopyAddress={handleCopyToClipboard}
+                              copiedAddress={copiedAddress}
+                            />
+                          </td>
+                          <td className="py-4 px-4">
                             <span className="font-semibold text-gray-900">
-                              {formatPercentage(utilization, 1)}
+                              {formatPercentage(offer.apr)}
                             </span>
-                            <div className="w-16 bg-gray-200 rounded-full h-1.5">
-                              <div
-                                className={`h-1.5 rounded-full transition-all duration-300 ${
-                                  utilization > 80
-                                    ? 'bg-success-500'
-                                    : utilization > 50
-                                      ? 'bg-warning-500'
-                                      : 'bg-primary-500'
-                                }`}
-                                style={{ width: `${Math.min(utilization, 100)}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span className="font-semibold text-gray-900">
-                            {formatNumber(totalExposure, 2)} {symbol}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span className="font-semibold text-gray-900">
-                            {formatNumber(availableAmount, 2)} {symbol}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div className="flex items-center space-x-2">
+                          </td>
+                          <td className="py-4 px-4">
+                            <UtilizationBar utilization={utilization} />
+                          </td>
+                          <td className="py-4 px-4">
                             <span className="font-semibold text-gray-900">
-                              {offer.targetLtv !== null && offer.targetLtv !== undefined
-                                ? formatPercentage(offer.targetLtv * 100)
-                                : 'N/A'}
+                              {formatNumber(totalExposure, 2)} {symbol}
                             </span>
-                            {offer.targetLtv !== null && offer.targetLtv !== undefined && (
-                              <span
-                                className={`text-xs font-medium px-1.5 py-0.5 rounded ${getRiskLevel(offer.targetLtv).color}`}
-                              >
-                                {/* {getRiskLevel(offer.targetLtv).label} */}
+                          </td>
+                          <td className="py-4 px-4">
+                            <span className="font-semibold text-gray-900">
+                              {formatNumber(availableAmount, 2)} {symbol}
+                            </span>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="flex items-center space-x-2">
+                              <span className="font-semibold text-gray-900">
+                                {offer.targetLtv !== null && offer.targetLtv !== undefined
+                                  ? formatPercentage(offer.targetLtv * 100)
+                                  : 'N/A'}
                               </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <Badge variant={offer.active ? 'success' : 'gray'} size="sm">
-                            {offer.active ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span className="text-sm text-gray-500">
-                            {formatDate(offer.createdAt, 'relative')}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div className="flex items-center space-x-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setSelectedOffer(offer)}
-                              className="p-1 h-8 w-8"
-                            >
-                              <Edit3 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setToggleOffer(offer)}
-                              className="p-1 h-8 w-8"
-                            >
-                              {offer.active ? (
-                                <Pause className="h-4 w-4" />
-                              ) : (
-                                <Play className="h-4 w-4" />
+                              {offer.targetLtv !== null && offer.targetLtv !== undefined && (
+                                <span
+                                  className={`text-xs font-medium px-1.5 py-0.5 rounded ${getRiskLevel(offer.targetLtv).color}`}
+                                >
+                                </span>
                               )}
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <Badge variant={offer.active ? 'success' : 'gray'} size="sm">
+                              {offer.active ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </td>
+                          <td className="py-4 px-4">
+                            <span className="text-sm text-gray-500">
+                              {formatDate(offer.createdAt, 'relative')}
+                            </span>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="flex items-center space-x-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setSelectedOffer(offer)}
+                                className="p-1 h-8 w-8"
+                              >
+                                <Edit3 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setToggleOffer(offer)}
+                                className="p-1 h-8 w-8"
+                              >
+                                {offer.active ? (
+                                  <Pause className="h-4 w-4" />
+                                ) : (
+                                  <Play className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile/Tablet Card View */}
+              <div className="lg:hidden">
+                {filteredOffers.map((offer) => (
+                  <OfferCard
+                    key={offer.publicKey.toString()}
+                    offer={offer}
+                    onEdit={setSelectedOffer}
+                    onToggle={setToggleOffer}
+                    onCopyAddress={handleCopyToClipboard}
+                    copiedAddress={copiedAddress}
+                  />
+                ))}
+              </div>
+            </>
           ) : (
             <div className="flex flex-col items-center justify-center py-12">
               <TrendingUp className="h-12 w-12 text-gray-400" />
               <h3 className="mt-4 text-lg font-medium">No Offers Found</h3>
-              <p className="mt-2 text-center text-gray-600">
+              <p className="mt-2 text-center text-gray-600 max-w-md">
                 {searchTerm || statusFilter !== 'all'
                   ? 'Try adjusting your filters to see more results.'
                   : 'Create your first lending offer to start earning interest on your assets.'}
               </p>
               {!searchTerm && statusFilter === 'all' && (
-                <Link to="/create-offer">
-                  <Button variant="glass" size="sm" className="mt-4">
+                <Link to="/create-offer" className="mt-4 w-full sm:w-auto">
+                  <Button variant="glass" size="sm" className="w-full sm:w-auto">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Offer
                   </Button>
