@@ -6,7 +6,7 @@ import { WalletMultiButton } from "@/contexts/WalletContext";
 import { useWallet } from "@/contexts/WalletContext";
 import { usePool } from "@/hooks/usePool";
 import { GradientText } from "@/components/brand";
-import { formatNumber } from "@/utils";
+import { formatNumberFloor } from "@/utils";
 import { DollarSign, AlertCircle } from "lucide-react";
 import { QUOTE_TOKENS } from "@/utils/tokens";
 
@@ -20,6 +20,7 @@ interface BalanceCardProps {
   onDeposit: () => void;
   onWithdraw: () => void;
   isProcessing: boolean;
+  onSelect: () => void;
 }
 
 const BalanceCard: React.FC<BalanceCardProps> = ({
@@ -32,12 +33,18 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
   onDeposit,
   onWithdraw,
   isProcessing,
+  onSelect,
 }) => {
   const isAmountValid = amount && parseFloat(amount) > 0;
-  const isAmountExceedsBalance = amount && parseFloat(amount) > balance;
+  const isAmountExceedsBalance = isSelected && amount && parseFloat(amount) > balance;
 
   return (
-    <div className={`card-lavarage h-full hover:shadow-2xl transition-all duration-300 ${isSelected ? "ring-2 ring-lavarage-coral" : ""}`}>
+    <div 
+      className={`card-lavarage h-full hover:shadow-2xl transition-all duration-300 cursor-pointer ${
+        isSelected ? "ring-2 ring-lavarage-coral" : "hover:ring-2 hover:ring-lavarage-coral/50"
+      }`}
+      onClick={onSelect}
+    >
       <div className="p-6 border-b border-lavarage-orange/20">
         <GradientText variant="primary" size="lg" weight="bold">
           {token} Balance
@@ -46,64 +53,69 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
       <div className="p-6 space-y-4">
         <div className="text-center">
           <GradientText variant="primary" size="2xl" weight="bold">
-            {loading ? "Loading..." : `${formatNumber(balance, 3)} ${token}`}
+            {loading ? "Loading..." : `${formatNumberFloor(balance, 3)} ${token}`}
           </GradientText>
         </div>
         
-        <div className="space-y-3">
-          <div className="relative">
-            <Input
-              type="number"
-              placeholder="Enter amount"
-              min="0"
-              step="0.1"
-              value={isSelected ? amount : ""}
-              onChange={(e) => {
-                if (isSelected) {
-                  onAmountChange(e.target.value);
-                }
-              }}
-              disabled={!isSelected || isProcessing}
-              className={`w-full transition-all duration-300 ${
-                isAmountExceedsBalance 
-                  ? "border-red-300 focus:border-red-500 focus:ring-red-500" 
-                  : "focus:border-lavarage-coral focus:ring-lavarage-coral/20"
-              }`}
-            />
+        {isSelected && (
+          <div className="space-y-3">
+            <div className="relative">
+              <Input
+                type="number"
+                placeholder="Enter amount"
+                min="0"
+                step="0.1"
+                value={amount}
+                onChange={(e) => onAmountChange(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                disabled={isProcessing}
+                className={`w-full transition-all duration-300 ${
+                  isAmountExceedsBalance 
+                    ? "border-red-300 focus:border-red-500 focus:ring-red-500" 
+                    : "focus:border-lavarage-coral focus:ring-lavarage-coral/20"
+                }`}
+              />
+            </div>
+            
             {isAmountExceedsBalance && (
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                <AlertCircle className="h-4 w-4 text-red-500" />
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-600 flex items-center">
+                  <AlertCircle className="h-3 w-3 mr-2 flex-shrink-0" />
+                  Amount exceeds available pool balance
+                </p>
+                <p className="text-xs text-red-500 mt-1">
+                  {/* You can only withdraw up to {formatNumberFloor(balance, 3)} {token} from your pool deposits.
+                  <br />
+                  {/* <span className="font-medium">Tip:</span> Deposit more {token} to increase your pool balance. */}
+                </p>
               </div>
             )}
-          </div>
-          
-          {isAmountExceedsBalance && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-sm text-red-600 flex items-center">
-                <AlertCircle className="h-3 w-3 mr-2" />
-                Amount exceeds available balance
-              </p>
+            
+            <div className="flex flex-col sm:flex-row gap-3" onClick={(e) => e.stopPropagation()}>
+              <Button 
+                onClick={onDeposit}
+                disabled={!isAmountValid || isProcessing}
+                variant="lavarage"
+                className="flex-1 font-semibold text-white shadow-lg hover:shadow-xl"
+              >
+                {isProcessing ? "Processing..." : "Deposit"}
+              </Button>
+              <Button 
+                onClick={onWithdraw}
+                disabled={!isAmountValid || isAmountExceedsBalance || isProcessing}
+                className="flex-1 font-semibold bg-white border-2 border-lavarage-coral text-lavarage-coral hover:bg-lavarage-coral hover:text-white hover:border-lavarage-coral transition-all duration-300 shadow-md hover:shadow-lg"
+              >
+                {isProcessing ? "Processing..." : "Withdraw"}
+              </Button>
             </div>
-          )}
-          
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button 
-              onClick={onDeposit}
-              disabled={!isSelected || !isAmountValid || isProcessing}
-              variant="lavarage"
-              className="flex-1 font-semibold text-white shadow-lg hover:shadow-xl"
-            >
-              {isProcessing ? "Processing..." : "Deposit"}
-            </Button>
-            <Button 
-              onClick={onWithdraw}
-              disabled={!isSelected || !isAmountValid || isAmountExceedsBalance || isProcessing}
-              className="flex-1 font-semibold bg-white border-2 border-lavarage-coral text-lavarage-coral hover:bg-lavarage-coral hover:text-white hover:border-lavarage-coral transition-all duration-300 shadow-md hover:shadow-lg"
-            >
-              {isProcessing ? "Processing..." : "Withdraw"}
-            </Button>
           </div>
-        </div>
+        )}
+        
+        {!isSelected && (
+          <div className="text-center py-4">
+            <p className="text-gray-500 text-sm">Click to select and manage funds</p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -206,34 +218,6 @@ const Balances: React.FC = () => {
         </div>
       </div>
 
-      {/* Token Selection - Mobile First */}
-      <div className="flex justify-center space-x-2 sm:space-x-4">
-        <Button
-          variant={selectedToken === "SOL" ? "lavarage" : "outline"}
-          onClick={() => handleTokenSelect("SOL")}
-          disabled={isProcessing}
-          className={`flex-1 sm:flex-none min-w-[80px] font-semibold transition-all duration-300 ${
-            selectedToken !== "SOL" 
-              ? "bg-white border-2 border-lavarage-coral text-lavarage-coral hover:bg-lavarage-coral hover:text-white shadow-md hover:shadow-lg" 
-              : "text-white shadow-lg hover:shadow-xl"
-          }`}
-        >
-          SOL
-        </Button>
-        <Button
-          variant={selectedToken === "USDC" ? "lavarage" : "outline"}
-          onClick={() => handleTokenSelect("USDC")}
-          disabled={isProcessing}
-          className={`flex-1 sm:flex-none min-w-[80px] font-semibold transition-all duration-300 ${
-            selectedToken !== "USDC" 
-              ? "bg-white border-2 border-lavarage-coral text-lavarage-coral hover:bg-lavarage-coral hover:text-white shadow-md hover:shadow-lg" 
-              : "text-white shadow-lg hover:shadow-xl"
-          }`}
-        >
-          USDC
-        </Button>
-      </div>
-
       {/* Balance Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <BalanceCard
@@ -246,6 +230,7 @@ const Balances: React.FC = () => {
           onDeposit={handleDeposit}
           onWithdraw={handleWithdraw}
           isProcessing={isProcessing}
+          onSelect={() => handleTokenSelect("SOL")}
         />
         
         <BalanceCard
@@ -258,6 +243,7 @@ const Balances: React.FC = () => {
           onDeposit={handleDeposit}
           onWithdraw={handleWithdraw}
           isProcessing={isProcessing}
+          onSelect={() => handleTokenSelect("USDC")}
         />
       </div>
     </div>

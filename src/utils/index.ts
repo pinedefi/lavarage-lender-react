@@ -32,6 +32,17 @@ export function formatNumber(num: number, decimals = 2): string {
   }).format(num);
 }
 
+// Helper function to format number with floor rounding
+export const formatNumberFloor = (num: number, decimals: number = 3): string => {
+  if (num === 0) return '0';
+  const multiplier = Math.pow(10, decimals);
+  const floored = Math.floor(num * multiplier) / multiplier;
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(floored);
+};
+
 /**
  * Formats a percentage
  */
