@@ -454,63 +454,136 @@ const Offers: React.FC = () => {
       onClose();
     };
 
-    return (
+        return (
       <Modal open={!!offer} onClose={onClose}>
-        <div className="p-4 sm:p-6 space-y-4">
-          <h2 className="text-lg sm:text-xl font-semibold">Edit Offer</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">APR (%)</label>
-              <Input
-                type="number"
-                value={apr}
-                onChange={(e) => setApr(e.target.value)}
-                step="0.1"
-                min="0"
-              />
+        <div className="card-lavarage p-3 sm:p-6 lg:p-8 space-y-3 sm:space-y-6 max-h-[90vh] overflow-y-auto">
+          {/* Header with improved spacing for mobile */}
+          <div className="pt-1 sm:pt-0">
+            <GradientText variant="primary" size="xl" weight="bold" as="h2" className="text-base sm:text-xl">
+              Edit Offer
+            </GradientText>
+            <div className="mt-2 p-2 sm:p-3 rounded-lg bg-lavarage-subtle/10 border-l-4 border-lavarage-coral">
+              <p className="text-xs sm:text-sm text-gray-700 font-medium">
+                Updates only affect new positions opened going forward.
+              </p>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Max Exposure ({symbol})
-              </label>
-              <Input
-                type="number"
-                value={exposure}
-                onChange={(e) => setExposure(e.target.value)}
-                step="0.1"
-                min="0"
-              />
+          </div>
+          
+          {/* Current Offer Details with glass styling */}
+          <div className="glass-lavarage p-3 sm:p-4 rounded-lg border border-white/20 backdrop-blur-sm">
+            <h3 className="text-xs sm:text-sm font-semibold text-gray-800 mb-3 flex items-center">
+              <div className="h-2 w-2 bg-lavarage-coral rounded-full mr-2"></div>
+              Current Offer Details
+            </h3>
+            <div className="grid grid-cols-2 gap-2 sm:gap-4">
+              <div className="flex flex-col items-start space-y-1">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Token</span>
+                <div className="flex items-center space-x-1">
+                  <TokenDisplay token={offer.collateralToken} showAddress={false} />
+                </div>
+              </div>
+              <div className="flex flex-col items-start space-y-1">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">APR</span>
+                <span className="text-sm font-bold text-gray-900">{formatPercentage(offer.apr)}</span>
+              </div>
+              <div className="flex flex-col items-start space-y-1">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Exposure</span>
+                <span className="text-xs sm:text-sm font-bold text-gray-900">
+                  {formatNumber(parseFloat(offer.maxExposure), 2)} {symbol}
+                </span>
+              </div>
+              <div className="flex flex-col items-start space-y-1">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">LTV</span>
+                <span className="text-sm font-bold text-gray-900">
+                  {offer.targetLtv !== null && offer.targetLtv !== undefined
+                    ? formatPercentage(offer.targetLtv * 100)
+                    : 'N/A'}
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-2">
-              <Button type="button" variant="ghost" onClick={onClose} className="w-full sm:w-auto">
+          </div>
+
+          {/* Edit Form */}
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+              <div>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1 sm:mb-2">
+                  APR <span className="text-gray-500 font-normal">(%)</span>
+                </label>
+                <Input
+                  type="number"
+                  value={apr}
+                  onChange={(e) => setApr(e.target.value)}
+                  step="0.1"
+                  min="0"
+                  className="bg-white/50 border-white/30 focus:border-lavarage-coral focus:ring-lavarage-coral/20 h-9 sm:h-10"
+                />
+              </div>
+              <div>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1 sm:mb-2">
+                  Max Exposure <span className="text-gray-500 font-normal">({symbol})</span>
+                </label>
+                <Input
+                  type="number"
+                  value={exposure}
+                  onChange={(e) => setExposure(e.target.value)}
+                  step="0.1"
+                  min="0"
+                  className="bg-white/50 border-white/30 focus:border-lavarage-coral focus:ring-lavarage-coral/20 h-9 sm:h-10"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-2 sm:pt-4">
+              <Button 
+                type="button" 
+                variant="ghost" 
+                onClick={onClose} 
+                className="w-full sm:w-auto order-2 sm:order-1 hover:bg-white/20 h-9 sm:h-10"
+              >
                 Cancel
               </Button>
-              <Button type="submit" variant="primary" className="w-full sm:w-auto">
-                Save
+              <Button 
+                type="submit" 
+                variant="lavarage" 
+                className="w-full sm:w-auto order-1 sm:order-2 h-9 sm:h-10"
+              >
+                Save Changes
               </Button>
             </div>
           </form>
-          <hr />
-          <h2 className="text-lg sm:text-xl font-semibold">Change LTV</h2>
-          <form onSubmit={handleLtvSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">New LTV (%)</label>
-              <Input
-                type="number"
-                value={ltv}
-                onChange={(e) => setLtv(e.target.value)}
-                step="0.1"
-                min="0"
-                max="80"
-                placeholder="e.g., 75 for 75%"
-              />
-            </div>
-            <div className="flex justify-end pt-2">
-              <Button type="submit" variant="primary" className="w-full sm:w-auto">
-                Update LTV
-              </Button>
-            </div>
-          </form>
+
+          {/* LTV Form */}
+          <div className="space-y-3">
+            <GradientText variant="primary" size="lg" weight="bold" as="h3" className="text-sm sm:text-lg">
+              Change LTV
+            </GradientText>
+            <form onSubmit={handleLtvSubmit} className="space-y-3">
+              <div>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1 sm:mb-2">
+                  New LTV <span className="text-gray-500 font-normal">(%)</span>
+                </label>
+                <Input
+                  type="number"
+                  value={ltv}
+                  onChange={(e) => setLtv(e.target.value)}
+                  step="0.1"
+                  min="0"
+                  max="80"
+                  placeholder="e.g., 75"
+                  className="bg-white/50 border-white/30 focus:border-lavarage-coral focus:ring-lavarage-coral/20 h-9 sm:h-10"
+                />
+              </div>
+              <div className="flex justify-end pt-1 sm:pt-2">
+                <Button 
+                  type="submit" 
+                  variant="lavarage" 
+                  className="w-full sm:w-auto h-9 sm:h-10"
+                >
+                  Update LTV
+                </Button>
+              </div>
+            </form>
+          </div>
         </div>
       </Modal>
     );
