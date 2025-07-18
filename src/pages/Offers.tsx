@@ -601,6 +601,10 @@ const Offers: React.FC = () => {
       ? 'Are you sure you want to pause this offer?'
       : 'Are you sure you want to reactivate this offer? (Default LTV is 75%)';
 
+    const quoteToken = typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
+    const symbol = quoteToken?.symbol ?? 'SOL';
+    const maxExposure = parseFloat(offer.maxExposure) || 0;
+
     const handleAction = async () => {
       try {
         if (isActive) {
@@ -631,6 +635,54 @@ const Offers: React.FC = () => {
               <GradientText variant="primary" size="lg" weight="bold" as="h3">
                 {actionText} Offer
               </GradientText>
+            </div>
+          </div>
+
+          {/* Offer Details */}
+          <div className="glass-lavarage p-3 sm:p-4 rounded-lg border border-white/20 backdrop-blur-sm">
+            <h4 className="text-xs sm:text-sm font-semibold text-gray-800 mb-3 flex items-center">
+              <div className="h-2 w-2 bg-lavarage-coral rounded-full mr-2"></div>
+              Offer Details
+            </h4>
+            
+            {/* Mobile: Stacked layout for better readability */}
+            <div className="block sm:hidden space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Token</span>
+                <div className="flex items-center space-x-1 max-w-[60%]">
+                  <TokenDisplay token={offer.collateralToken} showAddress={false} />
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">APR</span>
+                <span className="text-sm font-bold text-gray-900">{formatPercentage(offer.apr)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Exposure</span>
+                <span className="text-xs font-bold text-gray-900">
+                  {formatNumber(maxExposure, 2)} {symbol}
+                </span>
+              </div>
+            </div>
+            
+            {/* Desktop: Grid layout */}
+            <div className="hidden sm:grid grid-cols-3 gap-4">
+              <div className="flex flex-col items-start space-y-1">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Token</span>
+                <div className="flex items-center space-x-1">
+                  <TokenDisplay token={offer.collateralToken} showAddress={false} />
+                </div>
+              </div>
+              <div className="flex flex-col items-start space-y-1">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">APR</span>
+                <span className="text-sm font-bold text-gray-900">{formatPercentage(offer.apr)}</span>
+              </div>
+              <div className="flex flex-col items-start space-y-1">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Exposure</span>
+                <span className="text-sm font-bold text-gray-900">
+                  {formatNumber(maxExposure, 2)} {symbol}
+                </span>
+              </div>
             </div>
           </div>
 
