@@ -691,10 +691,10 @@ const Offers: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0 lg:flex-shrink lg:flex-grow-0 flex-shrink-0">
         <div className="min-w-0 flex-1">
           <GradientText variant="primary" size="3xl" weight="bold" as="h1" className="text-2xl sm:text-3xl">
-            Lending Offers
+            Loan Offers
           </GradientText>
           <p className="text-gray-600 mt-2 text-sm sm:text-base">
-            Manage your <span className="font-semibold text-lavarage-coral">LAVARAGE</span> lending
+            Manage your <span className="font-semibold text-lavarage-coral">LAVARAGE</span> loan
             offers and track performance
           </p>
         </div>
@@ -922,7 +922,7 @@ const Offers: React.FC = () => {
               <p className="mt-2 text-center text-gray-600 max-w-md">
                 {searchTerm || statusFilter !== 'all'
                   ? 'Try adjusting your filters to see more results.'
-                  : 'Create your first lending offer to start earning interest on your assets.'}
+                  : 'Create your first loan offer to start earning interest on your assets.'}
               </p>
               {!searchTerm && statusFilter === 'all' && (
                 <Link to="/create-offer" className="mt-4 w-full sm:w-auto">

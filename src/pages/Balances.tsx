@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Card, { CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { Link } from "react-router-dom";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { WalletMultiButton } from "@/contexts/WalletContext";
@@ -7,8 +7,7 @@ import { useWallet } from "@/contexts/WalletContext";
 import { usePool } from "@/hooks/usePool";
 import { GradientText } from "@/components/brand";
 import { formatNumberFloor } from "@/utils";
-import { DollarSign, AlertCircle } from "lucide-react";
-import { QUOTE_TOKENS } from "@/utils/tokens";
+import { DollarSign, AlertCircle, Plus, Info } from "lucide-react";
 
 interface BalanceCardProps {
   token: "SOL" | "USDC";
@@ -217,6 +216,31 @@ const Balances: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* Create Offers Notice */}
+      {connected && (
+        <div className="card-lavarage p-6 mb-6 border border-lavarage-orange/20">
+          <div className="flex items-start">
+            <div className="p-3 rounded-full bg-lavarage-primary flex items-center justify-center mr-4 flex-shrink-0">
+              <Info className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <GradientText variant="primary" size="lg" weight="bold" className="mb-2">
+                Getting Started
+              </GradientText>
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                To start managing pool funds, you need to create a <span className="font-semibold text-lavarage-coral">loan offer</span> first.
+              </p>
+              <Link to="/create-offer">
+                <Button variant="lavarage" size="sm" className="shadow-lg hover:shadow-xl transition-all duration-300">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Offer
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Balance Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">

@@ -48,10 +48,21 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
       setBalance(bal);
     } catch (err: any) {
       const message = err.message || 'Failed to fetch balance';
-      setError(message);
 
-      // Handle LavaRock NFT errors globally
-      handleError(message);
+      // Check for expected errors that shouldn't show toast notifications
+      const isExpectedError = message.toLowerCase().includes('node wallet not found'); // new wallets with no deposits
+
+      if (isExpectedError) {
+        // For expected errors, set balance to 0 and don't show error
+        console.log('Expected pool balance error:', message);
+        setBalance(0);
+        setError(null);
+      } else {
+        // For unexpected/critical errors, show them
+        setError(message);
+        // Handle LavaRock NFT errors globally
+        handleError(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -84,10 +95,17 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         await fetchBalance();
       } catch (err: any) {
         const message = err.message || 'Deposit failed';
-        setError(message);
 
-        // Handle LavaRock NFT errors globally first
-        handleError(message);
+        // Check for the specific case where user needs to create an offer first
+        if (message.toLowerCase().includes('node wallet not found')) {
+          const offerRequiredMessage = 'You need to create a loan offer before depositing funds.';
+          setError(offerRequiredMessage);
+          toast.error(offerRequiredMessage);
+        } else {
+          setError(message);
+          // Handle LavaRock NFT errors globally first
+          handleError(message);
+        }
 
         throw err;
       }
@@ -122,10 +140,17 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         await fetchBalance();
       } catch (err: any) {
         const message = err.message || 'Withdraw failed';
-        setError(message);
 
-        // Handle LavaRock NFT errors globally first
-        handleError(message);
+        // Check for the specific case where user needs to create an offer first
+        if (message.toLowerCase().includes('node wallet not found')) {
+          const offerRequiredMessage = 'You need to create a loan offer before withdrawing funds.';
+          setError(offerRequiredMessage);
+          toast.error(offerRequiredMessage);
+        } else {
+          setError(message);
+          // Handle LavaRock NFT errors globally first
+          handleError(message);
+        }
 
         throw err;
       }
