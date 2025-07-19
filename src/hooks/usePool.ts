@@ -5,11 +5,13 @@ import toast from 'react-hot-toast';
 import bs58 from 'bs58';
 import { VersionedTransaction } from '@solana/web3.js';
 import { useError } from '@/contexts/ErrorContext';
+import { SOL_ADDRESS } from '@/utils/tokens';
 
 interface UsePoolOptions {
   quoteToken?: string;
   autoRefresh?: boolean;
   refreshInterval?: number;
+  hasOffers?: boolean;
 }
 
 interface UsePoolReturn {
@@ -28,7 +30,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { quoteToken = 'SOL', autoRefresh = true, refreshInterval = 30000 } = options;
+  const { quoteToken = 'SOL', autoRefresh = true, refreshInterval = 30000, hasOffers } = options;
 
   const fetchBalance = useCallback(async () => {
     if (!connected || !publicKey) {
@@ -76,8 +78,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
       try {
         setError(null);
         const tx = await apiService.depositFunds({
-          amount:
-            amount * 10 ** (quoteToken === 'So11111111111111111111111111111111111111112' ? 9 : 6),
+          amount: amount * 10 ** (quoteToken === SOL_ADDRESS ? 9 : 6),
           quoteToken,
           userWallet: publicKey.toBase58(),
         });
@@ -100,7 +101,6 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         if (message.toLowerCase().includes('node wallet not found')) {
           const offerRequiredMessage = 'You need to create a loan offer before depositing funds.';
           setError(offerRequiredMessage);
-          toast.error(offerRequiredMessage);
         } else {
           setError(message);
           // Handle LavaRock NFT errors globally first
@@ -110,7 +110,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         throw err;
       }
     },
-    [publicKey, quoteToken, fetchBalance, sendTransaction, handleError]
+    [publicKey, quoteToken, fetchBalance, sendTransaction, handleError, hasOffers]
   );
 
   const withdraw = useCallback(
@@ -145,7 +145,6 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         if (message.toLowerCase().includes('node wallet not found')) {
           const offerRequiredMessage = 'You need to create a loan offer before withdrawing funds.';
           setError(offerRequiredMessage);
-          toast.error(offerRequiredMessage);
         } else {
           setError(message);
           // Handle LavaRock NFT errors globally first
@@ -155,7 +154,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         throw err;
       }
     },
-    [publicKey, quoteToken, fetchBalance, sendTransaction, handleError]
+    [publicKey, quoteToken, fetchBalance, sendTransaction, handleError, hasOffers]
   );
 
   useEffect(() => {
