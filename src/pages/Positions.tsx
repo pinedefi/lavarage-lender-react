@@ -28,7 +28,7 @@ import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { PositionV3Model } from '@/types';
-import { copyToClipboard, truncateAddress, formatNumber, formatPercentage } from '@/utils';
+import { copyToClipboard, truncateAddress, formatPrice, formatPercentage, formatDateTime } from '@/utils';
 
 type SortField = 'borrowedAmount' | 'interest' | 'riskLevel' | 'ltv' | 'apr' | 'openDate';
 type SortDirection = 'asc' | 'desc';
@@ -86,25 +86,6 @@ const Positions: React.FC = () => {
 
     return `${formatted} ${symbol}`;
   };
-
-  const formatPrice = (price: number): string => {
-  if (price >= 1000) {
-    return `${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  } else if (price >= 1) {
-    return `${price.toFixed(4)}`;
-  } else if (price >= 0.000001) {
-    return `${price.toFixed(6)}`;
-  } else if (isNaN(price)) {
-    return '--';
-  } else {
-    // Count leading zeros after decimal point
-    const leadingZeros = Math.abs(Math.floor(Math.log10(price))) - 1;
-    const significantDigits = price * Math.pow(10, leadingZeros + 1);
-    // Convert number to subscript
-    const subscript = leadingZeros.toString().split('').map(d => '₀₁₂₃₄₅₆₇₈₉'[parseInt(d)]).join('');
-    return `0.0${subscript}${(Number(significantDigits.toFixed(4)) * 10000).toFixed(0)}`;
-  }
-}
 
   const formatAddress = (address: any) => {
     return typeof address === 'string' ? address : address.toString();
@@ -494,14 +475,20 @@ const Positions: React.FC = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200">
-                      <th
+                                              <th
                         className="text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-50"
                         onClick={() => handleSort('openDate')}
                       >
-                        <div className="flex items-center space-x-1">
-                          <span>Asset</span>
-                          {getSortIcon('openDate')}
+                        <div className="flex flex-col items-start">
+                          <div className="flex items-center space-x-1">
+                            <span>Opened</span>
+                            {getSortIcon('openDate')}
+                          </div>
+                          <span className="text-xs text-gray-500">(UTC)</span>
                         </div>
+                      </th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-700">
+                        <span>Asset</span>
                       </th>
                       <th
                         className="text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-50"
@@ -565,6 +552,11 @@ const Positions: React.FC = () => {
                           key={formatAddress(position.positionAddress)}
                           className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                         >
+                          <td className="py-4 px-4">
+                            <div className="text-sm text-gray-900">
+                              {formatDateTime(position.openTimestamp)}
+                            </div>
+                          </td>
                           <td className="py-4 px-4">
                             <div>
                               <div className="font-medium text-gray-900 text-sm">
@@ -719,6 +711,14 @@ const Positions: React.FC = () => {
                           <div className="text-gray-600">Interest</div>
                           <div className="font-semibold text-green-600">
                             {formatCurrency(position.interestAccrued, position.quoteToken.symbol)}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-600">
+                            Opened <span className="text-xs">(UTC)</span>
+                          </div>
+                          <div className="font-semibold text-gray-900 text-xs">
+                            {formatDateTime(position.openTimestamp)}
                           </div>
                         </div>
                       </div>

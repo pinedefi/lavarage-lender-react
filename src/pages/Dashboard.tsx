@@ -78,10 +78,9 @@ const Dashboard: React.FC = () => {
   const statCards = [
     {
       title: 'Total Liquidity Deployed',
-      value:
-        Object.entries(dashboardStats.totalLiquidityDeployed)
-          .map(([currency, amount]) => `${formatNumber(amount, 2)} ${currency}`)
-          .join(' + ') || '0 SOL',
+      value: Object.entries(dashboardStats.totalLiquidityDeployed)
+        .map(([currency, amount]) => `${formatNumber(amount, 2)} ${currency}`)
+        .join('\n') || '0 SOL\n0 USDC',
       icon: TrendingUp,
       trend: '+12.5%',
       trendType: 'positive' as const,
@@ -94,7 +93,7 @@ const Dashboard: React.FC = () => {
       trendType: 'positive' as const,
     },
     {
-      title: 'At Risk Positions',
+      title: 'Positions (LTV > 75%)',
       value: atRiskPositions.toString(),
       icon: AlertTriangle,
       trend: atRiskPositions > 0 ? 'Monitor' : 'Safe',
@@ -105,7 +104,7 @@ const Dashboard: React.FC = () => {
       value:
         Object.entries(dashboardStats.totalInterestEarned)
           .map(([currency, amount]) => `${formatNumber(amount, 2)} ${currency}`)
-          .join(' + ') || '0 SOL',
+          .join('\n') || '0 SOL\n0 USDC',
       icon: BarChart3,
       trend: '+5.2%',
       trendType: 'positive' as const,
@@ -122,36 +121,43 @@ const Dashboard: React.FC = () => {
     trendType?: 'positive' | 'negative';
   }> = ({ title, value, change, changeType, icon, trend, trendType }) => (
     <div className="card-lavarage p-6 hover:shadow-2xl transition-all duration-300 group">
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600 mb-2">{title}</p>
-          <div className="space-y-2">
-            <GradientText variant="primary" size="2xl" weight="bold" className="block">
-              {value}
-            </GradientText>
-            {/* {trend && (
-              <div
-                className={`flex items-center text-sm ${
-                  trendType === 'positive'
-                    ? 'text-success-600'
-                    : trendType === 'negative'
-                      ? 'text-error-600'
-                      : 'text-gray-500'
-                }`}
-              >
-                {trendType === 'positive' ? (
-                  <ArrowUpRight className="h-4 w-4 mr-1" />
-                ) : trendType === 'negative' ? (
-                  <ArrowDownRight className="h-4 w-4 mr-1" />
-                ) : null}
-                {trend}
-              </div>
-            )} */}
+      <div className="flex flex-col h-full">
+        {/* Header with title and icon */}
+        <div className="flex items-start justify-between mb-4">
+          <p className="text-sm font-medium text-gray-600 leading-tight flex-1 pr-2">{title}</p>
+          <div className="p-3 rounded-full bg-gradient-to-br from-lavarage-subtle to-lavarage-orange/20 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+            <div className="text-lavarage-red">{icon}</div>
           </div>
         </div>
-        <div className="p-4 rounded-full bg-gradient-to-br from-lavarage-subtle to-lavarage-orange/20 group-hover:scale-110 transition-transform duration-300">
-          <div className="text-lavarage-red">{icon}</div>
+        
+        {/* Value section */}
+        <div className="flex-1 flex flex-col justify-center min-h-[60px]">
+          <GradientText variant="primary" size="2xl" weight="bold" className="block whitespace-pre-line leading-tight">
+            {value}
+          </GradientText>
         </div>
+        
+        {/* Trend section (if needed in future) */}
+        {/* {trend && (
+          <div className="mt-2">
+            <div
+              className={`flex items-center text-sm ${
+                trendType === 'positive'
+                  ? 'text-success-600'
+                  : trendType === 'negative'
+                    ? 'text-error-600'
+                    : 'text-gray-500'
+              }`}
+            >
+              {trendType === 'positive' ? (
+                <ArrowUpRight className="h-4 w-4 mr-1" />
+              ) : trendType === 'negative' ? (
+                <ArrowDownRight className="h-4 w-4 mr-1" />
+              ) : null}
+              {trend}
+            </div>
+          </div>
+        )} */}
       </div>
     </div>
   );
@@ -299,6 +305,37 @@ const Dashboard: React.FC = () => {
 
         {/* Quick Stats & Actions */}
         <div className="space-y-6">
+            {/* Quick Actions */}
+            <div className="card-lavarage">
+            <div className="p-6 border-b border-lavarage-orange/20">
+              <GradientText variant="primary" size="lg" weight="bold">
+                Quick Actions
+              </GradientText>
+            </div>
+            <div className="p-6">
+              <QuickActionMenu>
+                <QuickActionItem
+                  icon={<Plus className="h-5 w-5" />}
+                  onClick={() => (window.location.href = '/create-offer')}
+                >
+                  Create New Offer
+                </QuickActionItem>
+                <QuickActionItem
+                  icon={<Users className="h-5 w-5" />}
+                  onClick={() => (window.location.href = '/positions')}
+                >
+                  View All Positions
+                </QuickActionItem>
+                <QuickActionItem
+                  icon={<Activity className="h-5 w-5" />}
+                  onClick={() => (window.location.href = '/liquidations')}
+                >
+                  Check Liquidations
+                </QuickActionItem>
+              </QuickActionMenu>
+            </div>
+          </div>
+
           {/* Performance Summary */}
           <div className="card-lavarage">
             <div className="p-6 border-b border-lavarage-orange/20">
@@ -349,37 +386,6 @@ const Dashboard: React.FC = () => {
                   </Link>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="card-lavarage">
-            <div className="p-6 border-b border-lavarage-orange/20">
-              <GradientText variant="primary" size="lg" weight="bold">
-                Quick Actions
-              </GradientText>
-            </div>
-            <div className="p-6">
-              <QuickActionMenu>
-                <QuickActionItem
-                  icon={<Plus className="h-5 w-5" />}
-                  onClick={() => (window.location.href = '/create-offer')}
-                >
-                  Create New Offer
-                </QuickActionItem>
-                <QuickActionItem
-                  icon={<Users className="h-5 w-5" />}
-                  onClick={() => (window.location.href = '/positions')}
-                >
-                  View All Positions
-                </QuickActionItem>
-                <QuickActionItem
-                  icon={<Activity className="h-5 w-5" />}
-                  onClick={() => (window.location.href = '/liquidations')}
-                >
-                  Check Liquidations
-                </QuickActionItem>
-              </QuickActionMenu>
             </div>
           </div>
         </div>

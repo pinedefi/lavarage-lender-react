@@ -19,54 +19,90 @@ const CreateOffer: React.FC = () => {
   const [quoteToken, setQuoteToken] = useState('SOL');
   const [baseToken, setBaseToken] = useState('');
   const [tokenData, setTokenData] = useState<TokenModel | null>(null);
-  const [metaError, setMetaError] = useState<string | null>(null);
+  const [baseTokenError, setBaseTokenError] = useState<string | null>(null);
+  const [interestRateError, setInterestRateError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMetadata = async () => {
-      if (!isValidSolanaAddress(baseToken)) {
+      // Clear previous errors
+      setBaseTokenError(null);
+      
+      // If no base token, clear everything
+      if (!baseToken) {
         setTokenData(null);
         return;
       }
+      
+      // Validate address format first
+      if (!isValidSolanaAddress(baseToken)) {
+        setBaseTokenError('Please enter a valid Solana address');
+        setTokenData(null);
+        return;
+      }
+      
       try {
         const data = await apiService.getTokenMetadata(baseToken);
         setTokenData(data);
-        setMetaError(null);
       } catch (err) {
         console.error(err);
         const errorMessage = err instanceof Error ? err.message : 'Failed to fetch token metadata';
-        setMetaError(errorMessage);
+        setBaseTokenError(errorMessage);
         setTokenData(null);
 
         // Handle LavaRock NFT errors globally
         handleError(errorMessage);
       }
     };
-    if (baseToken) {
-      fetchMetadata();
-    } else {
-      setTokenData(null);
-      setMetaError(null);
-    }
+    
+    fetchMetadata();
   }, [baseToken, handleError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Clear any existing interest rate errors first
+    setInterestRateError(null);
+
     const parsedAmount = parseFloat(amount);
     const parsedInterest = parseFloat(interestRate);
 
-    if (isNaN(parsedAmount) || isNaN(parsedInterest)) {
-      handleError('Amount and interest rate are required and must be numeric');
+    // Validate that values are numbers
+    if (isNaN(parsedAmount)) {
+      handleError('Please enter a valid amount');
       return;
     }
 
-    await createOffer({
-      collateralToken: baseToken,
-      maxExposure: parsedAmount * 10 ** (quoteToken === 'SOL' ? 9 : 6),
-      interestRate: Math.round(parsedInterest),
-      quoteToken: getQuoteTokenAddress(quoteToken as keyof typeof QUOTE_TOKENS),
-      tokenData: tokenData || undefined,
-    });
+    if (isNaN(parsedInterest)) {
+      setInterestRateError('Please enter a valid number');
+      return;
+    }
+
+    // Validate interest rate range and integer
+    if (parsedInterest < 1 || parsedInterest > 255 || !Number.isInteger(parsedInterest)) {
+      setInterestRateError('Please enter a valid integer value from 1 to 255');
+      return;
+    }
+
+    // Validate base token
+    if (!baseToken || baseTokenError || !tokenData) {
+      handleError('Please enter a valid base token address');
+      return;
+    }
+
+    // If all validation passes, create the offer
+    try {
+      await createOffer({
+        collateralToken: baseToken,
+        maxExposure: parsedAmount * 10 ** (quoteToken === 'SOL' ? 9 : 6),
+        interestRate: Math.round(parsedInterest),
+        quoteToken: getQuoteTokenAddress(quoteToken as keyof typeof QUOTE_TOKENS),
+        tokenData: tokenData || undefined,
+      });
+    } catch (error) {
+      // Error is already handled by the useOffers hook
+      // This catch block prevents the error from becoming uncaught
+      console.error(error);
+    }
   };
 
   return (
@@ -111,7 +147,9 @@ const CreateOffer: React.FC = () => {
                     {tokenData.name} ({tokenData.symbol})
                   </p>
                 )}
-                {metaError && <p className="mt-1 text-sm text-error-600">{metaError}</p>}
+                {baseTokenError && (
+                  <p className="mt-1 text-sm text-red-600">{baseTokenError}</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -135,12 +173,30 @@ const CreateOffer: React.FC = () => {
                   variant="message"
                   type="number"
                   placeholder="Enter interest rate"
-                  min="0"
-                  max="255"
-                  step="1"
                   value={interestRate}
-                  onChange={(e) => setInterestRate(e.target.value)}
+                  step="1"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setInterestRate(value);
+                    
+                    // Real-time validation
+                    if (value && !isNaN(Number(value))) {
+                      const parsedValue = parseFloat(value);
+                      if (parsedValue < 1 || parsedValue > 255 || !Number.isInteger(parsedValue)) {
+                        setInterestRateError('Please enter a valid integer value from 1 to 255');
+                      } else {
+                        setInterestRateError(null);
+                      }
+                    } else if (value) {
+                      setInterestRateError('Please enter a valid number');
+                    } else {
+                      setInterestRateError(null);
+                    }
+                  }}
                 />
+                {interestRateError && (
+                  <p className="mt-1 text-sm text-red-600">{interestRateError}</p>
+                )}
               </div>
             </div>
             <Button className="w-full" type="submit">
