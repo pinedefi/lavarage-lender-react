@@ -5,7 +5,7 @@ A comprehensive React application for DeFi lenders to manage loan offers, monito
 ## 🚀 Features
 
 - **Wallet Integration**: Seamless Solana wallet connectivity with multiple wallet support
-- **Loan Offer Management**: Create, update, and monitor lending offers
+- **Loan Offer Management**: Create, update, and monitor loan offers
 - **Position Tracking**: Real-time monitoring of borrower positions using your liquidity
 - **Liquidation Management**: Track liquidation events and collateral recovery
 - **Performance Analytics**: Comprehensive portfolio insights and metrics
@@ -25,22 +25,26 @@ A comprehensive React application for DeFi lenders to manage loan offers, monito
 ## 📦 Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/piske-alex/lavarage-lender-react.git
    cd lavarage-lender-react
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    ```
-   
+
    Edit `.env` with your configuration:
+
    ```env
    REACT_APP_API_URL=https://api.lavarage.com
    REACT_APP_API_KEY=your_api_key_here
@@ -49,6 +53,7 @@ A comprehensive React application for DeFi lenders to manage loan offers, monito
    ```
 
 4. **Start the development server**
+
    ```bash
    npm start
    ```
@@ -91,21 +96,25 @@ src/
 ## 🔑 Key Components
 
 ### Wallet Integration
+
 - Supports Phantom, Solflare, Backpack, and other Solana wallets
 - Persistent connection across sessions
 - Transaction signing and submission
 
 ### Offer Management
+
 - Create new loan offers with customizable parameters
 - Real-time utilization tracking
 - Interest rate and exposure limit management
 
 ### Position Monitoring
+
 - Live borrower position tracking
 - Risk assessment and LTV monitoring
 - Interest accrual calculations
 
 ### Liquidation Tracking
+
 - Liquidation event monitoring
 - Collateral recovery tracking
 - P&L calculations
@@ -123,31 +132,33 @@ The app uses a custom design system built on Tailwind CSS:
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `REACT_APP_API_URL` | Lavarage API endpoint | `https://api.lavarage.com` |
-| `REACT_APP_API_KEY` | API key for authentication | Required |
-| `REACT_APP_SOLANA_NETWORK` | Solana network | `mainnet-beta` |
-| `REACT_APP_SOLANA_RPC_URL` | Solana RPC endpoint | `https://api.mainnet-beta.solana.com` |
+| Variable                   | Description                | Default                               |
+| -------------------------- | -------------------------- | ------------------------------------- |
+| `REACT_APP_API_URL`        | Lavarage API endpoint      | `https://api.lavarage.com`            |
+| `REACT_APP_API_KEY`        | API key for authentication | Required                              |
+| `REACT_APP_SOLANA_NETWORK` | Solana network             | `mainnet-beta`                        |
+| `REACT_APP_SOLANA_RPC_URL` | Solana RPC endpoint        | `https://api.mainnet-beta.solana.com` |
 
 ### Wallet Configuration
 
 The app automatically detects and connects to available Solana wallets:
+
 - Phantom
-- Solflare  
+- Solflare
 - Backpack
 - Trust Wallet
 
 ## 📖 Usage
 
 1. **Connect Wallet**: Click "Connect Wallet" and select your preferred Solana wallet
-2. **Create Offers**: Navigate to "My Offers" → "Create Offer" to set up lending terms
+2. **Create Offers**: Navigate to "My Offers" → "Create Offer" to set up loan terms
 3. **Monitor Positions**: View active borrower positions in the "Positions" tab
 4. **Track Performance**: Use the Dashboard for portfolio overview and analytics
 
 ## 🚨 Risk Considerations
 
 ⚠️ **Important**: DeFi lending involves significant risks including:
+
 - Smart contract risks
 - Borrower default risk
 - Collateral volatility

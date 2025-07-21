@@ -1,14 +1,15 @@
 import React, { useState } from "react";
-import Card, { CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { Link } from "react-router-dom";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { WalletMultiButton } from "@/contexts/WalletContext";
 import { useWallet } from "@/contexts/WalletContext";
 import { usePool } from "@/hooks/usePool";
+import { useOffers } from "@/hooks/useOffers";
 import { GradientText } from "@/components/brand";
-import { formatNumber } from "@/utils";
-import { DollarSign, AlertCircle } from "lucide-react";
-import { QUOTE_TOKENS } from "@/utils/tokens";
+import { formatNumberFloor } from "@/utils";
+import { SOL_ADDRESS, USDC_ADDRESS } from "@/utils/tokens";
+import { DollarSign, AlertCircle, Plus, Info } from "lucide-react";
 
 interface BalanceCardProps {
   token: "SOL" | "USDC";
@@ -20,6 +21,9 @@ interface BalanceCardProps {
   onDeposit: () => void;
   onWithdraw: () => void;
   isProcessing: boolean;
+  onSelect: () => void;
+  hasOffersForToken: boolean;
+  withdrawPressed: boolean;
 }
 
 const BalanceCard: React.FC<BalanceCardProps> = ({
@@ -32,12 +36,23 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
   onDeposit,
   onWithdraw,
   isProcessing,
+  onSelect,
+  hasOffersForToken,
+  withdrawPressed,
 }) => {
   const isAmountValid = amount && parseFloat(amount) > 0;
-  const isAmountExceedsBalance = amount && parseFloat(amount) > balance;
+  const isAmountExceedsBalance = isSelected && amount && parseFloat(amount) > balance;
+  
+  // Only show "exceeds balance" error for withdrawals and only after withdraw was pressed
+  const shouldShowExceedsBalanceError = withdrawPressed && isAmountExceedsBalance;
 
   return (
-    <div className={`card-lavarage h-full hover:shadow-2xl transition-all duration-300 ${isSelected ? "ring-2 ring-lavarage-coral" : ""}`}>
+    <div 
+      className={`card-lavarage h-full hover:shadow-2xl transition-all duration-300 cursor-pointer ${
+        isSelected ? "ring-2 ring-lavarage-coral" : "hover:ring-2 hover:ring-lavarage-coral/50"
+      }`}
+      onClick={onSelect}
+    >
       <div className="p-6 border-b border-lavarage-orange/20">
         <GradientText variant="primary" size="lg" weight="bold">
           {token} Balance
@@ -46,64 +61,74 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
       <div className="p-6 space-y-4">
         <div className="text-center">
           <GradientText variant="primary" size="2xl" weight="bold">
-            {loading ? "Loading..." : `${formatNumber(balance, 3)} ${token}`}
+            {loading ? "Loading..." : `${formatNumberFloor(balance, 3)} ${token}`}
           </GradientText>
         </div>
         
-        <div className="space-y-3">
-          <div className="relative">
-            <Input
-              type="number"
-              placeholder="Enter amount"
-              min="0"
-              step="0.1"
-              value={isSelected ? amount : ""}
-              onChange={(e) => {
-                if (isSelected) {
-                  onAmountChange(e.target.value);
-                }
-              }}
-              disabled={!isSelected || isProcessing}
-              className={`w-full transition-all duration-300 ${
-                isAmountExceedsBalance 
-                  ? "border-red-300 focus:border-red-500 focus:ring-red-500" 
-                  : "focus:border-lavarage-coral focus:ring-lavarage-coral/20"
-              }`}
-            />
-            {isAmountExceedsBalance && (
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                <AlertCircle className="h-4 w-4 text-red-500" />
+        {isSelected && (
+          <div className="space-y-3">
+            <div className="relative">
+              <Input
+                type="number"
+                placeholder="Enter amount"
+                min="0"
+                step="0.1"
+                value={amount}
+                onChange={(e) => onAmountChange(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                disabled={isProcessing}
+                className={`w-full transition-all duration-300 ${
+                  shouldShowExceedsBalanceError 
+                    ? "border-red-300 focus:border-red-500 focus:ring-red-500" 
+                    : "focus:border-lavarage-coral focus:ring-lavarage-coral/20"
+                }`}
+              />
+            </div>
+            
+            {shouldShowExceedsBalanceError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-600 flex items-center">
+                  <AlertCircle className="h-3 w-3 mr-2 flex-shrink-0" />
+                  Amount exceeds available pool balance
+                </p>
               </div>
             )}
-          </div>
-          
-          {isAmountExceedsBalance && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-sm text-red-600 flex items-center">
-                <AlertCircle className="h-3 w-3 mr-2" />
-                Amount exceeds available balance
-              </p>
+
+            {/* Show message when user doesn't have offers for this specific token */}
+            {!hasOffersForToken && (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                <p className="text-sm text-orange-600 flex items-center">
+                  <Info className="h-3 w-3 mr-2 flex-shrink-0" />
+                  You need to create a {token} loan offer before managing {token} pool funds.
+                </p>
+              </div>
+            )}
+            
+            <div className="flex flex-col sm:flex-row gap-3" onClick={(e) => e.stopPropagation()}>
+              <Button 
+                onClick={onDeposit}
+                disabled={!isAmountValid || isProcessing || !hasOffersForToken}
+                variant="lavarage"
+                className="flex-1 font-semibold text-white shadow-lg hover:shadow-xl"
+              >
+                {isProcessing ? "Processing..." : "Deposit"}
+              </Button>
+              <Button 
+                onClick={onWithdraw}
+                disabled={!isAmountValid || isAmountExceedsBalance || isProcessing || !hasOffersForToken}
+                className="flex-1 font-semibold bg-white border-2 border-lavarage-coral text-lavarage-coral hover:bg-lavarage-coral hover:text-white hover:border-lavarage-coral transition-all duration-300 shadow-md hover:shadow-lg"
+              >
+                {isProcessing ? "Processing..." : "Withdraw"}
+              </Button>
             </div>
-          )}
-          
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button 
-              onClick={onDeposit}
-              disabled={!isSelected || !isAmountValid || isProcessing}
-              variant="lavarage"
-              className="flex-1 font-semibold text-white shadow-lg hover:shadow-xl"
-            >
-              {isProcessing ? "Processing..." : "Deposit"}
-            </Button>
-            <Button 
-              onClick={onWithdraw}
-              disabled={!isSelected || !isAmountValid || isAmountExceedsBalance || isProcessing}
-              className="flex-1 font-semibold bg-white border-2 border-lavarage-coral text-lavarage-coral hover:bg-lavarage-coral hover:text-white hover:border-lavarage-coral transition-all duration-300 shadow-md hover:shadow-lg"
-            >
-              {isProcessing ? "Processing..." : "Withdraw"}
-            </Button>
           </div>
-        </div>
+        )}
+        
+        {!isSelected && (
+          <div className="text-center py-4">
+            <p className="text-gray-500 text-sm">Click to select and manage funds</p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -112,15 +137,47 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
 const Balances: React.FC = () => {
   const { connected } = useWallet();
   const [selectedToken, setSelectedToken] = useState<"SOL" | "USDC">("SOL");
-  const { balance: solBalance, loading: solLoading, deposit: depositSol, withdraw: withdrawSol } = usePool({ quoteToken: "So11111111111111111111111111111111111111112" });
-  const { balance: usdcBalance, loading: usdcLoading, deposit: depositUsdc, withdraw: withdrawUsdc } = usePool({ quoteToken: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" });
+  const { offers } = useOffers({ autoRefresh: true });
   const [amount, setAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [withdrawPressed, setWithdrawPressed] = useState(false);
+
+  // Helper function to check if user has offers for specific token
+  const hasOffersForToken = (tokenType: "SOL" | "USDC"): boolean => {
+    const targetAddress = tokenType === "SOL" 
+      ? SOL_ADDRESS 
+      : USDC_ADDRESS;
+    
+    return offers.some(offer => {
+      if (typeof offer.quoteToken === 'string') {
+        return offer.quoteToken === targetAddress;
+      } else if (offer.quoteToken && typeof offer.quoteToken === 'object') {
+        return offer.quoteToken.address === targetAddress;
+      }
+      return false;
+    });
+  };
+
+  const hasSOLOffers = hasOffersForToken("SOL");
+  const hasUSDCOffers = hasOffersForToken("USDC");
+  const hasAnyOffers = offers.length > 0;
+
+  const { balance: solBalance, loading: solLoading, deposit: depositSol, withdraw: withdrawSol } = usePool({ 
+    quoteToken: SOL_ADDRESS, 
+    hasOffers: hasSOLOffers 
+  });
+  const { balance: usdcBalance, loading: usdcLoading, deposit: depositUsdc, withdraw: withdrawUsdc } = usePool({ 
+    quoteToken: USDC_ADDRESS, 
+    hasOffers: hasUSDCOffers 
+  });
 
   const handleDeposit = async () => {
     if (!amount || parseFloat(amount) <= 0) {
       return;
     }
+
+    // Reset withdraw pressed state
+    setWithdrawPressed(false);
 
     setIsProcessing(true);
     
@@ -145,6 +202,10 @@ const Balances: React.FC = () => {
     }
 
     const currentBalance = selectedToken === "SOL" ? solBalance : usdcBalance;
+    
+    // Set withdraw pressed to show validation errors
+    setWithdrawPressed(true);
+    
     if (parseFloat(amount) > currentBalance) {
       return;
     }
@@ -158,6 +219,7 @@ const Balances: React.FC = () => {
         await withdrawUsdc(parseFloat(amount));
       }
       setAmount("");
+      setWithdrawPressed(false);
     } catch (error: any) {
       // Error handling is done in the usePool hook
       console.error('Withdraw error:', error);
@@ -170,6 +232,15 @@ const Balances: React.FC = () => {
     if (isProcessing) return; // Prevent token switching during processing
     setSelectedToken(token);
     setAmount("");
+    setWithdrawPressed(false); // Reset withdraw pressed state when switching tokens
+  };
+
+  const handleAmountChange = (value: string) => {
+    setAmount(value);
+    // Reset withdraw pressed state when amount changes
+    if (withdrawPressed) {
+      setWithdrawPressed(false);
+    }
   };
 
   if (!connected) {
@@ -206,33 +277,30 @@ const Balances: React.FC = () => {
         </div>
       </div>
 
-      {/* Token Selection - Mobile First */}
-      <div className="flex justify-center space-x-2 sm:space-x-4">
-        <Button
-          variant={selectedToken === "SOL" ? "lavarage" : "outline"}
-          onClick={() => handleTokenSelect("SOL")}
-          disabled={isProcessing}
-          className={`flex-1 sm:flex-none min-w-[80px] font-semibold transition-all duration-300 ${
-            selectedToken !== "SOL" 
-              ? "bg-white border-2 border-lavarage-coral text-lavarage-coral hover:bg-lavarage-coral hover:text-white shadow-md hover:shadow-lg" 
-              : "text-white shadow-lg hover:shadow-xl"
-          }`}
-        >
-          SOL
-        </Button>
-        <Button
-          variant={selectedToken === "USDC" ? "lavarage" : "outline"}
-          onClick={() => handleTokenSelect("USDC")}
-          disabled={isProcessing}
-          className={`flex-1 sm:flex-none min-w-[80px] font-semibold transition-all duration-300 ${
-            selectedToken !== "USDC" 
-              ? "bg-white border-2 border-lavarage-coral text-lavarage-coral hover:bg-lavarage-coral hover:text-white shadow-md hover:shadow-lg" 
-              : "text-white shadow-lg hover:shadow-xl"
-          }`}
-        >
-          USDC
-        </Button>
-      </div>
+      {/* Create Offers Notice - Only show if user has no offers at all */}
+      {connected && !hasAnyOffers && (
+        <div className="card-lavarage p-6 mb-6 border border-lavarage-orange/20">
+          <div className="flex items-start">
+            <div className="p-3 rounded-full bg-lavarage-primary flex items-center justify-center mr-4 flex-shrink-0">
+              <Info className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <GradientText variant="primary" size="lg" weight="bold" className="mb-2">
+                Getting Started
+              </GradientText>
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                To start managing pool funds, you need to create a <span className="font-semibold text-lavarage-coral">loan offer</span> first.
+              </p>
+              <Link to="/create-offer">
+                <Button variant="lavarage" size="sm" className="shadow-lg hover:shadow-xl transition-all duration-300">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Offer
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Balance Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
@@ -242,10 +310,13 @@ const Balances: React.FC = () => {
           loading={solLoading}
           isSelected={selectedToken === "SOL"}
           amount={amount}
-          onAmountChange={setAmount}
+          onAmountChange={handleAmountChange}
           onDeposit={handleDeposit}
           onWithdraw={handleWithdraw}
           isProcessing={isProcessing}
+          onSelect={() => handleTokenSelect("SOL")}
+          hasOffersForToken={hasSOLOffers}
+          withdrawPressed={withdrawPressed}
         />
         
         <BalanceCard
@@ -254,10 +325,13 @@ const Balances: React.FC = () => {
           loading={usdcLoading}
           isSelected={selectedToken === "USDC"}
           amount={amount}
-          onAmountChange={setAmount}
+          onAmountChange={handleAmountChange}
           onDeposit={handleDeposit}
           onWithdraw={handleWithdraw}
           isProcessing={isProcessing}
+          onSelect={() => handleTokenSelect("USDC")}
+          hasOffersForToken={hasUSDCOffers}
+          withdrawPressed={withdrawPressed}
         />
       </div>
     </div>

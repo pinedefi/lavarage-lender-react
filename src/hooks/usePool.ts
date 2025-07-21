@@ -5,11 +5,13 @@ import toast from 'react-hot-toast';
 import bs58 from 'bs58';
 import { VersionedTransaction } from '@solana/web3.js';
 import { useError } from '@/contexts/ErrorContext';
+import { SOL_ADDRESS } from '@/utils/tokens';
 
 interface UsePoolOptions {
   quoteToken?: string;
   autoRefresh?: boolean;
   refreshInterval?: number;
+  hasOffers?: boolean;
 }
 
 interface UsePoolReturn {
@@ -28,52 +30,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { quoteToken = 'SOL', autoRefresh = true, refreshInterval = 30000 } = options;
-
-  const getUserFriendlyErrorMessage = (error: any): string => {
-    const errorMessage = typeof error === 'string' ? error : error?.message || 'Unknown error';
-
-    // User rejected the transaction
-    if (errorMessage.includes('User rejected') || errorMessage.includes('user rejected')) {
-      return 'Transaction was cancelled by user';
-    }
-
-    // Insufficient funds
-    if (
-      errorMessage.includes('Insufficient funds') ||
-      errorMessage.includes('insufficient funds')
-    ) {
-      return 'Insufficient funds in wallet';
-    }
-
-    // Network errors
-    if (errorMessage.includes('Network request failed') || errorMessage.includes('fetch')) {
-      return 'Network error. Please check your connection and try again';
-    }
-
-    // Wallet not connected
-    if (errorMessage.includes('Wallet not connected')) {
-      return 'Please connect your wallet first';
-    }
-
-    // Transaction failed
-    if (errorMessage.includes('Transaction failed')) {
-      return 'Transaction failed. Please try again';
-    }
-
-    // Timeout errors
-    if (errorMessage.includes('timeout') || errorMessage.includes('Timeout')) {
-      return 'Transaction timed out. Please try again';
-    }
-
-    // Slippage errors
-    if (errorMessage.includes('slippage') || errorMessage.includes('Slippage')) {
-      return 'Transaction failed due to slippage. Please try again';
-    }
-
-    // Generic fallback
-    return errorMessage;
-  };
+  const { quoteToken = 'SOL', autoRefresh = true, refreshInterval = 30000, hasOffers } = options;
 
   const fetchBalance = useCallback(async () => {
     if (!connected || !publicKey) {
@@ -93,10 +50,21 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
       setBalance(bal);
     } catch (err: any) {
       const message = err.message || 'Failed to fetch balance';
-      setError(message);
 
-      // Handle LavaRock NFT errors globally
-      handleError(message);
+      // Check for expected errors that shouldn't show toast notifications
+      const isExpectedError = message.toLowerCase().includes('node wallet not found'); // new wallets with no deposits
+
+      if (isExpectedError) {
+        // For expected errors, set balance to 0 and don't show error
+        console.log('Expected pool balance error:', message);
+        setBalance(0);
+        setError(null);
+      } else {
+        // For unexpected/critical errors, show them
+        setError(message);
+        // Handle LavaRock NFT errors globally
+        handleError(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -110,8 +78,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
       try {
         setError(null);
         const tx = await apiService.depositFunds({
-          amount:
-            amount * 10 ** (quoteToken === 'So11111111111111111111111111111111111111112' ? 9 : 6),
+          amount: amount * 10 ** (quoteToken === SOL_ADDRESS ? 9 : 6),
           quoteToken,
           userWallet: publicKey.toBase58(),
         });
@@ -129,18 +96,21 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         await fetchBalance();
       } catch (err: any) {
         const message = err.message || 'Deposit failed';
-        setError(message);
 
-        // Handle LavaRock NFT errors globally first
-        handleError(message);
+        // Check for the specific case where user needs to create an offer first
+        if (message.toLowerCase().includes('node wallet not found')) {
+          const offerRequiredMessage = 'You need to create a loan offer before depositing funds.';
+          setError(offerRequiredMessage);
+        } else {
+          setError(message);
+          // Handle LavaRock NFT errors globally first
+          handleError(message);
+        }
 
-        // Show user-friendly toast message
-        const userFriendlyMessage = getUserFriendlyErrorMessage(err);
-        toast.error(userFriendlyMessage);
         throw err;
       }
     },
-    [publicKey, quoteToken, fetchBalance, sendTransaction, handleError]
+    [publicKey, quoteToken, fetchBalance, sendTransaction, handleError, hasOffers]
   );
 
   const withdraw = useCallback(
@@ -170,18 +140,21 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         await fetchBalance();
       } catch (err: any) {
         const message = err.message || 'Withdraw failed';
-        setError(message);
 
-        // Handle LavaRock NFT errors globally first
-        handleError(message);
+        // Check for the specific case where user needs to create an offer first
+        if (message.toLowerCase().includes('node wallet not found')) {
+          const offerRequiredMessage = 'You need to create a loan offer before withdrawing funds.';
+          setError(offerRequiredMessage);
+        } else {
+          setError(message);
+          // Handle LavaRock NFT errors globally first
+          handleError(message);
+        }
 
-        // Show user-friendly toast message
-        const userFriendlyMessage = getUserFriendlyErrorMessage(err);
-        toast.error(userFriendlyMessage);
         throw err;
       }
     },
-    [publicKey, quoteToken, fetchBalance, sendTransaction, handleError]
+    [publicKey, quoteToken, fetchBalance, sendTransaction, handleError, hasOffers]
   );
 
   useEffect(() => {

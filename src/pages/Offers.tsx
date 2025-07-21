@@ -454,63 +454,169 @@ const Offers: React.FC = () => {
       onClose();
     };
 
-    return (
+        return (
       <Modal open={!!offer} onClose={onClose}>
-        <div className="p-4 sm:p-6 space-y-4">
-          <h2 className="text-lg sm:text-xl font-semibold">Edit Offer</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">APR (%)</label>
-              <Input
-                type="number"
-                value={apr}
-                onChange={(e) => setApr(e.target.value)}
-                step="0.1"
-                min="0"
-              />
+        <div className="card-lavarage p-3 sm:p-6 lg:p-5 space-y-3 sm:space-y-3 max-h-[90vh] overflow-y-auto">
+          {/* Header with improved spacing for mobile */}
+          <div className="pt-1 sm:pt-0">
+            <div className="flex items-center space-x-2">
+              <div className="p-2 rounded-full bg-primary-100">
+                <Edit3 className="h-4 w-4 text-primary-600" />
+              </div>
+              <GradientText variant="primary" size="xl" weight="bold" as="h2" className="text-base sm:text-xl">
+                Edit Offer
+              </GradientText>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Max Exposure ({symbol})
-              </label>
-              <Input
-                type="number"
-                value={exposure}
-                onChange={(e) => setExposure(e.target.value)}
-                step="0.1"
-                min="0"
-              />
+            <div className="mt-1.5 p-2 sm:p-3 rounded-lg bg-lavarage-subtle/10 border-l-4 border-lavarage-coral">
+              <p className="text-xs sm:text-sm text-gray-700 font-medium">
+                Updates only affect new positions opened going forward.
+              </p>
             </div>
-            <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-2">
-              <Button type="button" variant="ghost" onClick={onClose} className="w-full sm:w-auto">
+          </div>
+          
+          {/* Current Offer Details with glass styling - more compact on mobile */}
+          <div className="glass-lavarage p-2 sm:p-4 rounded-lg border border-white/20 backdrop-blur-sm">
+            <h3 className="text-xs sm:text-sm font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center">
+              <div className="h-2 w-2 bg-lavarage-coral rounded-full mr-2"></div>
+              Current Offer Details
+            </h3>
+            {/* Mobile: Show only essential details in a compact row */}
+            <div className="block sm:hidden">
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center space-x-1 min-w-0 flex-1">
+                  <TokenDisplay token={offer.collateralToken} showAddress={false} />
+                </div>
+                <div className="flex items-center space-x-3 flex-shrink-0">
+                  <div className="text-center">
+                    <div className="text-gray-500">APR</div>
+                    <div className="font-bold text-gray-900">{formatPercentage(offer.apr)}</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-gray-500">LTV</div>
+                    <div className="font-bold text-gray-900">
+                      {offer.targetLtv !== null && offer.targetLtv !== undefined
+                        ? formatPercentage(offer.targetLtv * 100)
+                        : 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Desktop: Full grid layout */}
+            <div className="hidden sm:grid grid-cols-2 gap-4">
+              <div className="flex flex-col items-start space-y-1">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Token</span>
+                <div className="flex items-center space-x-1">
+                  <TokenDisplay token={offer.collateralToken} showAddress={false} />
+                </div>
+              </div>
+              <div className="flex flex-col items-start space-y-1">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">APR</span>
+                <span className="text-sm font-bold text-gray-900">{formatPercentage(offer.apr)}</span>
+              </div>
+              <div className="flex flex-col items-start space-y-1">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Exposure</span>
+                <span className="text-xs sm:text-sm font-bold text-gray-900">
+                  {formatNumber(parseFloat(offer.maxExposure), 2)} {symbol}
+                </span>
+              </div>
+              <div className="flex flex-col items-start space-y-1">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">LTV</span>
+                <span className="text-sm font-bold text-gray-900">
+                  {offer.targetLtv !== null && offer.targetLtv !== undefined
+                    ? formatPercentage(offer.targetLtv * 100)
+                    : 'N/A'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Edit Form */}
+          <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+              <div>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1">
+                  APR <span className="text-gray-500 font-normal">(%)</span>
+                </label>
+                <Input
+                  type="number"
+                  value={apr}
+                  onChange={(e) => setApr(e.target.value)}
+                  step="0.1"
+                  min="0"
+                  className="bg-white/50 border-white/30 focus:border-lavarage-coral focus:ring-lavarage-coral/20 h-9 sm:h-10"
+                />
+              </div>
+              <div>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1">
+                  Max Exposure <span className="text-gray-500 font-normal">({symbol})</span>
+                </label>
+                <Input
+                  type="number"
+                  value={exposure}
+                  onChange={(e) => setExposure(e.target.value)}
+                  step="0.1"
+                  min="0"
+                  className="bg-white/50 border-white/30 focus:border-lavarage-coral focus:ring-lavarage-coral/20 h-9 sm:h-10"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-1 sm:pt-2">
+              <Button 
+                type="button" 
+                variant="ghost" 
+                onClick={onClose} 
+                className="w-full sm:w-auto order-2 sm:order-1 hover:bg-white/20 h-8 sm:h-10"
+              >
                 Cancel
               </Button>
-              <Button type="submit" variant="primary" className="w-full sm:w-auto">
-                Save
+              <Button 
+                type="submit" 
+                variant="lavarage" 
+                className="w-full sm:w-auto order-1 sm:order-2 h-8 sm:h-10"
+              >
+                Save Changes
               </Button>
             </div>
           </form>
-          <hr />
-          <h2 className="text-lg sm:text-xl font-semibold">Change LTV</h2>
-          <form onSubmit={handleLtvSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">New LTV (%)</label>
-              <Input
-                type="number"
-                value={ltv}
-                onChange={(e) => setLtv(e.target.value)}
-                step="0.1"
-                min="0"
-                max="80"
-                placeholder="e.g., 75 for 75%"
-              />
+
+          {/* LTV Form */}
+          <div className="space-y-2 sm:space-y-3">
+            <div className="flex items-center space-x-2">
+              <div className="p-1.5 rounded-full bg-warning-100">
+                <ArrowUpDown className="h-4 w-4 text-warning-600" />
+              </div>
+              <GradientText variant="primary" size="lg" weight="bold" as="h3" className="text-sm sm:text-lg">
+                Change LTV
+              </GradientText>
             </div>
-            <div className="flex justify-end pt-2">
-              <Button type="submit" variant="primary" className="w-full sm:w-auto">
-                Update LTV
-              </Button>
-            </div>
-          </form>
+            <form onSubmit={handleLtvSubmit} className="space-y-2">
+              <div>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1">
+                  New LTV <span className="text-gray-500 font-normal">(%)</span>
+                </label>
+                <Input
+                  type="number"
+                  value={ltv}
+                  onChange={(e) => setLtv(e.target.value)}
+                  step="0.1"
+                  min="0"
+                  max="80"
+                  placeholder="e.g., 75"
+                  className="bg-white/50 border-white/30 focus:border-lavarage-coral focus:ring-lavarage-coral/20 h-9 sm:h-10"
+                />
+              </div>
+              <div className="flex justify-end pt-1">
+                <Button 
+                  type="submit" 
+                  variant="lavarage" 
+                  className="w-full sm:w-auto h-8 sm:h-10"
+                >
+                  Update LTV
+                </Button>
+              </div>
+            </form>
+          </div>
         </div>
       </Modal>
     );
@@ -527,6 +633,10 @@ const Offers: React.FC = () => {
     const actionDescription = isActive
       ? 'Are you sure you want to pause this offer?'
       : 'Are you sure you want to reactivate this offer? (Default LTV is 75%)';
+
+    const quoteToken = typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
+    const symbol = quoteToken?.symbol ?? 'SOL';
+    const maxExposure = parseFloat(offer.maxExposure) || 0;
 
     const handleAction = async () => {
       try {
@@ -558,6 +668,54 @@ const Offers: React.FC = () => {
               <GradientText variant="primary" size="lg" weight="bold" as="h3">
                 {actionText} Offer
               </GradientText>
+            </div>
+          </div>
+
+          {/* Offer Details */}
+          <div className="glass-lavarage p-3 sm:p-4 rounded-lg border border-white/20 backdrop-blur-sm">
+            <h4 className="text-xs sm:text-sm font-semibold text-gray-800 mb-3 flex items-center">
+              <div className="h-2 w-2 bg-lavarage-coral rounded-full mr-2"></div>
+              Offer Details
+            </h4>
+            
+            {/* Mobile: Stacked layout for better readability */}
+            <div className="block sm:hidden space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Token</span>
+                <div className="flex items-center space-x-1 max-w-[60%]">
+                  <TokenDisplay token={offer.collateralToken} showAddress={false} />
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">APR</span>
+                <span className="text-sm font-bold text-gray-900">{formatPercentage(offer.apr)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Exposure</span>
+                <span className="text-xs font-bold text-gray-900">
+                  {formatNumber(maxExposure, 2)} {symbol}
+                </span>
+              </div>
+            </div>
+            
+            {/* Desktop: Grid layout */}
+            <div className="hidden sm:grid grid-cols-3 gap-4">
+              <div className="flex flex-col items-start space-y-1">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Token</span>
+                <div className="flex items-center space-x-1">
+                  <TokenDisplay token={offer.collateralToken} showAddress={false} />
+                </div>
+              </div>
+              <div className="flex flex-col items-start space-y-1">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">APR</span>
+                <span className="text-sm font-bold text-gray-900">{formatPercentage(offer.apr)}</span>
+              </div>
+              <div className="flex flex-col items-start space-y-1">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Exposure</span>
+                <span className="text-sm font-bold text-gray-900">
+                  {formatNumber(maxExposure, 2)} {symbol}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -618,10 +776,10 @@ const Offers: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0 lg:flex-shrink lg:flex-grow-0 flex-shrink-0">
         <div className="min-w-0 flex-1">
           <GradientText variant="primary" size="3xl" weight="bold" as="h1" className="text-2xl sm:text-3xl">
-            Lending Offers
+            Loan Offers
           </GradientText>
           <p className="text-gray-600 mt-2 text-sm sm:text-base">
-            Manage your <span className="font-semibold text-lavarage-coral">LAVARAGE</span> lending
+            Manage your <span className="font-semibold text-lavarage-coral">LAVARAGE</span> loan
             offers and track performance
           </p>
         </div>
@@ -849,7 +1007,7 @@ const Offers: React.FC = () => {
               <p className="mt-2 text-center text-gray-600 max-w-md">
                 {searchTerm || statusFilter !== 'all'
                   ? 'Try adjusting your filters to see more results.'
-                  : 'Create your first lending offer to start earning interest on your assets.'}
+                  : 'Create your first loan offer to start earning interest on your assets.'}
               </p>
               {!searchTerm && statusFilter === 'all' && (
                 <Link to="/create-offer" className="mt-4 w-full sm:w-auto">

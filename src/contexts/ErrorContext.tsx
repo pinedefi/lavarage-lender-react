@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import { toast } from 'react-hot-toast';
 import Modal from '@/components/ui/Modal';
 import { GradientText } from '@/components/brand';
 import Button from '@/components/ui/Button';
@@ -34,8 +35,10 @@ export const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
     if (errorMessage.toLowerCase().includes('lavarock nft')) {
       console.log('LavaRock NFT error detected, showing modal');
       setShowLavaRockModal(true);
+    } else {
+      // For all other errors, show them via toast
+      toast.error(errorMessage);
     }
-    // For all other errors, do nothing - let the calling code handle toasts
   }, []);
 
   const openTensorTrade = () => {
