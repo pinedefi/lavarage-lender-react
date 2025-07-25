@@ -29,7 +29,8 @@ interface UseOffersReturn {
 }
 
 export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
-  const { publicKey, connected, sendTransaction } = useWallet();
+  const { publicKey, connected, sendTransaction, signTransaction } = useWallet();
+  const { connection } = useWallet();
   const { handleError } = useError();
   const [offers, setOffers] = useState<OfferV2Model[]>([]);
   const [loading, setLoading] = useState(true);
@@ -111,7 +112,8 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
         const transaction = VersionedTransaction.deserialize(transactionBuffer);
 
         // Send the transaction directly
-        const signature = await sendTransaction(transaction);
+        const signedTransaction = await signTransaction(transaction);
+        const signature = await connection.sendRawTransaction(signedTransaction.serialize());
 
         console.log('Transaction sent with signature:', signature);
         toast.success('Offer created successfully');
