@@ -253,14 +253,19 @@ const Positions: React.FC = () => {
   // Calculate enhanced stats
   const enhancedStats = useMemo(() => {
     const activePositions = positions.filter((p) => p.status === 'active');
-    const totalInterestEarned = positions.reduce((sum, p) => sum + (p.interestAccrued || 0), 0);
+    const interestByToken = positions.reduce((acc, p) => {
+      const symbol = p.quoteToken.symbol;
+      acc[symbol] = (acc[symbol] || 0) + (p.interestAccrued || 0);
+      return acc;
+    }, { 'USDC': 0, 'SOL': 0 } as Record<string, number>); // Initialize with both tokens
+
     const highRiskPositions = activePositions.filter(
       (p) => calculateRiskLevel(p) === 'high'
     ).length;
 
     return {
       ...stats,
-      totalInterestEarned,
+      interestByToken,
       highRiskPositions,
       averageAPR:
         activePositions.length > 0
@@ -373,9 +378,16 @@ const Positions: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs md:text-sm font-medium text-gray-600 mb-2">Interest Earned</p>
-              <GradientText variant="primary" size="xl" weight="bold">
-                ${enhancedStats.totalInterestEarned.toFixed(2)}
-              </GradientText>
+              <div className="flex flex-col space-y-1">
+                {['USDC', 'SOL'].map((symbol) => (
+                  <div key={symbol} className="flex flex-col">
+                    <span className="text-sm text-gray-500">{symbol}</span>
+                    <GradientText variant="primary" size="xl" weight="bold">
+                      {formatCurrency(enhancedStats.interestByToken[symbol] || 0, symbol)}
+                    </GradientText>
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="p-2 md:p-4 rounded-full bg-lavarage-primary">
               <DollarSign className="h-4 w-4 md:h-6 md:w-6 text-white" />
@@ -613,8 +625,11 @@ const Positions: React.FC = () => {
                             </div>
                           </td>
                           <td className="py-4 px-4">
-                            <div className="font-semibold text-green-600">
-                              {formatCurrency(position.interestAccrued, position.quoteToken.symbol)}
+                            <div className="flex flex-col">
+                              <span className="text-sm text-gray-600">{position.quoteToken.symbol}</span>
+                              <div className="font-semibold text-green-600">
+                                {formatCurrency(position.interestAccrued, position.quoteToken.symbol)}
+                              </div>
                             </div>
                           </td>
                           <td className="py-4 px-4">{getRiskBadge(position)}</td>
@@ -709,8 +724,11 @@ const Positions: React.FC = () => {
                         </div>
                         <div>
                           <div className="text-gray-600">Interest</div>
-                          <div className="font-semibold text-green-600">
-                            {formatCurrency(position.interestAccrued, position.quoteToken.symbol)}
+                          <div className="flex flex-col">
+                            <span className="text-sm text-gray-600">{position.quoteToken.symbol}</span>
+                            <div className="font-semibold text-green-600">
+                              {formatCurrency(position.interestAccrued, position.quoteToken.symbol)}
+                            </div>
                           </div>
                         </div>
                         <div>
