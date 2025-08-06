@@ -328,8 +328,11 @@ const OfferCard: React.FC<{
 
 const Offers: React.FC = () => {
   const { connected } = useWallet();
+  const [selectedOffer, setSelectedOffer] = useState<OfferV2Model | null>(null);
+  const [toggleOffer, setToggleOffer] = useState<OfferV2Model | null>(null);
+  
   const { offers, loading, error, refetch, changeLTV, updateOffer } = useOffers({
-    autoRefresh: true,
+    autoRefresh: !selectedOffer, // Disable auto-refresh when modal is open
     inactiveOffers: true,
   });
   const [searchTerm, setSearchTerm] = useState('');
@@ -338,8 +341,6 @@ const Offers: React.FC = () => {
     'created' | 'apr' | 'utilization' | 'exposure' | 'token' | 'available'
   >('created');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [selectedOffer, setSelectedOffer] = useState<OfferV2Model | null>(null);
-  const [toggleOffer, setToggleOffer] = useState<OfferV2Model | null>(null);
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
 
   const handleCopyToClipboard = async (address: string) => {
