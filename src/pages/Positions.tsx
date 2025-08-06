@@ -253,7 +253,7 @@ const Positions: React.FC = () => {
   // Calculate enhanced stats
   const enhancedStats = useMemo(() => {
     const activePositions = positions.filter((p) => p.status === 'active');
-    const interestByToken = positions.reduce((acc, p) => {
+    const interestByToken = activePositions.reduce((acc, p) => {
       const symbol = p.quoteToken.symbol;
       acc[symbol] = (acc[symbol] || 0) + (p.interestAccrued || 0);
       return acc;
