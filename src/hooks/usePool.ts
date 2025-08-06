@@ -52,7 +52,9 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
       const message = err.message || 'Failed to fetch balance';
 
       // Check for expected errors that shouldn't show toast notifications
-      const isExpectedError = message.toLowerCase().includes('node wallet not found'); // new wallets with no deposits
+      const isExpectedError =
+        message.toLowerCase().includes('node wallet not found') || // new wallets with no deposits
+        message.toLowerCase().includes('failed to get pool balance'); // token account doesn't exist yet
 
       if (isExpectedError) {
         // For expected errors, set balance to 0 and don't show error
