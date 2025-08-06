@@ -791,7 +791,7 @@ const Offers: React.FC = () => {
         </Link>
       </div>
 
-      <Card className="lg:block flex flex-col flex-1 min-h-0">
+      <Card className="lg:block flex flex-col flex-1 min-h-0 lg:min-h-[80vh]">
         <CardHeader className="lg:block flex-shrink-0">
           <div className="flex flex-col space-y-4">
             <CardTitle>Your Offers</CardTitle>
