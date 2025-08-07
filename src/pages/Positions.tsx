@@ -28,7 +28,7 @@ import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { PositionV3Model } from '@/types';
-import { copyToClipboard, truncateAddress, formatPrice, formatPercentage, formatDateTime } from '@/utils';
+import { copyToClipboard, truncateAddress, formatPrice, formatPercentage, formatDateTime, formatCurrency } from '@/utils';
 
 type SortField = 'borrowedAmount' | 'interest' | 'riskLevel' | 'ltv' | 'apr' | 'openDate';
 type SortDirection = 'asc' | 'desc';
@@ -61,30 +61,6 @@ const Positions: React.FC = () => {
 
   const openSolscan = (address: string) => {
     window.open(`https://solscan.io/account/${address}`, '_blank');
-  };
-
-  const formatCurrency = (amount: string | number, symbol: string = 'USDC') => {
-    const value = typeof amount === 'string' ? parseFloat(amount) : amount;
-
-    let minimumFractionDigits: number;
-    let maximumFractionDigits: number;
-
-    if (symbol === 'SOL') {
-      // For SOL, allow flexible decimals - no minimum, but up to 6 maximum
-      minimumFractionDigits = 0;
-      maximumFractionDigits = value < 1 ? 6 : value < 10 ? 4 : 2;
-    } else {
-      // For USDC and other tokens, use standard currency formatting
-      minimumFractionDigits = 2;
-      maximumFractionDigits = 4;
-    }
-
-    const formatted = new Intl.NumberFormat('en-US', {
-      minimumFractionDigits,
-      maximumFractionDigits,
-    }).format(value);
-
-    return `${formatted} ${symbol}`;
   };
 
   const formatAddress = (address: any) => {
@@ -359,9 +335,9 @@ const Positions: React.FC = () => {
       </div>
 
       {/* Enhanced Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         <div className="card-lavarage p-4 md:p-6 hover:shadow-2xl transition-all duration-300">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between">
             <div>
               <p className="text-xs md:text-sm font-medium text-gray-600 mb-2">Total Positions</p>
               <GradientText variant="primary" size="xl" weight="bold">
@@ -375,7 +351,7 @@ const Positions: React.FC = () => {
         </div>
 
         <div className="card-lavarage p-4 md:p-6 hover:shadow-2xl transition-all duration-300">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between">
             <div>
               <p className="text-xs md:text-sm font-medium text-gray-600 mb-2">Interest Earned</p>
               <div className="flex flex-col space-y-1">
@@ -396,7 +372,7 @@ const Positions: React.FC = () => {
         </div>
 
         <div className="card-lavarage p-4 md:p-6 hover:shadow-2xl transition-all duration-300">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between">
             <div>
               <p className="text-xs md:text-sm font-medium text-gray-600 mb-2">Avg APR</p>
               <GradientText variant="primary" size="xl" weight="bold">
@@ -410,7 +386,7 @@ const Positions: React.FC = () => {
         </div>
 
         <div className="card-lavarage p-4 md:p-6 hover:shadow-2xl transition-all duration-300">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between">
             <div>
               <p className="text-xs md:text-sm font-medium text-gray-600 mb-2">High Risk</p>
               <GradientText variant="primary" size="xl" weight="bold">

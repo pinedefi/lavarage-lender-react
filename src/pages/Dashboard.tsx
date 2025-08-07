@@ -24,7 +24,7 @@ import Badge from '@/components/ui/Badge';
 import { useOffers } from '@/hooks/useOffers';
 import { usePositions } from '@/hooks/usePositions';
 import { useWallet } from '@/contexts/WalletContext';
-import { formatNumber, formatPercentage } from '@/utils';
+import { formatPercentage, formatCurrency } from '@/utils';
 import { QuickActionMenu, QuickActionItem } from '@/components/ui/QuickActionMenu';
 import { GradientText, LoadingSpinner, LavarageLogo } from '@/components/brand';
 
@@ -51,7 +51,7 @@ const Dashboard: React.FC = () => {
       acc[symbol] += currentExposure;
       
       return acc;
-    }, { SOL: 0, USDC: 0 }),
+    }, { USDC: 0, SOL: 0 }),
     activeOffersCount: offers.filter((offer) => offer.active).length,
     portfolioUtilization:
       offers.length > 0
@@ -78,9 +78,9 @@ const Dashboard: React.FC = () => {
   const statCards = [
     {
       title: 'Total Liquidity Deployed',
-      value: Object.entries(dashboardStats.totalLiquidityDeployed)
-        .map(([currency, amount]) => `${formatNumber(amount, 2)} ${currency}`)
-        .join('\n') || '0 SOL\n0 USDC',
+      value: ['USDC', 'SOL']
+        .map(currency => formatCurrency(dashboardStats.totalLiquidityDeployed[currency] || 0, currency))
+        .join('\n'),
       icon: TrendingUp,
       trend: '+12.5%',
       trendType: 'positive' as const,
@@ -101,10 +101,9 @@ const Dashboard: React.FC = () => {
     },
     {
       title: 'Total Pending Interest',
-      value:
-        Object.entries(dashboardStats.totalInterestEarned)
-          .map(([currency, amount]) => `${formatNumber(amount, 2)} ${currency}`)
-          .join('\n') || '0 SOL\n0 USDC',
+      value: ['USDC', 'SOL']
+        .map(currency => formatCurrency(dashboardStats.totalInterestEarned[currency] || 0, currency))
+        .join('\n'),
       icon: BarChart3,
       trend: '+5.2%',
       trendType: 'positive' as const,
@@ -350,19 +349,17 @@ const Dashboard: React.FC = () => {
                     Total Interest Earned
                   </span>
                   <div className="space-y-3">
-                    {Object.entries(dashboardStats.totalInterestEarned).map(
-                      ([currency, amount]) => (
-                        <div
-                          key={currency}
-                          className="flex justify-between items-center p-3 rounded-lg bg-lavarage-subtle"
-                        >
-                          <span className="text-sm font-medium text-gray-700">{currency}</span>
-                          <GradientText variant="primary" weight="bold">
-                            {formatNumber(amount, 4)} {currency}
-                          </GradientText>
-                        </div>
-                      )
-                    )}
+                    {['USDC', 'SOL'].map(currency => (
+                      <div
+                        key={currency}
+                        className="flex justify-between items-center p-3 rounded-lg bg-lavarage-subtle"
+                      >
+                        <span className="text-sm font-medium text-gray-700">{currency}</span>
+                        <GradientText variant="primary" weight="bold">
+                          {formatCurrency(dashboardStats.totalInterestEarned[currency] || 0, currency)}
+                        </GradientText>
+                      </div>
+                    ))}
                   </div>
                 </div>
                 <div className="flex justify-between items-center p-3 rounded-lg bg-lavarage-subtle">
