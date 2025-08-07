@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Plus,
@@ -331,6 +331,15 @@ const Offers: React.FC = () => {
   const [selectedOffer, setSelectedOffer] = useState<OfferV2Model | null>(null);
   const [toggleOffer, setToggleOffer] = useState<OfferV2Model | null>(null);
   
+  // Form state for edit modal - moved to parent to persist across re-renders
+  const [editFormState, setEditFormState] = useState({
+    apr: '',
+    exposure: '',
+    ltv: '',
+    initializedOfferId: null as string | null,
+    isInitialized: false
+  });
+  
   const { offers, loading, error, refetch, changeLTV, updateOffer } = useOffers({
     autoRefresh: !selectedOffer, // Disable auto-refresh when modal is open
     inactiveOffers: true,
@@ -342,6 +351,18 @@ const Offers: React.FC = () => {
   >('created');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+
+  // Handle closing the edit modal and resetting form state
+  const handleCloseEditModal = useCallback(() => {
+    setSelectedOffer(null);
+    setEditFormState({
+      apr: '',
+      exposure: '',
+      ltv: '',
+      initializedOfferId: null,
+      isInitialized: false
+    });
+  }, []);
 
   const handleCopyToClipboard = async (address: string) => {
     const success = await copyToClipboard(address);
@@ -417,19 +438,30 @@ const Offers: React.FC = () => {
   const OfferModal: React.FC<{
     offer: OfferV2Model | null;
     onClose: () => void;
-  }> = ({ offer, onClose }) => {
-    const [apr, setApr] = useState('');
-    const [exposure, setExposure] = useState('');
-    const [ltv, setLtv] = useState('');
+    formState: typeof editFormState;
+    setFormState: React.Dispatch<React.SetStateAction<typeof editFormState>>;
+  }> = ({ offer, onClose, formState, setFormState }) => {
+    const { apr, exposure, ltv, initializedOfferId, isInitialized } = formState;
 
+    // Initialize form when offer changes
     useEffect(() => {
       if (offer) {
-        const quoteToken = typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
-        setApr(formatNumberForInput(offer.apr, 2));
-        setExposure(formatNumberForInput(parseFloat(offer.maxExposure), 2));
-        setLtv(formatNumberForInput((offer.targetLtv || 0.75) * 100, 2));
+        const offerId = offer.publicKey.toString();
+        
+        // Initialize form if not initialized or if different offer
+        if (!isInitialized || (initializedOfferId && offerId !== initializedOfferId)) {
+          
+          const quoteToken = typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
+          setFormState({
+            apr: formatNumberForInput(offer.apr, 2),
+            exposure: formatNumberForInput(parseFloat(offer.maxExposure), 2),
+            ltv: formatNumberForInput((offer.targetLtv || 0.75) * 100, 2),
+            initializedOfferId: offerId,
+            isInitialized: true
+          });
+        }
       }
-    }, [offer]);
+    }, [offer, isInitialized, initializedOfferId, setFormState]);
 
     if (!offer) return null;
 
@@ -438,21 +470,38 @@ const Offers: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      await updateOffer({
-        nodeWallet: offer.nodeWallet.toString(),
-        collateralToken: offer.collateralToken?.address || '',
-        quoteToken:
-          typeof offer.quoteToken === 'string' ? offer.quoteToken : offer.quoteToken.address,
-        maxExposure: parseFloat(exposure) * 10 ** (quoteToken?.decimals ?? 9),
-        interestRate: Number(parseFloat(apr).toFixed(0)),
-      });
-      onClose();
+      
+      try {
+        await updateOffer({
+          nodeWallet: offer.nodeWallet.toString(),
+          collateralToken: offer.collateralToken?.address || '',
+          quoteToken:
+            typeof offer.quoteToken === 'string' ? offer.quoteToken : offer.quoteToken.address,
+          maxExposure: parseFloat(exposure) * 10 ** (quoteToken?.decimals ?? 9),
+          interestRate: Number(parseFloat(apr).toFixed(0)),
+        });
+        // Only close modal after successful completion
+        onClose();
+      } catch (error) {
+        console.error('Failed to update offer:', error);
+        // Don't close modal if there's an error, so user can retry
+        return;
+      }
     };
 
     const handleLtvSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      await changeLTV(offer.publicKey.toString(), parseFloat(ltv) / 100);
-      onClose();
+      
+      try {
+        const ltvValue = parseFloat(ltv) / 100;
+        await changeLTV(offer.publicKey.toString(), ltvValue);
+        // Only close modal after successful completion
+        onClose();
+      } catch (error) {
+        console.error('Failed to update LTV:', error);
+        // Don't close modal if there's an error, so user can retry
+        return;
+      }
     };
 
         return (
@@ -542,7 +591,7 @@ const Offers: React.FC = () => {
                 <Input
                   type="number"
                   value={apr}
-                  onChange={(e) => setApr(e.target.value)}
+                  onChange={(e) => setFormState(prev => ({ ...prev, apr: e.target.value }))}
                   step="0.1"
                   min="0"
                   className="bg-white/50 border-white/30 focus:border-lavarage-coral focus:ring-lavarage-coral/20 h-9 sm:h-10"
@@ -555,7 +604,7 @@ const Offers: React.FC = () => {
                 <Input
                   type="number"
                   value={exposure}
-                  onChange={(e) => setExposure(e.target.value)}
+                  onChange={(e) => setFormState(prev => ({ ...prev, exposure: e.target.value }))}
                   step="0.1"
                   min="0"
                   className="bg-white/50 border-white/30 focus:border-lavarage-coral focus:ring-lavarage-coral/20 h-9 sm:h-10"
@@ -599,7 +648,7 @@ const Offers: React.FC = () => {
                 <Input
                   type="number"
                   value={ltv}
-                  onChange={(e) => setLtv(e.target.value)}
+                  onChange={(e) => setFormState(prev => ({ ...prev, ltv: e.target.value }))}
                   step="0.1"
                   min="0"
                   max="80"
@@ -1022,7 +1071,12 @@ const Offers: React.FC = () => {
           )}
         </CardContent>
       </Card>
-      <OfferModal offer={selectedOffer} onClose={() => setSelectedOffer(null)} />
+      <OfferModal 
+        offer={selectedOffer} 
+        onClose={handleCloseEditModal}
+        formState={editFormState}
+        setFormState={setEditFormState}
+      />
       <PauseModal offer={toggleOffer} onClose={() => setToggleOffer(null)} />
     </div>
   );
