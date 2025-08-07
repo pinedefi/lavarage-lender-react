@@ -67,10 +67,10 @@ export function usePositions(options: UsePositionsOptions = {}): UsePositionsRet
         const errorMessage = err.message || 'Failed to fetch positions';
         setError(errorMessage);
         console.error('Error fetching positions:', err);
-        
+
         // Handle LavaRock NFT errors globally first
         handleError(errorMessage);
-        
+
         // Then show toast for all errors
         toast.error(errorMessage);
       } finally {
@@ -92,6 +92,11 @@ export function usePositions(options: UsePositionsOptions = {}): UsePositionsRet
 
     const totalInterestEarned = positions.reduce(
       (acc: Record<string, number>, position) => {
+        // Only include interest from active positions
+        if (position.status !== 'active') {
+          return acc;
+        }
+
         const quoteCurrency = position.quoteToken.symbol;
         const interest = position.interestAccrued || 0;
 
