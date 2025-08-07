@@ -7,6 +7,10 @@ import { VersionedTransaction } from '@solana/web3.js';
 import { useError } from '@/contexts/ErrorContext';
 import { SOL_ADDRESS } from '@/utils/tokens';
 
+const EXPECTED_BALANCE_ERRORS = [
+  'node wallet not found', // new wallets with no deposits
+  'failed to get pool balance', // token account doesn't exist yet
+] as const;
 interface UsePoolOptions {
   quoteToken?: string;
   autoRefresh?: boolean;
@@ -52,7 +56,9 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
       const message = err.message || 'Failed to fetch balance';
 
       // Check for expected errors that shouldn't show toast notifications
-      const isExpectedError = message.toLowerCase().includes('node wallet not found'); // new wallets with no deposits
+      const isExpectedError = EXPECTED_BALANCE_ERRORS.some((e) =>
+        message.toLowerCase().includes(e)
+      );
 
       if (isExpectedError) {
         // For expected errors, set balance to 0 and don't show error
@@ -97,8 +103,12 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
       } catch (err: any) {
         const message = err.message || 'Deposit failed';
 
-        // Check for the specific case where user needs to create an offer first
-        if (message.toLowerCase().includes('node wallet not found')) {
+        // Check for expected errors that shouldn't show toast notifications
+        const isExpectedError = EXPECTED_BALANCE_ERRORS.some((e) =>
+          message.toLowerCase().includes(e)
+        );
+
+        if (isExpectedError) {
           const offerRequiredMessage = 'You need to create a loan offer before depositing funds.';
           setError(offerRequiredMessage);
         } else {
@@ -141,8 +151,12 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
       } catch (err: any) {
         const message = err.message || 'Withdraw failed';
 
-        // Check for the specific case where user needs to create an offer first
-        if (message.toLowerCase().includes('node wallet not found')) {
+        // Check for expected errors that shouldn't show toast notifications
+        const isExpectedError = EXPECTED_BALANCE_ERRORS.some((e) =>
+          message.toLowerCase().includes(e)
+        );
+
+        if (isExpectedError) {
           const offerRequiredMessage = 'You need to create a loan offer before withdrawing funds.';
           setError(offerRequiredMessage);
         } else {
