@@ -441,27 +441,63 @@ const Offers: React.FC = () => {
     formState: typeof editFormState;
     setFormState: React.Dispatch<React.SetStateAction<typeof editFormState>>;
   }> = ({ offer, onClose, formState, setFormState }) => {
+    // Local state for immediate UI responsiveness
+    const [localApr, setLocalApr] = useState('');
+    const [localExposure, setLocalExposure] = useState('');
+    const [localLtv, setLocalLtv] = useState('');
+    const [isLocalInitialized, setIsLocalInitialized] = useState(false);
+
     const { apr, exposure, ltv, initializedOfferId, isInitialized } = formState;
 
-    // Initialize form when offer changes
+    // Initialize both local and parent state when offer changes
     useEffect(() => {
       if (offer) {
         const offerId = offer.publicKey.toString();
         
         // Initialize form if not initialized or if different offer
         if (!isInitialized || (initializedOfferId && offerId !== initializedOfferId)) {
-          
           const quoteToken = typeof offer.quoteToken === 'object' ? offer.quoteToken : null;
+          const newApr = formatNumberForInput(offer.apr, 2);
+          const newExposure = formatNumberForInput(parseFloat(offer.maxExposure), 2);
+          const newLtv = formatNumberForInput((offer.targetLtv || 0.75) * 100, 2);
+          
+          // Update parent state
           setFormState({
-            apr: formatNumberForInput(offer.apr, 2),
-            exposure: formatNumberForInput(parseFloat(offer.maxExposure), 2),
-            ltv: formatNumberForInput((offer.targetLtv || 0.75) * 100, 2),
+            apr: newApr,
+            exposure: newExposure,
+            ltv: newLtv,
             initializedOfferId: offerId,
             isInitialized: true
           });
+          
+          // Update local state
+          setLocalApr(newApr);
+          setLocalExposure(newExposure);
+          setLocalLtv(newLtv);
+          setIsLocalInitialized(true);
         }
       }
     }, [offer, isInitialized, initializedOfferId, setFormState]);
+
+    // Sync local state with parent state when parent state changes (for error recovery)
+    useEffect(() => {
+      if (isInitialized && !isLocalInitialized) {
+        setLocalApr(apr);
+        setLocalExposure(exposure);
+        setLocalLtv(ltv);
+        setIsLocalInitialized(true);
+      }
+    }, [apr, exposure, ltv, isInitialized, isLocalInitialized]);
+
+    // Sync local state to parent state (for persistence)
+    const syncToParent = useCallback(() => {
+      setFormState(prev => ({
+        ...prev,
+        apr: localApr,
+        exposure: localExposure,
+        ltv: localLtv
+      }));
+    }, [localApr, localExposure, localLtv, setFormState]);
 
     if (!offer) return null;
 
@@ -471,19 +507,24 @@ const Offers: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       
+      // Sync current local values to parent state before submitting
+      syncToParent();
+      
       try {
         await updateOffer({
           nodeWallet: offer.nodeWallet.toString(),
           collateralToken: offer.collateralToken?.address || '',
           quoteToken:
             typeof offer.quoteToken === 'string' ? offer.quoteToken : offer.quoteToken.address,
-          maxExposure: parseFloat(exposure) * 10 ** (quoteToken?.decimals ?? 9),
-          interestRate: Number(parseFloat(apr).toFixed(0)),
+          maxExposure: parseFloat(localExposure) * 10 ** (quoteToken?.decimals ?? 9),
+          interestRate: Number(parseFloat(localApr).toFixed(0)),
         });
         // Only close modal after successful completion
         onClose();
       } catch (error) {
         console.error('Failed to update offer:', error);
+        // Sync to parent for persistence on error
+        syncToParent();
         // Don't close modal if there's an error, so user can retry
         return;
       }
@@ -492,13 +533,18 @@ const Offers: React.FC = () => {
     const handleLtvSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       
+      // Sync current local values to parent state before submitting
+      syncToParent();
+      
       try {
-        const ltvValue = parseFloat(ltv) / 100;
+        const ltvValue = parseFloat(localLtv) / 100;
         await changeLTV(offer.publicKey.toString(), ltvValue);
         // Only close modal after successful completion
         onClose();
       } catch (error) {
         console.error('Failed to update LTV:', error);
+        // Sync to parent for persistence on error
+        syncToParent();
         // Don't close modal if there's an error, so user can retry
         return;
       }
@@ -590,8 +636,8 @@ const Offers: React.FC = () => {
                 </label>
                 <Input
                   type="number"
-                  value={apr}
-                  onChange={(e) => setFormState(prev => ({ ...prev, apr: e.target.value }))}
+                  value={localApr}
+                  onChange={(e) => setLocalApr(e.target.value)}
                   step="0.1"
                   min="0"
                   className="bg-white/50 border-white/30 focus:border-lavarage-coral focus:ring-lavarage-coral/20 h-9 sm:h-10"
@@ -603,8 +649,8 @@ const Offers: React.FC = () => {
                 </label>
                 <Input
                   type="number"
-                  value={exposure}
-                  onChange={(e) => setFormState(prev => ({ ...prev, exposure: e.target.value }))}
+                  value={localExposure}
+                  onChange={(e) => setLocalExposure(e.target.value)}
                   step="0.1"
                   min="0"
                   className="bg-white/50 border-white/30 focus:border-lavarage-coral focus:ring-lavarage-coral/20 h-9 sm:h-10"
@@ -647,8 +693,8 @@ const Offers: React.FC = () => {
                 </label>
                 <Input
                   type="number"
-                  value={ltv}
-                  onChange={(e) => setFormState(prev => ({ ...prev, ltv: e.target.value }))}
+                  value={localLtv}
+                  onChange={(e) => setLocalLtv(e.target.value)}
                   step="0.1"
                   min="0"
                   max="80"
