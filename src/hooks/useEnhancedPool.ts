@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiService } from '@/services/api';
 import { useWallet } from '@/contexts/WalletContext';
-import { useWalletBalance } from '@/hooks/useWalletBalance';
 import { useError } from '@/contexts/ErrorContext';
 import { SOL_ADDRESS } from '@/utils/tokens';
 
@@ -33,11 +32,17 @@ interface EnhancedPoolData {
   userWalletBalance: number; // Balance in user's personal wallet (not pool)
 }
 
+interface WalletBalances {
+  SOL: number;
+  USDC: number;
+}
+
 interface UseEnhancedPoolOptions {
   quoteToken?: string;
   autoRefresh?: boolean;
   refreshInterval?: number;
   hasOffers?: boolean;
+  walletBalances?: WalletBalances;
 }
 
 interface UseEnhancedPoolReturn {
@@ -54,13 +59,12 @@ export function useEnhancedPool(options: UseEnhancedPoolOptions = {}): UseEnhanc
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { quoteToken = 'SOL', autoRefresh = true, refreshInterval = 30000 } = options;
-
-  // Get wallet balances
-  const { balances: walletBalances, loading: walletLoading } = useWalletBalance({
-    autoRefresh,
-    refreshInterval,
-  });
+  const {
+    quoteToken = 'SOL',
+    autoRefresh = true,
+    refreshInterval = 30000,
+    walletBalances = { SOL: 0, USDC: 0 },
+  } = options;
 
   const fetchBalanceData = useCallback(async () => {
     if (!connected || !publicKey) {
@@ -70,6 +74,7 @@ export function useEnhancedPool(options: UseEnhancedPoolOptions = {}): UseEnhanc
     }
 
     try {
+      setLoading(true);
       setError(null);
 
       // Fetch pool balance data from API
@@ -152,7 +157,6 @@ export function useEnhancedPool(options: UseEnhancedPoolOptions = {}): UseEnhanc
         handleError(message);
       }
     } finally {
-      // Combine loading states - we're done loading when both API and wallet data are loaded
       setLoading(false);
     }
   }, [connected, publicKey, quoteToken, handleError, walletBalances]);
@@ -169,7 +173,7 @@ export function useEnhancedPool(options: UseEnhancedPoolOptions = {}): UseEnhanc
 
   return {
     data,
-    loading: loading || walletLoading,
+    loading,
     error,
     refresh: fetchBalanceData,
   };

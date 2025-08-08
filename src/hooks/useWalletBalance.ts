@@ -1,7 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import {
+  getAssociatedTokenAddress,
+  TOKEN_PROGRAM_ID,
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+} from '@solana/spl-token';
 import { useWallet } from '@/contexts/WalletContext';
-import { SOL_ADDRESS, USDC_ADDRESS } from '@/utils/tokens';
+import { USDC_ADDRESS } from '@/utils/tokens';
 
 interface WalletBalances {
   SOL: number;
@@ -44,17 +49,14 @@ export function useWalletBalance(options: UseWalletBalanceOptions = {}): UseWall
   const fetchSPLTokenBalance = useCallback(
     async (walletPublicKey: PublicKey, mintAddress: string, decimals: number): Promise<number> => {
       try {
-        // Calculate the Associated Token Account address manually
+        // Use canonical helper to get the Associated Token Account address
         const mintPublicKey = new PublicKey(mintAddress);
-
-        // Find associated token address using the standard formula
-        const [associatedTokenAddress] = await PublicKey.findProgramAddress(
-          [
-            walletPublicKey.toBuffer(),
-            new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA').toBuffer(), // TOKEN_PROGRAM_ID
-            mintPublicKey.toBuffer(),
-          ],
-          new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL') // ASSOCIATED_TOKEN_PROGRAM_ID
+        const associatedTokenAddress = await getAssociatedTokenAddress(
+          mintPublicKey,
+          walletPublicKey,
+          false, // allowOwnerOffCurve
+          TOKEN_PROGRAM_ID,
+          ASSOCIATED_TOKEN_PROGRAM_ID
         );
 
         const accountInfo = await connection.getAccountInfo(associatedTokenAddress);

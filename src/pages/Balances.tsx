@@ -200,18 +200,20 @@ const Balances: React.FC = () => {
     hasOffers: hasUSDCOffers 
   });
 
-  // Enhanced pool data for detailed balance breakdown
+  // Wallet balance data - called once at top level
+  const { balances: walletBalances, loading: walletBalanceLoading } = useWalletBalance();
+
+  // Enhanced pool data for detailed balance breakdown - pass wallet balances to avoid duplicate polling
   const { data: solEnhancedData, loading: solEnhancedLoading } = useEnhancedPool({ 
     quoteToken: SOL_ADDRESS, 
-    hasOffers: hasSOLOffers 
+    hasOffers: hasSOLOffers,
+    walletBalances 
   });
   const { data: usdcEnhancedData, loading: usdcEnhancedLoading } = useEnhancedPool({ 
     quoteToken: USDC_ADDRESS, 
-    hasOffers: hasUSDCOffers 
+    hasOffers: hasUSDCOffers,
+    walletBalances 
   });
-
-  // Wallet balance data
-  const { balances: walletBalances, loading: walletBalanceLoading } = useWalletBalance();
 
   const handleDeposit = async () => {
     if (!amount || parseFloat(amount) <= 0) {
