@@ -11,14 +11,29 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * Formats a number as currency
  */
-export function formatCurrency(amount: number, currency = 'USD', decimals = 2): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  }).format(amount);
-}
+export const formatCurrency = (amount: string | number, symbol: string = 'USDC') => {
+  const value = typeof amount === 'string' ? parseFloat(amount) : amount;
+
+  let minimumFractionDigits: number;
+  let maximumFractionDigits: number;
+
+  if (symbol === 'SOL') {
+    // For SOL, allow flexible decimals - no minimum, but up to 6 maximum
+    minimumFractionDigits = 0;
+    maximumFractionDigits = value < 1 ? 6 : value < 10 ? 4 : 2;
+  } else {
+    // For USDC and other tokens, use standard currency formatting
+    minimumFractionDigits = 2;
+    maximumFractionDigits = 4;
+  }
+
+  const formatted = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits,
+    maximumFractionDigits,
+  }).format(value);
+
+  return `${formatted} ${symbol}`;
+};
 
 /**
  * Formats a number with commas
