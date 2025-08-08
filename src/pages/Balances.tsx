@@ -2,14 +2,17 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import { BalanceBreakdown } from "@/components/ui/BalanceBreakdown";
 import { WalletMultiButton } from "@/contexts/WalletContext";
 import { useWallet } from "@/contexts/WalletContext";
 import { usePool } from "@/hooks/usePool";
+import { useEnhancedPool } from "@/hooks/useEnhancedPool";
+import { useWalletBalance } from "@/hooks/useWalletBalance";
 import { useOffers } from "@/hooks/useOffers";
 import { GradientText } from "@/components/brand";
 import { formatNumberFloor } from "@/utils";
 import { SOL_ADDRESS, USDC_ADDRESS } from "@/utils/tokens";
-import { DollarSign, AlertCircle, Plus, Info } from "lucide-react";
+import { DollarSign, AlertCircle, Plus, Info, BarChart3, TrendingUp } from "lucide-react";
 
 interface BalanceCardProps {
   token: "SOL" | "USDC";
@@ -162,6 +165,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
 const Balances: React.FC = () => {
   const { connected } = useWallet();
   const [selectedToken, setSelectedToken] = useState<"SOL" | "USDC">("SOL");
+  const [showDetailedBalances, setShowDetailedBalances] = useState(false);
   const { offers } = useOffers({ autoRefresh: true });
   const [amount, setAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -195,6 +199,19 @@ const Balances: React.FC = () => {
     quoteToken: USDC_ADDRESS, 
     hasOffers: hasUSDCOffers 
   });
+
+  // Enhanced pool data for detailed balance breakdown
+  const { data: solEnhancedData, loading: solEnhancedLoading } = useEnhancedPool({ 
+    quoteToken: SOL_ADDRESS, 
+    hasOffers: hasSOLOffers 
+  });
+  const { data: usdcEnhancedData, loading: usdcEnhancedLoading } = useEnhancedPool({ 
+    quoteToken: USDC_ADDRESS, 
+    hasOffers: hasUSDCOffers 
+  });
+
+  // Wallet balance data
+  const { balances: walletBalances, loading: walletBalanceLoading } = useWalletBalance();
 
   const handleDeposit = async () => {
     if (!amount || parseFloat(amount) <= 0) {
@@ -295,8 +312,64 @@ const Balances: React.FC = () => {
             Manage your <span className="font-semibold text-lavarage-coral">LAVARAGE</span> pool deposits
           </p>
         </div>
+        
+        {/* Toggle for detailed view */}
+        <div className="flex items-center space-x-4">
+          <Button
+            onClick={() => setShowDetailedBalances(!showDetailedBalances)}
+            variant={showDetailedBalances ? "lavarage" : "outline"}
+            className="flex items-center space-x-2"
+          >
+            <BarChart3 className="h-4 w-4" />
+            <span>{showDetailedBalances ? "Simple View" : "Detailed View"}</span>
+          </Button>
+        </div>
       </div>
 
+      {/* Wallet Balance Summary - shown in both views */}
+      {connected && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="card-lavarage p-4 border-l-4 border-l-yellow-400">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="p-2 rounded-full bg-yellow-100 mr-3">
+                  <DollarSign className="h-5 w-5 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Wallet SOL Balance</p>
+                  <GradientText variant="primary" size="lg" weight="semibold">
+                    {walletBalanceLoading ? "Loading..." : `${formatNumberFloor(walletBalances.SOL, 4)} SOL`}
+                  </GradientText>
+                </div>
+              </div>
+              {!walletBalanceLoading && walletBalances.SOL > 0 && (
+                <p className="text-xs text-yellow-600 text-right">Available<br/>for deposit</p>
+              )}
+            </div>
+          </div>
+          
+          <div className="card-lavarage p-4 border-l-4 border-l-green-400">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="p-2 rounded-full bg-green-100 mr-3">
+                  <DollarSign className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Wallet USDC Balance</p>
+                  <GradientText variant="primary" size="lg" weight="semibold">
+                    {walletBalanceLoading ? "Loading..." : `${formatNumberFloor(walletBalances.USDC, 2)} USDC`}
+                  </GradientText>
+                </div>
+              </div>
+              {!walletBalanceLoading && walletBalances.USDC > 0 && (
+                <p className="text-xs text-green-600 text-right">Available<br/>for deposit</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Offers Notice - Only show if user has no offers at all */}
       {connected && !hasAnyOffers && (
         <div className="card-lavarage p-6 mb-6 border border-lavarage-orange/20">
           <div className="flex items-start">
@@ -321,41 +394,124 @@ const Balances: React.FC = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <BalanceCard
-          token="SOL"
-          balance={solBalance}
-          loading={solLoading}
-          isSelected={selectedToken === "SOL"}
-          amount={amount}
-          onAmountChange={handleAmountChange}
-          onDeposit={handleDeposit}
-          onWithdraw={handleWithdraw}
-          isProcessing={isProcessing}
-          onSelect={() => handleTokenSelect("SOL")}
-          hasOffersForToken={hasSOLOffers}
-          withdrawPressed={withdrawPressed}
-          impersonateWallet={impersonateWallet}
-          onImpersonateWalletChange={setImpersonateWallet}
-        />
-        
-        <BalanceCard
-          token="USDC"
-          balance={usdcBalance}
-          loading={usdcLoading}
-          isSelected={selectedToken === "USDC"}
-          amount={amount}
-          onAmountChange={handleAmountChange}
-          onDeposit={handleDeposit}
-          onWithdraw={handleWithdraw}
-          isProcessing={isProcessing}
-          onSelect={() => handleTokenSelect("USDC")}
-          hasOffersForToken={hasUSDCOffers}
-          withdrawPressed={withdrawPressed}
-          impersonateWallet={impersonateWallet}
-          onImpersonateWalletChange={setImpersonateWallet}
-        />
-      </div>
+      {/* Balance Cards */}
+      {!showDetailedBalances && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <BalanceCard
+            token="SOL"
+            balance={solBalance}
+            loading={solLoading}
+            isSelected={selectedToken === "SOL"}
+            amount={amount}
+            onAmountChange={handleAmountChange}
+            onDeposit={handleDeposit}
+            onWithdraw={handleWithdraw}
+            isProcessing={isProcessing}
+            onSelect={() => handleTokenSelect("SOL")}
+            hasOffersForToken={hasSOLOffers}
+            withdrawPressed={withdrawPressed}
+            impersonateWallet={impersonateWallet}
+            onImpersonateWalletChange={setImpersonateWallet}
+          />
+          
+          <BalanceCard
+            token="USDC"
+            balance={usdcBalance}
+            loading={usdcLoading}
+            isSelected={selectedToken === "USDC"}
+            amount={amount}
+            onAmountChange={handleAmountChange}
+            onDeposit={handleDeposit}
+            onWithdraw={handleWithdraw}
+            isProcessing={isProcessing}
+            onSelect={() => handleTokenSelect("USDC")}
+            hasOffersForToken={hasUSDCOffers}
+            withdrawPressed={withdrawPressed}
+            impersonateWallet={impersonateWallet}
+            onImpersonateWalletChange={setImpersonateWallet}
+          />
+        </div>
+      )}
+
+      {/* Detailed Balance Breakdown */}
+      {showDetailedBalances && (
+        <div className="space-y-8">
+          {/* SOL Balance Breakdown */}
+          {(hasSOLOffers || solEnhancedData) && (
+            <div>
+              <div className="flex items-center mb-6">
+                <div className="p-2 rounded-full bg-yellow-100 mr-3">
+                  <TrendingUp className="h-5 w-5 text-yellow-600" />
+                </div>
+                <GradientText variant="primary" size="2xl" weight="bold">
+                  SOL Pool Analysis
+                </GradientText>
+              </div>
+              
+              {solEnhancedData ? (
+                <BalanceBreakdown
+                  token="SOL"
+                  balances={solEnhancedData.balances}
+                  performance={solEnhancedData.performance}
+                  loading={solEnhancedLoading}
+                />
+              ) : (
+                <div className="card-lavarage p-8 text-center">
+                  <p className="text-gray-500">No SOL pool data available</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* USDC Balance Breakdown */}
+          {(hasUSDCOffers || usdcEnhancedData) && (
+            <div>
+              <div className="flex items-center mb-6">
+                <div className="p-2 rounded-full bg-green-100 mr-3">
+                  <TrendingUp className="h-5 w-5 text-green-600" />
+                </div>
+                <GradientText variant="primary" size="2xl" weight="bold">
+                  USDC Pool Analysis
+                </GradientText>
+              </div>
+              
+              {usdcEnhancedData ? (
+                <BalanceBreakdown
+                  token="USDC"
+                  balances={usdcEnhancedData.balances}
+                  performance={usdcEnhancedData.performance}
+                  loading={usdcEnhancedLoading}
+                />
+              ) : (
+                <div className="card-lavarage p-8 text-center">
+                  <p className="text-gray-500">No USDC pool data available</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Show message if no detailed data is available */}
+          {!hasSOLOffers && !hasUSDCOffers && (
+            <div className="card-lavarage p-8 text-center">
+              <div className="flex flex-col items-center">
+                <BarChart3 className="h-12 w-12 text-gray-400 mb-4" />
+                <GradientText variant="primary" size="lg" weight="semibold" className="mb-2">
+                  No Detailed Data Available
+                </GradientText>
+                <p className="text-gray-500 mb-4">
+                  Create loan offers to see detailed balance breakdowns and performance metrics.
+                </p>
+                <Link to="/create-offer">
+                  <Button variant="lavarage" size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Your First Offer
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
