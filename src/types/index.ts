@@ -246,6 +246,7 @@ export interface LiquidationEvent {
 export interface CreateOfferFormData {
   collateralToken: string;
   maxExposure: number;
+  maxBorrow?: number;
   interestRate: number;
   quoteToken: string;
   userWallet: string;
