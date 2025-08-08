@@ -47,7 +47,7 @@ export function useWalletBalance(options: UseWalletBalanceOptions = {}): UseWall
   );
 
   const fetchSPLTokenBalance = useCallback(
-    async (walletPublicKey: PublicKey, mintAddress: string, decimals: number): Promise<number> => {
+    async (walletPublicKey: PublicKey, mintAddress: string): Promise<number> => {
       try {
         // Use canonical helper to get the Associated Token Account address
         const mintPublicKey = new PublicKey(mintAddress);
@@ -59,28 +59,11 @@ export function useWalletBalance(options: UseWalletBalanceOptions = {}): UseWall
           ASSOCIATED_TOKEN_PROGRAM_ID
         );
 
-        const accountInfo = await connection.getAccountInfo(associatedTokenAddress);
+        // Use the safer getTokenAccountBalance RPC helper
+        const tokenAccountBalance = await connection.getTokenAccountBalance(associatedTokenAddress);
 
-        if (!accountInfo) {
-          return 0; // Account doesn't exist
-        }
-
-        // Parse the account data to get the token balance
-        // Token account data structure: amount is at bytes 64-72 (8 bytes, little-endian)
-        const data = accountInfo.data;
-        if (data.length < 72) {
-          return 0;
-        }
-
-        // Read 8 bytes starting at position 64 (amount field)
-        const amountBuffer = data.slice(64, 72);
-        let amount = BigInt(0);
-        for (let i = 0; i < 8; i++) {
-          amount += BigInt(amountBuffer[i]) << (BigInt(i) * BigInt(8));
-        }
-
-        const balance = Number(amount) / Math.pow(10, decimals);
-        return balance;
+        // Return the UI amount which is already adjusted for decimals
+        return tokenAccountBalance.value.uiAmount || 0;
       } catch (err) {
         // Account might not exist if user has never held the token
         console.log(`No token account found for ${mintAddress}:`, err);
@@ -104,7 +87,7 @@ export function useWalletBalance(options: UseWalletBalanceOptions = {}): UseWall
       // Fetch balances concurrently
       const [solBalance, usdcBalance] = await Promise.all([
         fetchSOLBalance(publicKey),
-        fetchSPLTokenBalance(publicKey, USDC_ADDRESS, 6), // USDC has 6 decimals
+        fetchSPLTokenBalance(publicKey, USDC_ADDRESS), // getTokenAccountBalance handles decimals automatically
       ]);
 
       setBalances({
