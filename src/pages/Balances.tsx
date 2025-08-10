@@ -24,6 +24,8 @@ interface BalanceCardProps {
   onSelect: () => void;
   hasOffersForToken: boolean;
   withdrawPressed: boolean;
+  impersonateWallet: string;
+  onImpersonateWalletChange: (value: string) => void;
 }
 
 const BalanceCard: React.FC<BalanceCardProps> = ({
@@ -39,12 +41,19 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
   onSelect,
   hasOffersForToken,
   withdrawPressed,
+  impersonateWallet,
+  onImpersonateWalletChange,
 }) => {
   const isAmountValid = amount && parseFloat(amount) > 0;
   const isAmountExceedsBalance = isSelected && amount && parseFloat(amount) > balance;
   
-  // Only show "exceeds balance" error for withdrawals and only after withdraw was pressed
   const shouldShowExceedsBalanceError = withdrawPressed && isAmountExceedsBalance;
+
+  const canDeposit = isAmountValid && !isProcessing && (
+    hasOffersForToken || (impersonateWallet && impersonateWallet.trim().length > 0)
+  );
+
+  const shouldShowOfferNotice = !hasOffersForToken && (!impersonateWallet || impersonateWallet.trim().length === 0);
 
   return (
     <div 
@@ -94,8 +103,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
               </div>
             )}
 
-            {/* Show message when user doesn't have offers for this specific token */}
-            {!hasOffersForToken && (
+            {shouldShowOfferNotice && (
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
                 <p className="text-sm text-orange-600 flex items-center">
                   <Info className="h-3 w-3 mr-2 flex-shrink-0" />
@@ -103,11 +111,28 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
                 </p>
               </div>
             )}
+
+            <details className="mt-2 select-none" onClick={(e) => e.stopPropagation()}>
+              <summary className="cursor-pointer text-sm font-semibold text-gray-700 py-2">Advanced</summary>
+              <div className="mt-2 space-y-2">
+                <Input
+                  type="text"
+                  placeholder="Other lender wallet (optional)"
+                  value={impersonateWallet}
+                  onChange={(e) => onImpersonateWalletChange(e.target.value)}
+                  disabled={isProcessing}
+                  className="w-full"
+                />
+                <p className="text-xs text-gray-500">
+                  If provided, the deposit will be created on behalf of this wallet.
+                </p>
+              </div>
+            </details>
             
             <div className="flex flex-col sm:flex-row gap-3" onClick={(e) => e.stopPropagation()}>
               <Button 
                 onClick={onDeposit}
-                disabled={!isAmountValid || isProcessing || !hasOffersForToken}
+                disabled={!canDeposit}
                 variant="lavarage"
                 className="flex-1 font-semibold text-white shadow-lg hover:shadow-xl"
               >
@@ -141,8 +166,8 @@ const Balances: React.FC = () => {
   const [amount, setAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [withdrawPressed, setWithdrawPressed] = useState(false);
+  const [impersonateWallet, setImpersonateWallet] = useState("");
 
-  // Helper function to check if user has offers for specific token
   const hasOffersForToken = (tokenType: "SOL" | "USDC"): boolean => {
     const targetAddress = tokenType === "SOL" 
       ? SOL_ADDRESS 
@@ -176,20 +201,18 @@ const Balances: React.FC = () => {
       return;
     }
 
-    // Reset withdraw pressed state
     setWithdrawPressed(false);
 
     setIsProcessing(true);
     
     try {
       if (selectedToken === "SOL") {
-        await depositSol(parseFloat(amount));
+        await depositSol(parseFloat(amount), impersonateWallet);
       } else {
-        await depositUsdc(parseFloat(amount));
+        await depositUsdc(parseFloat(amount), impersonateWallet);
       }
       setAmount("");
     } catch (error: any) {
-      // Error handling is done in the usePool hook
       console.error('Deposit error:', error);
     } finally {
       setIsProcessing(false);
@@ -203,7 +226,6 @@ const Balances: React.FC = () => {
 
     const currentBalance = selectedToken === "SOL" ? solBalance : usdcBalance;
     
-    // Set withdraw pressed to show validation errors
     setWithdrawPressed(true);
     
     if (parseFloat(amount) > currentBalance) {
@@ -221,7 +243,6 @@ const Balances: React.FC = () => {
       setAmount("");
       setWithdrawPressed(false);
     } catch (error: any) {
-      // Error handling is done in the usePool hook
       console.error('Withdraw error:', error);
     } finally {
       setIsProcessing(false);
@@ -229,15 +250,14 @@ const Balances: React.FC = () => {
   };
 
   const handleTokenSelect = (token: "SOL" | "USDC") => {
-    if (isProcessing) return; // Prevent token switching during processing
+    if (isProcessing) return;
     setSelectedToken(token);
     setAmount("");
-    setWithdrawPressed(false); // Reset withdraw pressed state when switching tokens
+    setWithdrawPressed(false);
   };
 
   const handleAmountChange = (value: string) => {
     setAmount(value);
-    // Reset withdraw pressed state when amount changes
     if (withdrawPressed) {
       setWithdrawPressed(false);
     }
@@ -277,7 +297,6 @@ const Balances: React.FC = () => {
         </div>
       </div>
 
-      {/* Create Offers Notice - Only show if user has no offers at all */}
       {connected && !hasAnyOffers && (
         <div className="card-lavarage p-6 mb-6 border border-lavarage-orange/20">
           <div className="flex items-start">
@@ -302,7 +321,6 @@ const Balances: React.FC = () => {
         </div>
       )}
 
-      {/* Balance Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <BalanceCard
           token="SOL"
@@ -317,6 +335,8 @@ const Balances: React.FC = () => {
           onSelect={() => handleTokenSelect("SOL")}
           hasOffersForToken={hasSOLOffers}
           withdrawPressed={withdrawPressed}
+          impersonateWallet={impersonateWallet}
+          onImpersonateWalletChange={setImpersonateWallet}
         />
         
         <BalanceCard
@@ -332,6 +352,8 @@ const Balances: React.FC = () => {
           onSelect={() => handleTokenSelect("USDC")}
           hasOffersForToken={hasUSDCOffers}
           withdrawPressed={withdrawPressed}
+          impersonateWallet={impersonateWallet}
+          onImpersonateWalletChange={setImpersonateWallet}
         />
       </div>
     </div>
