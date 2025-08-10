@@ -145,7 +145,8 @@ class ApiService {
   async depositFunds(data: {
     amount: number;
     quoteToken: string;
-    userWallet: string;
+    userWallet: string; // lender wallet
+    externalDepositor?: string; // connected wallet when depositing on behalf
   }): Promise<TransactionModel> {
     const response = await this.api.post('/api/sdk/v1.0/lender/pools/deposit', data);
     return response.data;

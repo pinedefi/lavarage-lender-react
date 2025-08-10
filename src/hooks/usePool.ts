@@ -83,12 +83,15 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
       }
       try {
         setError(null);
+        const override = overrideUserWallet && overrideUserWallet.trim().length > 0
+          ? overrideUserWallet.trim()
+          : undefined;
+        const isImpersonating = !!override && override !== publicKey.toBase58();
         const tx = await apiService.depositFunds({
           amount: amount * 10 ** (quoteToken === SOL_ADDRESS ? 9 : 6),
           quoteToken,
-          userWallet: overrideUserWallet && overrideUserWallet.trim().length > 0
-            ? overrideUserWallet.trim()
-            : publicKey.toBase58(),
+          userWallet: override ?? publicKey.toBase58(),
+          externalDepositor: isImpersonating ? publicKey.toBase58() : undefined,
         });
         console.log('Deposit submitted', tx);
 
