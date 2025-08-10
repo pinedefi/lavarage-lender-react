@@ -23,7 +23,7 @@ interface UsePoolReturn {
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
-  deposit: (amount: number) => Promise<void>;
+  deposit: (amount: number, overrideUserWallet?: string) => Promise<void>;
   withdraw: (amount: number) => Promise<void>;
 }
 
@@ -77,7 +77,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
   }, [connected, publicKey, quoteToken, handleError]);
 
   const deposit = useCallback(
-    async (amount: number) => {
+    async (amount: number, overrideUserWallet?: string) => {
       if (!publicKey) {
         throw new Error('Wallet not connected');
       }
@@ -86,7 +86,9 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         const tx = await apiService.depositFunds({
           amount: amount * 10 ** (quoteToken === SOL_ADDRESS ? 9 : 6),
           quoteToken,
-          userWallet: publicKey.toBase58(),
+          userWallet: overrideUserWallet && overrideUserWallet.trim().length > 0
+            ? overrideUserWallet.trim()
+            : publicKey.toBase58(),
         });
         console.log('Deposit submitted', tx);
 
