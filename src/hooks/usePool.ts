@@ -66,10 +66,14 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         setBalance(0);
         setError(null);
       } else {
-        // For unexpected/critical errors, show them
+        // For unexpected/critical errors, show them (but silently handle timeout errors for background requests)
         setError(message);
-        // Handle LavaRock NFT errors globally
-        handleError(message);
+        if (!message.toLowerCase().includes('timeout')) {
+          handleError(message);
+        } else {
+          // Log timeout for debugging but don't show toast for background refresh
+          console.log('Background pool timeout (silent):', message);
+        }
       }
     } finally {
       setLoading(false);

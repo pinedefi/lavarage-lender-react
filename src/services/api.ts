@@ -238,11 +238,11 @@ class ApiService {
   // Liquidation Management
   async searchLiquidations(params: LiquidationSearchParams): Promise<LiquidationData[]> {
     const requestBody = {
-      method: "search",
+      method: 'search',
       params: {
         gte: params.gte,
         lte: params.lte,
-      }
+      },
     };
 
     try {
@@ -250,17 +250,17 @@ class ApiService {
       const response = await axios.post(
         `https://outside-lenders-liquidations-production.up.railway.app/rpc`,
         requestBody,
-        { 
-          headers: { 
+        {
+          headers: {
             'Content-Type': 'application/json',
             'x-api-key': this.apiKey,
           },
-          timeout: 30000
+          timeout: 60000, // Increased to 60 seconds
         }
       );
 
       const data: LiquidationSearchResponse = response.data;
-      
+
       if (data.error) {
         throw new Error(data.error);
       }

@@ -68,11 +68,13 @@ export function usePositions(options: UsePositionsOptions = {}): UsePositionsRet
         setError(errorMessage);
         console.error('Error fetching positions:', err);
 
-        // Handle LavaRock NFT errors globally first
-        handleError(errorMessage);
-
-        // Then show toast for all errors
-        toast.error(errorMessage);
+        // Silently handle timeout errors for background refresh
+        if (!errorMessage.toLowerCase().includes('timeout')) {
+          handleError(errorMessage);
+          toast.error(errorMessage);
+        } else {
+          console.log('Background positions timeout:', errorMessage);
+        }
       } finally {
         setLoading(false);
       }

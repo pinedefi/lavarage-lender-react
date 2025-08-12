@@ -35,7 +35,8 @@ export const BalanceBreakdown: React.FC<BalanceBreakdownProps> = ({
   const balanceRows = [
     {
       icon: CheckCircle,
-      label: 'Available Balance',
+      label: 'Available',
+      shortLabel: 'Available',
       description: 'Ready for new loans',
       amount: balances.available,
       bgColor: 'bg-green-50',
@@ -45,7 +46,8 @@ export const BalanceBreakdown: React.FC<BalanceBreakdownProps> = ({
     },
     {
       icon: Activity,
-      label: 'Deployed Balance',
+      label: 'Deployed',
+      shortLabel: 'Deployed',
       description: 'Currently in active positions',
       amount: balances.deployed,
       bgColor: 'bg-blue-50',
@@ -55,7 +57,8 @@ export const BalanceBreakdown: React.FC<BalanceBreakdownProps> = ({
     },
     {
       icon: AlertTriangle,
-      label: 'Amount from Liquidation(s)',
+      label: 'Liquidation(s)',
+      shortLabel: 'Liquidation(s)',
       description: 'Pending return to wallet',
       amount: balances.liquidated,
       bgColor: 'bg-yellow-50',
@@ -65,7 +68,8 @@ export const BalanceBreakdown: React.FC<BalanceBreakdownProps> = ({
     },
     {
       icon: TrendingUp,
-      label: 'Pending Interest',
+      label: 'Interest',
+      shortLabel: 'Interest',
       description: 'Accrued but not claimed',
       amount: balances.pendingInterest,
       bgColor: 'bg-purple-50',
@@ -94,8 +98,34 @@ export const BalanceBreakdown: React.FC<BalanceBreakdownProps> = ({
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* Mobile Cards (shown on small screens) */}
+        <div className="block md:hidden space-y-3 p-4">
+          {balanceRows.map((row, index) => {
+            const IconComponent = row.icon;
+            return (
+              <div key={index} className={`${row.bgColor} rounded-lg p-4 border border-gray-200`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center flex-1 min-w-0">
+                    <div className={`p-2 rounded-full bg-white mr-3 shadow-sm flex-shrink-0`}>
+                      <IconComponent className={`h-4 w-4 ${row.iconColor}`} />
+                    </div>
+                    <span className={`text-sm font-semibold ${row.textColor} truncate`}>
+                      {row.shortLabel}
+                    </span>
+                  </div>
+                  <div className="text-right ml-2">
+                    <span className={`text-sm font-bold ${row.amountColor}`}>
+                      {formatAmount(row.amount)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop Table (hidden on small screens) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="bg-gradient-to-r from-lavarage-orange/10 to-lavarage-coral/10 border-b border-lavarage-orange/30">

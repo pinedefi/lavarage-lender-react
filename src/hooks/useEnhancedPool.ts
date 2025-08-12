@@ -224,7 +224,6 @@ export function useEnhancedPool(options: UseEnhancedPoolOptions = {}): UseEnhanc
 
       if (isExpectedError) {
         // For expected errors, set empty data and don't show error
-        console.log('Expected pool balance error:', message);
         const emptyData: EnhancedPoolData = {
           poolId: 'none',
           quoteToken: quoteToken as 'SOL' | 'USDC',
@@ -240,9 +239,14 @@ export function useEnhancedPool(options: UseEnhancedPoolOptions = {}): UseEnhanc
         setData(emptyData);
         setError(null);
       } else {
-        // For unexpected/critical errors, show them
+        // For unexpected/critical errors, show them (but silently handle timeout errors for background requests)
         setError(message);
-        handleError(message);
+        if (!message.toLowerCase().includes('timeout')) {
+          handleError(message);
+        } else {
+          // Log timeout for debugging but don't show toast for background refresh
+          console.log('Background pool balance timeout:', message);
+        }
       }
     } finally {
       setLoading(false);
