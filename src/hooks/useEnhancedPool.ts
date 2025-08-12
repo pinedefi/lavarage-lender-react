@@ -7,6 +7,7 @@ import { useLiquidations } from '@/hooks/useLiquidations';
 import { useOffers } from '@/hooks/useOffers';
 import { usePositions } from '@/hooks/usePositions';
 import { LiquidationData, PositionV3Model } from '@/types';
+import { parseNumber } from '@/utils';
 
 const EXPECTED_BALANCE_ERRORS = ['node wallet not found', 'failed to get pool balance'] as const;
 
@@ -195,9 +196,9 @@ export function useEnhancedPool(options: UseEnhancedPoolOptions = {}): UseEnhanc
 
       // Extract balance data - liquidated amount and pending interest are calculated from external data
       const balances: EnhancedPoolBalances = {
-        total: parseFloat(balanceResponse?.balances?.total ?? 0),
-        available: parseFloat(balanceResponse?.balances?.available ?? 0),
-        deployed: parseFloat(balanceResponse?.balances?.deployed ?? 0),
+        total: parseNumber(balanceResponse?.balances?.total),
+        available: parseNumber(balanceResponse?.balances?.available),
+        deployed: parseNumber(balanceResponse?.balances?.deployed),
         liquidated: liquidatedAmount, // Use calculated amount from liquidations data
         pendingInterest: pendingInterest, // Use calculated amount from positions data
       };

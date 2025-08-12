@@ -332,3 +332,12 @@ export const formatDateTime = (timestamp: string): string => {
     })
   );
 };
+
+export const parseNumber = (value: unknown): number => {
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string') {
+    const parsed = parseFloat(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
+};
