@@ -48,9 +48,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
         userWallet: publicKey.toBase58(),
         quoteToken,
       });
-      console.log(quoteToken, data);
       const bal = parseFloat((data && data.balances && data.balances.available) ?? 0);
-      console.log(quoteToken, bal);
       setBalance(bal);
     } catch (err: any) {
       const message = err.message || 'Failed to fetch balance';
@@ -72,7 +70,7 @@ export function usePool(options: UsePoolOptions = {}): UsePoolReturn {
           handleError(message);
         } else {
           // Log timeout for debugging but don't show toast for background refresh
-          console.log('Background pool timeout (silent):', message);
+          console.log('Background pool timeout:', message);
         }
       }
     } finally {

@@ -39,7 +39,6 @@ export const formatCurrency = (amount: string | number, symbol: string = 'USDC')
  * Formats a number with commas
  */
 export function formatNumber(num: number, decimals = 2): string {
-  console.log(num, decimals);
   if (num === 0) return '0';
   return new Intl.NumberFormat('en-US', {
     minimumFractionDigits: decimals,
