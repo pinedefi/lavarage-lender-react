@@ -4,7 +4,6 @@ import { formatNumberFloor } from '@/utils';
 import { 
   DollarSign, 
   TrendingUp, 
-  Clock, 
   AlertTriangle, 
   CheckCircle,
   Activity
@@ -16,17 +15,8 @@ interface BalanceBreakdownProps {
     total: number;
     available: number;
     deployed: number;
-    pendingDeposits: number;
-    pendingWithdrawals: number;
     liquidated: number;
-  };
-  performance: {
-    totalInterestEarned: number;
-    averageAPY: number;
-    activeOffers: number;
-    totalPositions: number;
     pendingInterest: number;
-    pendingLiquidation: number;
   };
   loading: boolean;
 }
@@ -34,118 +24,126 @@ interface BalanceBreakdownProps {
 export const BalanceBreakdown: React.FC<BalanceBreakdownProps> = ({
   token,
   balances,
-  performance,
   loading,
 }) => {
-  const formatBalance = (amount: number) => {
+
+  const formatAmount = (amount: number) => {
     return loading ? 'Loading...' : `${formatNumberFloor(amount, 6)} ${token}`;
   };
 
+  // Define table rows with their data
+  const balanceRows = [
+    {
+      icon: CheckCircle,
+      label: 'Available Balance',
+      description: 'Ready for new loans',
+      amount: balances.available,
+      bgColor: 'bg-green-50',
+      iconColor: 'text-green-600',
+      textColor: 'text-green-800',
+      amountColor: 'text-green-900'
+    },
+    {
+      icon: Activity,
+      label: 'Deployed Balance',
+      description: 'Currently in active positions',
+      amount: balances.deployed,
+      bgColor: 'bg-blue-50',
+      iconColor: 'text-blue-600',
+      textColor: 'text-blue-800',
+      amountColor: 'text-blue-900'
+    },
+    {
+      icon: AlertTriangle,
+      label: 'Amount from Liquidation(s)',
+      description: 'Pending return to wallet',
+      amount: balances.liquidated,
+      bgColor: 'bg-yellow-50',
+      iconColor: 'text-yellow-600',
+      textColor: 'text-yellow-800',
+      amountColor: 'text-yellow-900'
+    },
+    {
+      icon: TrendingUp,
+      label: 'Pending Interest',
+      description: 'Accrued but not claimed',
+      amount: balances.pendingInterest,
+      bgColor: 'bg-purple-50',
+      iconColor: 'text-purple-600',
+      textColor: 'text-purple-800',
+      amountColor: 'text-purple-900'
+    }
+  ];
+
   return (
     <div className="space-y-6">
-     
-      {/* Pool Balances Breakdown */}
-      <div className="card-lavarage p-6">
-        <div className="flex items-center mb-6">
-          <div className="p-2 rounded-full bg-lavarage-primary mr-3">
-            <DollarSign className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <GradientText variant="primary" size="lg" weight="semibold">
-              Pool Balance Breakdown
-            </GradientText>
-            <p className="text-sm text-gray-500">Detailed breakdown of your lending pool</p>
+      {/* Pool Balance Breakdown Table */}
+      <div className="card-lavarage overflow-hidden">
+        {/* Header */}
+        <div className="bg-lavarage-subtle p-6 border-b border-lavarage-orange/20">
+          <div className="flex items-center">
+            <div className="p-2 rounded-full bg-lavarage-primary mr-3">
+              <DollarSign className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <GradientText variant="primary" size="lg" weight="semibold">
+                Pool Balance Breakdown
+              </GradientText>
+              <p className="text-sm text-gray-500">Detailed breakdown of your lending pool</p>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Available Balance */}
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center">
-                <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
-                <span className="text-sm font-medium text-green-800">Available</span>
-              </div>
-            </div>
-            <p className="text-lg font-bold text-green-900">
-              {formatBalance(balances.available)}
-            </p>
-            <p className="text-xs text-green-600 mt-1">Ready for new loans</p>
-          </div>
-
-          {/* Deployed Balance */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center">
-                <Activity className="h-4 w-4 text-blue-600 mr-2" />
-                <span className="text-sm font-medium text-blue-800">Deployed</span>
-              </div>
-            </div>
-            <p className="text-lg font-bold text-blue-900">
-              {formatBalance(balances.deployed)}
-            </p>
-            <p className="text-xs text-blue-600 mt-1">Currently in active positions</p>
-          </div>
-
-          {/* Liquidated Funds */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center">
-                <AlertTriangle className="h-4 w-4 text-yellow-600 mr-2" />
-                <span className="text-sm font-medium text-yellow-800">Liquidated</span>
-              </div>
-            </div>
-            <p className="text-lg font-bold text-yellow-900">
-              {formatBalance(balances.liquidated)}
-            </p>
-            <p className="text-xs text-yellow-600 mt-1">Pending return to wallet</p>
-          </div>
-
-          {/* Pending Interest */}
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center">
-                <TrendingUp className="h-4 w-4 text-purple-600 mr-2" />
-                <span className="text-sm font-medium text-purple-800">Pending Interest</span>
-              </div>
-            </div>
-            <p className="text-lg font-bold text-purple-900">
-              {formatBalance(performance.pendingInterest)}
-            </p>
-            <p className="text-xs text-purple-600 mt-1">Accrued but not claimed</p>
-          </div>
-
-          {/* Pending Liquidation */}
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center">
-                <Clock className="h-4 w-4 text-orange-600 mr-2" />
-                <span className="text-sm font-medium text-orange-800">Pending Liquidation</span>
-              </div>
-            </div>
-            <p className="text-lg font-bold text-orange-900">
-              {formatBalance(performance.pendingLiquidation)}
-            </p>
-            <p className="text-xs text-orange-600 mt-1">In liquidation process</p>
-          </div>
-
-          {/* Pending Deposits */}
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center">
-                <Clock className="h-4 w-4 text-gray-600 mr-2" />
-                <span className="text-sm font-medium text-gray-800">Pending Deposits</span>
-              </div>
-            </div>
-            <p className="text-lg font-bold text-gray-900">
-              {formatBalance(balances.pendingDeposits)}
-            </p>
-            <p className="text-xs text-gray-600 mt-1">Waiting for confirmation</p>
-          </div>
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gradient-to-r from-lavarage-orange/10 to-lavarage-coral/10 border-b border-lavarage-orange/30">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-lavarage-coral uppercase tracking-wider">
+                  Type
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-lavarage-coral uppercase tracking-wider">
+                  Description
+                </th>
+                <th className="px-6 py-4 text-right text-xs font-semibold text-lavarage-coral uppercase tracking-wider">
+                  Amount
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-gradient-to-b from-white/80 to-lavarage-yellow/5 divide-y divide-lavarage-orange/20">
+              {balanceRows.map((row, index) => {
+                const IconComponent = row.icon;
+                return (
+                  <tr key={index} className="hover:bg-lavarage-yellow/10 transition-colors duration-300">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className={`p-2 rounded-full ${row.bgColor} mr-3 shadow-sm`}>
+                          <IconComponent className={`h-4 w-4 ${row.iconColor}`} />
+                        </div>
+                        <span className={`text-sm font-medium ${row.textColor}`}>
+                          {row.label}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-700">
+                        {row.description}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <span className={`text-sm font-bold ${row.amountColor}`}>
+                        {formatAmount(row.amount)}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
 
-        {/* Total Balance Summary */}
-        <div className="mt-6 pt-6 border-t border-lavarage-orange/20">
+        {/* Total Section */}
+        <div className="bg-lavarage-subtle border-t-2 border-lavarage-coral p-6">
           <div className="flex items-center justify-between">
             <div>
               <GradientText variant="primary" size="lg" weight="semibold">
@@ -155,7 +153,7 @@ export const BalanceBreakdown: React.FC<BalanceBreakdownProps> = ({
             </div>
             <div className="text-right">
               <GradientText variant="primary" size="2xl" weight="bold">
-                {formatBalance(balances.total)}
+                {formatAmount(balances.total)}
               </GradientText>
             </div>
           </div>

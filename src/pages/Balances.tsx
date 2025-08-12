@@ -454,7 +454,6 @@ const Balances: React.FC = () => {
                 <BalanceBreakdown
                   token="SOL"
                   balances={solEnhancedData.balances}
-                  performance={solEnhancedData.performance}
                   loading={solEnhancedLoading}
                 />
               ) : (
@@ -481,7 +480,6 @@ const Balances: React.FC = () => {
                 <BalanceBreakdown
                   token="USDC"
                   balances={usdcEnhancedData.balances}
-                  performance={usdcEnhancedData.performance}
                   loading={usdcEnhancedLoading}
                 />
               ) : (

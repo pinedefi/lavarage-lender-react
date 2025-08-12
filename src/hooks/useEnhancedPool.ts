@@ -1,34 +1,65 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { apiService } from '@/services/api';
 import { useWallet } from '@/contexts/WalletContext';
 import { useError } from '@/contexts/ErrorContext';
 import { SOL_ADDRESS } from '@/utils/tokens';
+import { useLiquidations } from '@/hooks/useLiquidations';
+import { useOffers } from '@/hooks/useOffers';
+import { LiquidationData } from '@/types';
 
 const EXPECTED_BALANCE_ERRORS = ['node wallet not found', 'failed to get pool balance'] as const;
+
+/**
+ * Calculate the liquidated amount from liquidations data
+ * This is the amount that will be sent back to the node wallet after liquidation & cooldown
+ */
+const calculateLiquidatedAmount = (
+  liquidations: LiquidationData[],
+  userOfferAddresses: Set<string>,
+  targetQuoteTokenAddress: string
+): number => {
+  if (!liquidations.length || !userOfferAddresses.size) return 0;
+
+  // Determine decimals based on token address
+  const getTokenDecimals = (tokenAddress: string): number => {
+    if (tokenAddress === SOL_ADDRESS) return 9;
+    // For USDC and other tokens, assume 6 decimals (could be made more dynamic later)
+    return 6;
+  };
+
+  const tokenDecimals = getTokenDecimals(targetQuoteTokenAddress);
+
+  return liquidations
+    .filter((liquidation) => {
+      // Only include liquidations from user's offers
+      if (!userOfferAddresses.has(liquidation.offer)) return false;
+
+      // Only include liquidations that haven't been sent back yet (no sendTx)
+      if (liquidation.sendTx) return false;
+
+      // Check if liquidation is for the target quote token
+      // In the liquidation data, toReceiveToken should match the quote token
+      return liquidation.toReceiveToken === targetQuoteTokenAddress;
+    })
+    .reduce((total, liquidation) => {
+      // soldFor is the amount after fees that will be returned to the lender
+      // Convert from raw amount to decimal amount
+      const decimalAmount = liquidation.soldFor / Math.pow(10, tokenDecimals);
+      return total + decimalAmount;
+    }, 0);
+};
 
 interface EnhancedPoolBalances {
   total: number;
   available: number;
   deployed: number;
-  pendingDeposits: number;
-  pendingWithdrawals: number;
   liquidated: number; // Amount from liquidations pending to return to lender
+  pendingInterest: number;
 }
-
-interface EnhancedPoolPerformance {
-  totalInterestEarned: number;
-  averageAPY: number;
-  activeOffers: number;
-  totalPositions: number;
-  pendingInterest: number; // Interest accrued but not yet claimed
-  pendingLiquidation: number; // Liquidations in progress/cooldown
-}
-
 interface EnhancedPoolData {
   poolId: string;
   quoteToken: 'SOL' | 'USDC';
   balances: EnhancedPoolBalances;
-  performance: EnhancedPoolPerformance;
   userWalletBalance: number; // Balance in user's personal wallet (not pool)
 }
 
@@ -66,6 +97,38 @@ export function useEnhancedPool(options: UseEnhancedPoolOptions = {}): UseEnhanc
     walletBalances = { SOL: 0, USDC: 0 },
   } = options;
 
+  // Fetch liquidations data to calculate liquidated amounts
+  const { liquidations } = useLiquidations();
+
+  // Fetch user's offers to determine which liquidations belong to them
+  const { offers: lenderOffers } = useOffers({ includeTokens: true, inactiveOffers: true });
+
+  // Create a set of offer addresses that the user owns for the target quote token
+  const userOfferAddresses = useMemo(() => {
+    if (!publicKey) return new Set<string>();
+
+    return new Set(
+      lenderOffers
+        .filter((offer) => {
+          // Filter offers by quote token
+          if (typeof offer.quoteToken === 'string') {
+            return offer.quoteToken === quoteToken;
+          } else if (offer.quoteToken && typeof offer.quoteToken === 'object') {
+            return offer.quoteToken.address === quoteToken;
+          }
+          return false;
+        })
+        .map((offer) => offer.publicKey.toString())
+    );
+  }, [lenderOffers, publicKey, quoteToken]);
+
+  // Calculate liquidated amount from liquidations data
+  const liquidatedAmount = useMemo(() => {
+    // Convert quoteToken to the proper address format if needed
+    const targetTokenAddress = quoteToken === 'SOL' ? SOL_ADDRESS : quoteToken;
+    return calculateLiquidatedAmount(liquidations, userOfferAddresses, targetTokenAddress);
+  }, [liquidations, userOfferAddresses, quoteToken]);
+
   const fetchBalanceData = useCallback(async () => {
     if (!connected || !publicKey) {
       setData(null);
@@ -83,25 +146,13 @@ export function useEnhancedPool(options: UseEnhancedPoolOptions = {}): UseEnhanc
         quoteToken,
       });
 
-      // Extract balance data - with fallbacks for data that might not be implemented yet
+      // Extract balance data - liquidated amount is calculated from liquidations data
       const balances: EnhancedPoolBalances = {
         total: parseFloat(balanceResponse?.balances?.total ?? 0),
         available: parseFloat(balanceResponse?.balances?.available ?? 0),
         deployed: parseFloat(balanceResponse?.balances?.deployed ?? 0),
-        pendingDeposits: parseFloat(balanceResponse?.balances?.pendingDeposits ?? 0),
-        pendingWithdrawals: parseFloat(balanceResponse?.balances?.pendingWithdrawals ?? 0),
-        // These might come from different endpoints or calculations
-        liquidated: parseFloat(balanceResponse?.balances?.liquidated ?? 0),
-      };
-
-      const performance: EnhancedPoolPerformance = {
-        totalInterestEarned: parseFloat(balanceResponse?.performance?.totalInterestEarned ?? 0),
-        averageAPY: parseFloat(balanceResponse?.performance?.averageAPY ?? 0),
-        activeOffers: parseInt(balanceResponse?.performance?.activeOffers ?? 0),
-        totalPositions: parseInt(balanceResponse?.performance?.totalPositions ?? 0),
-        // These might need to be calculated from position data
+        liquidated: liquidatedAmount, // Use calculated amount from liquidations data
         pendingInterest: parseFloat(balanceResponse?.performance?.pendingInterest ?? 0),
-        pendingLiquidation: parseFloat(balanceResponse?.performance?.pendingLiquidation ?? 0),
       };
 
       // Get user wallet balance from wallet balance hook
@@ -112,7 +163,6 @@ export function useEnhancedPool(options: UseEnhancedPoolOptions = {}): UseEnhanc
         poolId: balanceResponse?.poolId || 'unknown',
         quoteToken: quoteToken as 'SOL' | 'USDC',
         balances,
-        performance,
         userWalletBalance,
       };
 
@@ -135,17 +185,8 @@ export function useEnhancedPool(options: UseEnhancedPoolOptions = {}): UseEnhanc
             total: 0,
             available: 0,
             deployed: 0,
-            pendingDeposits: 0,
-            pendingWithdrawals: 0,
             liquidated: 0,
-          },
-          performance: {
-            totalInterestEarned: 0,
-            averageAPY: 0,
-            activeOffers: 0,
-            totalPositions: 0,
             pendingInterest: 0,
-            pendingLiquidation: 0,
           },
           userWalletBalance: 0,
         };
@@ -159,7 +200,7 @@ export function useEnhancedPool(options: UseEnhancedPoolOptions = {}): UseEnhanc
     } finally {
       setLoading(false);
     }
-  }, [connected, publicKey, quoteToken, handleError, walletBalances]);
+  }, [connected, publicKey, quoteToken, handleError, walletBalances, liquidatedAmount]);
 
   useEffect(() => {
     fetchBalanceData();
