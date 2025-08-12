@@ -5,7 +5,8 @@ import { useError } from '@/contexts/ErrorContext';
 import { SOL_ADDRESS } from '@/utils/tokens';
 import { useLiquidations } from '@/hooks/useLiquidations';
 import { useOffers } from '@/hooks/useOffers';
-import { LiquidationData } from '@/types';
+import { usePositions } from '@/hooks/usePositions';
+import { LiquidationData, PositionV3Model } from '@/types';
 
 const EXPECTED_BALANCE_ERRORS = ['node wallet not found', 'failed to get pool balance'] as const;
 
@@ -46,6 +47,38 @@ const calculateLiquidatedAmount = (
       // Convert from raw amount to decimal amount
       const decimalAmount = liquidation.soldFor / Math.pow(10, tokenDecimals);
       return total + decimalAmount;
+    }, 0);
+};
+
+/**
+ * Calculate pending interest from active positions for a specific quote token
+ * This is the interest accrued from traders who opened positions against the lender's offers
+ */
+const calculatePendingInterest = (
+  positions: PositionV3Model[],
+  userOfferAddresses: Set<string>,
+  targetQuoteToken: string
+): number => {
+  if (!positions.length || !userOfferAddresses.size) return 0;
+
+  return positions
+    .filter((position) => {
+      // Only include active positions (where interest is still accruing)
+      if (position.status !== 'active') return false;
+
+      // Only include positions from user's offers
+      if (!userOfferAddresses.has(position.offerAddress.toString())) return false;
+
+      // Only include positions for the target quote token
+      return (
+        position.quoteToken.symbol === targetQuoteToken ||
+        position.quoteToken.address === targetQuoteToken
+      );
+    })
+    .reduce((total, position) => {
+      // interestAccrued is the pending interest for this position
+      const interest = position.interestAccrued || 0;
+      return total + interest;
     }, 0);
 };
 
@@ -103,6 +136,13 @@ export function useEnhancedPool(options: UseEnhancedPoolOptions = {}): UseEnhanc
   // Fetch user's offers to determine which liquidations belong to them
   const { offers: lenderOffers } = useOffers({ includeTokens: true, inactiveOffers: true });
 
+  // Fetch positions data to calculate pending interest
+  const { positions } = usePositions({
+    status: 'all',
+    includeInactionable: true,
+    autoRefresh: true,
+  });
+
   // Create a set of offer addresses that the user owns for the target quote token
   const userOfferAddresses = useMemo(() => {
     if (!publicKey) return new Set<string>();
@@ -129,6 +169,13 @@ export function useEnhancedPool(options: UseEnhancedPoolOptions = {}): UseEnhanc
     return calculateLiquidatedAmount(liquidations, userOfferAddresses, targetTokenAddress);
   }, [liquidations, userOfferAddresses, quoteToken]);
 
+  // Calculate pending interest from active positions
+  const pendingInterest = useMemo(() => {
+    // Use the quoteToken symbol for matching (SOL or USDC)
+    const targetTokenSymbol = quoteToken === 'SOL' || quoteToken === SOL_ADDRESS ? 'SOL' : 'USDC';
+    return calculatePendingInterest(positions, userOfferAddresses, targetTokenSymbol);
+  }, [positions, userOfferAddresses, quoteToken]);
+
   const fetchBalanceData = useCallback(async () => {
     if (!connected || !publicKey) {
       setData(null);
@@ -146,13 +193,13 @@ export function useEnhancedPool(options: UseEnhancedPoolOptions = {}): UseEnhanc
         quoteToken,
       });
 
-      // Extract balance data - liquidated amount is calculated from liquidations data
+      // Extract balance data - liquidated amount and pending interest are calculated from external data
       const balances: EnhancedPoolBalances = {
         total: parseFloat(balanceResponse?.balances?.total ?? 0),
         available: parseFloat(balanceResponse?.balances?.available ?? 0),
         deployed: parseFloat(balanceResponse?.balances?.deployed ?? 0),
         liquidated: liquidatedAmount, // Use calculated amount from liquidations data
-        pendingInterest: parseFloat(balanceResponse?.performance?.pendingInterest ?? 0),
+        pendingInterest: pendingInterest, // Use calculated amount from positions data
       };
 
       // Get user wallet balance from wallet balance hook
@@ -200,7 +247,15 @@ export function useEnhancedPool(options: UseEnhancedPoolOptions = {}): UseEnhanc
     } finally {
       setLoading(false);
     }
-  }, [connected, publicKey, quoteToken, handleError, walletBalances, liquidatedAmount]);
+  }, [
+    connected,
+    publicKey,
+    quoteToken,
+    handleError,
+    walletBalances,
+    liquidatedAmount,
+    pendingInterest,
+  ]);
 
   useEffect(() => {
     fetchBalanceData();
