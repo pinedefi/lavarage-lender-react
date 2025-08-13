@@ -37,7 +37,7 @@ export const BalanceBreakdown: React.FC<BalanceBreakdownProps> = ({
       icon: CheckCircle,
       label: 'Available',
       shortLabel: 'Available',
-      description: 'Ready for new loans',
+      description: 'Idle funds in pool ready to lend',
       amount: balances.available,
       bgColor: 'bg-green-50',
       iconColor: 'text-green-600',
@@ -48,7 +48,7 @@ export const BalanceBreakdown: React.FC<BalanceBreakdownProps> = ({
       icon: Activity,
       label: 'Lent',
       shortLabel: 'Lent',
-      description: 'Currently in active positions',
+      description: 'Principal currently on loan',
       amount: balances.deployed,
       bgColor: 'bg-blue-50',
       iconColor: 'text-blue-600',
@@ -56,26 +56,26 @@ export const BalanceBreakdown: React.FC<BalanceBreakdownProps> = ({
       amountColor: 'text-blue-900'
     },
     {
-      icon: AlertTriangle,
-      label: 'Amount from Liquidation(s)',
-      shortLabel: 'Liquidation(s)',
-      description: 'Pending return to wallet',
-      amount: balances.liquidated,
-      bgColor: 'bg-yellow-50',
-      iconColor: 'text-yellow-600',
-      textColor: 'text-yellow-800',
-      amountColor: 'text-yellow-900'
-    },
-    {
       icon: TrendingUp,
-      label: 'Pending Interest',
-      shortLabel: 'Interest',
-      description: 'Accrued but not claimed',
+      label: 'Accrued Interest',
+      shortLabel: 'Accrued Interest',
+      description: 'Earned interest, not yet received',
       amount: balances.pendingInterest,
       bgColor: 'bg-purple-50',
       iconColor: 'text-purple-600',
       textColor: 'text-purple-800',
       amountColor: 'text-purple-900'
+    },
+    {
+      icon: AlertTriangle,
+      label: 'Liquidated Proceeds',
+      shortLabel: 'Liquidated Proceeds',
+      description: 'Amount due back from liquidated positions',
+      amount: balances.liquidated,
+      bgColor: 'bg-yellow-50',
+      iconColor: 'text-yellow-600',
+      textColor: 'text-yellow-800',
+      amountColor: 'text-yellow-900'
     }
   ];
 
