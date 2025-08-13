@@ -79,9 +79,13 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
         const errorMessage = err.message || 'Failed to fetch offers';
         setError(errorMessage);
         setOffers([]);
-        
-        // Handle LavaRock NFT errors globally
-        handleError(errorMessage);
+
+        // Silently handle timeout errors for background refresh
+        if (!errorMessage.toLowerCase().includes('timeout')) {
+          handleError(errorMessage);
+        } else {
+          console.log('Background offers timeout:', errorMessage);
+        }
       } finally {
         if (showLoading) {
           setLoading(false);
@@ -123,10 +127,10 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
       } catch (err: any) {
         const errorMessage = err.message || 'Failed to create offer';
         setError(errorMessage);
-        
+
         // Handle LavaRock NFT errors globally first
         handleError(errorMessage);
-        
+
         // Then show toast for all errors
         toast.error(errorMessage);
         throw err;
@@ -166,10 +170,10 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
       } catch (err: any) {
         const errorMessage = err.message || 'Failed to update offer';
         setError(errorMessage);
-        
+
         // Handle LavaRock NFT errors globally first
         handleError(errorMessage);
-        
+
         // Then show toast for all errors
         toast.error(errorMessage);
         throw err;
@@ -210,10 +214,10 @@ export function useOffers(options: UseOffersOptions = {}): UseOffersReturn {
       } catch (err: any) {
         const errorMessage = err.message || 'Failed to update LTV';
         setError(errorMessage);
-        
+
         // Handle LavaRock NFT errors globally first
         handleError(errorMessage);
-        
+
         // Then show toast for all errors
         toast.error(errorMessage);
         throw err;
@@ -286,11 +290,13 @@ export function useAllOffers(options: UseOffersOptions = {}) {
         const errorMessage = err.message || 'Failed to fetch offers';
         setError(errorMessage);
         console.error('Error fetching all offers:', err);
-        
-        // Handle LavaRock NFT errors globally first
-        handleError(errorMessage);
-        
-        // Note: This hook doesn't show toasts by default, but the error will be displayed in the UI
+
+        // Silently handle timeout errors for background refresh
+        if (!errorMessage.toLowerCase().includes('timeout')) {
+          handleError(errorMessage);
+        } else {
+          console.log('Background all offers timeout:', errorMessage);
+        }
       } finally {
         setLoading(false);
       }
