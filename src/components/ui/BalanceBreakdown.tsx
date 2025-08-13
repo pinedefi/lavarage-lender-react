@@ -46,8 +46,8 @@ export const BalanceBreakdown: React.FC<BalanceBreakdownProps> = ({
     },
     {
       icon: Activity,
-      label: 'Deployed',
-      shortLabel: 'Deployed',
+      label: 'Lent',
+      shortLabel: 'Lent',
       description: 'Currently in active positions',
       amount: balances.deployed,
       bgColor: 'bg-blue-50',
@@ -57,7 +57,7 @@ export const BalanceBreakdown: React.FC<BalanceBreakdownProps> = ({
     },
     {
       icon: AlertTriangle,
-      label: 'Liquidation(s)',
+      label: 'Amount from Liquidation(s)',
       shortLabel: 'Liquidation(s)',
       description: 'Pending return to wallet',
       amount: balances.liquidated,
@@ -68,7 +68,7 @@ export const BalanceBreakdown: React.FC<BalanceBreakdownProps> = ({
     },
     {
       icon: TrendingUp,
-      label: 'Interest',
+      label: 'Pending Interest',
       shortLabel: 'Interest',
       description: 'Accrued but not claimed',
       amount: balances.pendingInterest,
