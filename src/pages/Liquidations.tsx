@@ -506,14 +506,14 @@ const Liquidations: React.FC = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">Liquidated At</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">Position</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">Borrowed Amount</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">Sold For (After Fees)</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">Liquidation PnL</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900 w-40">Sold At</th>
-                      <th className="text-left py-3 px-2 font-medium text-gray-900 w-28">Claim Status</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">Transactions</th>
+                      <th className="text-left py-3 px-3 font-medium text-gray-900">Liquidated At</th>
+                      <th className="text-left py-3 px-3 font-medium text-gray-900">Position</th>
+                      <th className="text-left py-3 px-3 font-medium text-gray-900">Borrowed Amount</th>
+                      <th className="text-left py-3 px-3 font-medium text-gray-900">Sold For (After Fees)</th>
+                      <th className="text-left py-3 px-3 font-medium text-gray-900">Liquidation PnL</th>
+                      <th className="text-left py-3 px-3 font-medium text-gray-900 w-40">Sold At</th>
+                      <th className="text-left py-3 px-3 font-medium text-gray-900 w-28">Claim Status</th>
+                      <th className="text-left py-3 px-3 font-medium text-gray-900">Transactions</th>
                     </tr>
                   </thead>
                   <tbody>
