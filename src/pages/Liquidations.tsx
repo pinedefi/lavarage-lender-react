@@ -43,10 +43,10 @@ const LiquidationRow: React.FC<{
   if (variant === 'desktop') {
     return (
       <tr className="border-b border-gray-100 hover:bg-gray-50">
-        <td className="py-3 px-4 text-sm text-gray-900">
+        <td className="py-3 px-3 text-sm text-gray-900">
           {formatDate(liquidation.liquidatedAt)}
         </td>
-        <td className="py-3 px-4 text-sm text-gray-900">
+        <td className="py-3 px-3 text-sm text-gray-900">
           <div className="flex flex-col">
             <span className="font-mono text-xs">
               {shortenAddress(liquidation.position)}
@@ -56,33 +56,42 @@ const LiquidationRow: React.FC<{
             </span>
           </div>
         </td>
-        <td className="py-3 px-4 text-sm text-gray-900">
+        <td className="py-3 px-3 text-sm text-gray-900">
           <div className="flex flex-col">
             <span>{formatAmount(liquidation.amount.toString(), tokenInfo.quoteDecimals)} {tokenInfo.quoteSymbol}</span>
           </div>
         </td>
-        <td className="py-3 px-4 text-sm text-gray-900">
+        <td className="py-3 px-3 text-sm text-gray-900">
           <div className="flex flex-col">
             <span>{formatAmount(liquidation.soldFor.toString(), tokenInfo.quoteDecimals)} {tokenInfo.quoteSymbol}</span>
           </div>
         </td>
-        <td className="py-3 px-4 text-sm text-gray-900">
-          {formatDate(liquidation.soldAt)}
-        </td>
-        <td className="py-3 px-4 text-sm">
-          <div className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full border ${claimStatus.bgColor} ${claimStatus.borderColor}`}>
-            <StatusIcon className={`h-4 w-4 ${claimStatus.color}`} />
-            <span className={`text-xs font-medium ${claimStatus.color}`}>
-              {claimStatus.label}
+        <td className="py-3 px-3 text-sm text-gray-900">
+          <div className="flex flex-col">
+            <span className={`font-semibold ${getPnLColor(liquidation.soldFor, liquidation.amount)}`}>
+              {formatPnL(liquidation.soldFor, liquidation.amount, tokenInfo.quoteDecimals)} {tokenInfo.quoteSymbol}
             </span>
-            {claimStatus.timeRemaining && (
-              <span className={`text-xs ${claimStatus.color} font-mono`}>
-                {claimStatus.timeRemaining}
-              </span>
-            )}
           </div>
         </td>
-        <td className="py-3 px-4 text-sm">
+        <td className="py-3 px-3 text-sm text-gray-900">
+            {formatDate(liquidation.soldAt)}
+        </td>
+        <td className="py-3 px-3 text-sm">
+          <div className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full border text-xs ${claimStatus.bgColor} ${claimStatus.borderColor}`}>
+            <StatusIcon className={`h-3 w-3 ${claimStatus.color} flex-shrink-0`} />
+            <div className={`${claimStatus.color} text-center leading-tight`}>
+              <div className={`font-medium`}>
+                {claimStatus.label}
+              </div>
+              {claimStatus.timeRemaining && (
+                <div className={`font-mono text-xs leading-tight`}>
+                  {claimStatus.timeRemaining}
+                </div>
+              )}
+            </div>
+          </div>
+        </td>
+        <td className="py-3 px-3 text-sm">
           <TransactionButtons liquidation={liquidation} variant="desktop" />
         </td>
       </tr>
@@ -128,7 +137,7 @@ const LiquidationRow: React.FC<{
           </div>
 
           {/* Amounts */}
-          <div className="grid grid-cols-2 gap-4 py-2 border-t border-gray-100">
+          <div className="grid grid-cols-3 gap-3 py-2 border-t border-gray-100">
             <div>
               <div className="text-xs text-gray-500">Borrowed</div>
               <div className="text-sm font-medium text-gray-900">
@@ -139,6 +148,12 @@ const LiquidationRow: React.FC<{
               <div className="text-xs text-gray-500">Sold For</div>
               <div className="text-sm font-medium text-gray-900">
                 {formatAmount(liquidation.soldFor.toString(), tokenInfo.quoteDecimals)} {tokenInfo.quoteSymbol}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-gray-500">Liquidation PnL</div>
+              <div className={`text-sm font-medium ${getPnLColor(liquidation.soldFor, liquidation.amount)}`}>
+                {formatPnL(liquidation.soldFor, liquidation.amount, tokenInfo.quoteDecimals)} {tokenInfo.quoteSymbol}
               </div>
             </div>
           </div>
@@ -273,6 +288,20 @@ const getTokenInfo = (offer: OfferV2Model | null) => {
     quoteDecimals: quoteToken?.decimals ?? 9,
     quoteSymbol: quoteToken?.symbol ?? 'SOL'
   };
+};
+
+// Helper function to format PnL (Sold For - Borrowed Amount)
+const formatPnL = (soldFor: number, borrowedAmount: number, decimals: number = 9) => {
+  const pnl = soldFor - borrowedAmount;
+  const formattedPnl = pnl / Math.pow(10, decimals);
+  const sign = formattedPnl >= 0 ? '+' : '';
+  return `${sign}${formattedPnl.toLocaleString('en-US', { maximumFractionDigits: 4 })}`;
+};
+
+// Helper function to get PnL color (green for positive, red for negative)
+const getPnLColor = (soldFor: number, borrowedAmount: number) => {
+  const pnl = soldFor - borrowedAmount;
+  return pnl >= 0 ? 'text-green-600' : 'text-red-600';
 };
 
 const Liquidations: React.FC = () => {
@@ -477,13 +506,14 @@ const Liquidations: React.FC = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">Liquidated At</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">Position</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">Borrowed Amount</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">Sold For (After Fees)</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">Sold At</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">Claim Status</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">Transactions</th>
+                      <th className="text-left py-3 px-3 font-medium text-gray-900">Liquidated At</th>
+                      <th className="text-left py-3 px-3 font-medium text-gray-900">Position</th>
+                      <th className="text-left py-3 px-3 font-medium text-gray-900">Borrowed Amount</th>
+                      <th className="text-left py-3 px-3 font-medium text-gray-900">Sold For (After Fees)</th>
+                      <th className="text-left py-3 px-3 font-medium text-gray-900">Liquidation PnL</th>
+                      <th className="text-left py-3 px-3 font-medium text-gray-900 w-40">Sold At</th>
+                      <th className="text-left py-3 px-3 font-medium text-gray-900 w-28">Claim Status</th>
+                      <th className="text-left py-3 px-3 font-medium text-gray-900">Transactions</th>
                     </tr>
                   </thead>
                   <tbody>
